@@ -7417,6 +7417,11 @@ vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
+vue-virtual-scroll-list@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/vue-virtual-scroll-list/-/vue-virtual-scroll-list-2.3.0.tgz#d5dda60b4890acef670ed1d4412b60c7137bb706"
+  integrity sha512-A0Cyvj9+oqsHoA95jH77kP8QaYzOm71aq4LiOvPXLQ7AVK73raDEy09Kbh+RQbWz1iw5I3++UU2WOmHYIHwN8A==
+
 vue-virtual-scroller@^1.0.10:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/vue-virtual-scroller/-/vue-virtual-scroller-1.0.10.tgz#fdf243240001f05bd79aa77f2e2e60403760e2fb"

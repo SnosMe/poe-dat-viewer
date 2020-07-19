@@ -10,6 +10,7 @@
   "dependencies": {
     "tailwindcss": "^1.5.1",
     "vue": "^2.6.11",
+    "vue-virtual-scroll-list": "^2.3.0",
     "vue-virtual-scroller": "^1.0.10"
   },
   "devDependencies": {
@@ -43,11 +44,25 @@
     "parserOptions": {
       "ecmaVersion": 2020
     },
-    "rules": {}
+    "rules": {
+      "@typescript-eslint/no-non-null-assertion": [
+        "off"
+      ],
+      "@typescript-eslint/no-unused-vars": [
+        "off"
+      ]
+    }
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "postcss-nested": {},
+      "autoprefixer": {}
+    }
+  }
 }

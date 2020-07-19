@@ -1,29 +1,50 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+    <analyze />
   </div>
 </template>
 
-<script lang="ts">
-import Vue from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+<script>
+import Analyze from './Analyze'
 
-export default Vue.extend({
+export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
-})
+  components: { Analyze }
+}
 </script>
 
-<style>
+<style lang="postcss">
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  justify-content: space-between;
+}
+
+.layout-column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.vue-recycle-scroller__item-wrapper {
+  overflow: visible !important;
+}
+
+.vue-recycle-scroller__slot {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  @apply shadow;
+  display: inline-block;
+}
+
+.vue-recycle-scroller.ready.direction-vertical .vue-recycle-scroller__item-view {
+  width: auto !important;
 }
 </style>
