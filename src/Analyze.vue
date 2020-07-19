@@ -6,7 +6,7 @@
       data-key="rowId"
       :data-sources="parsed.rows"
       :data-component="rowComponent"
-      :extra-props="{ variableData: parsed.variableData, headers }"
+      :extra-props="{ variableData: parsed.variableData, format: rowFormat }"
       :estimate-size="24"
       :keeps="7"
       header-class="sticky top-0"
@@ -16,12 +16,25 @@
           <div
             class="bg-gray-200 sticky whitespace-pre select-none px-1 mr-px"
             style="z-index: 1; top: 0; left: 0">{{ ''.padStart(rowNumberLength) }}</div>
-          <button v-for="col in columns" :key="col.idx"
-            class="hover:bg-blue-400 flex flex-col text-gray-600"
-            style="padding: 0 0.5ch; height: 3ch; line-height: 3ch;">
-            <!-- <span class="text-center leading-none text-xs">{{ col.idx100 }}</span> -->
-            <span>{{ col.idx99 }}</span>
-          </button>
+          <div>
+            <div class="inline-flex">
+              <button v-for="(col, idx) in headers" :key="idx"
+                class="viewer-col viewer-col-border"
+                :style="{ width: `${col.length * 3}ch` }">
+                <span>{{ col.name }}</span>
+              </button>
+            </div>
+            <div class="inline-flex">
+              <button v-for="col in columns" :key="col.idx"
+                class="viewer-col"
+                :class="{ 'viewer-col-border': col.dataEnd }"
+                style="width: 3ch"
+                >
+                <!-- <span class="text-center leading-none text-xs">{{ col.idx100 }}</span> -->
+                <span>{{ col.idx99 }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </template>
     </virtual-list>
@@ -33,43 +46,47 @@
 import VirtualList from 'vue-virtual-scroll-list'
 import { parse } from './file'
 import DataRow from './DataRow'
+import { state, importFile, getRowFormating } from './Viewer'
 
 export default {
   components: { VirtualList },
   created () {
-    const parsed = parse()
-    const padLine = String(parsed.rows.length - 1).length
-    parsed.rows = parsed.rows.map((data, idx) =>
-      ({ rowId: String(idx).padStart(padLine, ' '), data }))
-    this.columns = new Array(parsed.rows[0].data.length).fill(undefined)
-      .map((_, idx) => {
-        return {
-          idx,
-          idx99: String(idx % 100).padStart(2, '0'),
-          idx100: Math.floor(idx / 100)
-        }
-      })
-    console.log(this.columns)
-    this.parsed = Object.freeze(parsed)
+    importFile()
   },
   data () {
-    return {
-      headers: [],
-      columns: [],
-      parsed: null,
-      rowIndexing: 0,
-      colIndexing: 0
-    }
+    return state
   },
   computed: {
     rowComponent () {
       return DataRow
     },
-    rowNumberLength () {
-      return String(
-        this.parsed.rows.length - 1 + this.rowIndexing
-      ).length
+    rowFormat () {
+      return getRowFormating(this.columns)
     }
   }
 }
 </script>
+
+<style lang="postcss">
+.viewer-col {
+  @apply text-gray-600;
+  text-align: center;
+  box-sizing: content-box;
+  height: 3ch;
+  line-height: 3ch;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &.viewer-col-border {
+    @apply border-r border-red-500;
+  }
+
+  &:hover {
+    @apply bg-blue-400;
+  }
+
+  &:last-child {
+    border: none;
+  }
+}
+</style>
