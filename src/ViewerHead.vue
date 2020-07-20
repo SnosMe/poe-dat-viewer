@@ -21,8 +21,10 @@
             'viewer-col-selected': col.selected
           }"
           style="width: 3ch"
-          @mousedown="selectColumn(col.offset)"
+          @mousedown="selectColumn(col.offset, $event)"
           @mouseenter="selectColumn(col.offset, $event)"
+          @touchstart="selectColumn(col.offset, $event)"
+          @touchmove="selectColumn(col.offset, $event)"
           >{{ col.colNum99 }}</button>
       </div>
     </div>
@@ -54,18 +56,33 @@ export default {
     }
   },
   methods: {
+    selectStart (offset) {
+      this.selectionStart = offset
+      this.colsBeforeSelection = Object.freeze(
+        JSON.parse(JSON.stringify(this.columns))
+      )
+      toggleColsBetween(this.columns, this.selectionStart, this.selectionStart)
+    },
+    selectContinue (offset) {
+      this.columns.forEach((col, idx) => {
+        col.selected = this.colsBeforeSelection[idx].selected
+      })
+      toggleColsBetween(this.columns, this.selectionStart, offset)
+    },
     selectColumn (offset, e) {
-      if (e === undefined) {
-        this.selectionStart = offset
-        this.colsBeforeSelection = Object.freeze(
-          JSON.parse(JSON.stringify(this.columns))
-        )
-        toggleColsBetween(this.columns, this.selectionStart, this.selectionStart)
-      } else if (e.buttons === 1) {
-        this.columns.forEach((col, idx) => {
-          col.selected = this.colsBeforeSelection[idx].selected
-        })
-        toggleColsBetween(this.columns, this.selectionStart, offset)
+      if (e.type === 'mousedown' || e.type === 'touchstart') {
+        this.selectStart(offset)
+      } else if (e.type === 'mouseenter' && e.buttons === 1) {
+        this.selectContinue(offset)
+      } else if (e.type === 'touchmove' && e.changedTouches.length === 1) {
+        const el = document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)
+        const event = new Event('mouseenter')
+        event.buttons = 1
+        el.dispatchEvent(event)
+      }
+
+      if (e.type === 'touchstart' || e.type === 'touchmove') {
+        e.preventDefault()
       }
     }
   }
