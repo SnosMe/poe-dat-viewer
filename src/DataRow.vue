@@ -37,8 +37,8 @@ export default {
     @apply border-r border-red-500;
   }
 
-  &:viewer-row-selected {
-    @apply bg-blue-400;
+  &.viewer-row-selected {
+    @apply bg-blue-200;
   }
 
   &:last-child {

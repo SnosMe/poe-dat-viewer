@@ -12,33 +12,16 @@
       header-class="sticky top-0"
       :header-style="{ 'z-index': 1 }">
       <template #header>
-        <div class="inline-flex bg-gray-200 shadow relative">
-          <div
-            class="bg-gray-200 sticky whitespace-pre select-none px-1 mr-px"
-            style="z-index: 1; top: 0; left: 0">{{ ''.padStart(rowNumberLength) }}</div>
-          <div>
-            <div class="inline-flex">
-              <button v-for="(col, idx) in headers" :key="idx"
-                class="viewer-col viewer-col-border"
-                :style="{ width: `${col.length * 3}ch` }">
-                <span>{{ col.name }}</span>
-              </button>
-            </div>
-            <div class="inline-flex">
-              <button v-for="col in columns" :key="col.idx"
-                class="viewer-col"
-                :class="{ 'viewer-col-border': col.dataEnd }"
-                style="width: 3ch"
-                >
-                <!-- <span class="text-center leading-none text-xs">{{ col.idx100 }}</span> -->
-                <span>{{ col.idx99 }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <viewer-head
+          :headers="headers"
+          :columns="columns"
+          :row-number-length="rowNumberLength" />
       </template>
     </virtual-list>
-    <div style="height: 64px;" class="bg-gray-800 text-gray-100">bottom line</div>
+    <div style="height: 64px;" class="bg-gray-800 text-gray-100">
+      <div>Controls</div>
+      <div>Alexander Drozdov, v1.0.0</div>
+    </div>
   </div>
 </template>
 
@@ -46,10 +29,11 @@
 import VirtualList from 'vue-virtual-scroll-list'
 import { parse } from './file'
 import DataRow from './DataRow'
+import ViewerHead from './ViewerHead'
 import { state, importFile, getRowFormating } from './Viewer'
 
 export default {
-  components: { VirtualList },
+  components: { VirtualList, ViewerHead },
   created () {
     importFile()
   },
@@ -66,27 +50,3 @@ export default {
   }
 }
 </script>
-
-<style lang="postcss">
-.viewer-col {
-  @apply text-gray-600;
-  text-align: center;
-  box-sizing: content-box;
-  height: 3ch;
-  line-height: 3ch;
-  white-space: nowrap;
-  overflow: hidden;
-
-  &.viewer-col-border {
-    @apply border-r border-red-500;
-  }
-
-  &:hover {
-    @apply bg-blue-400;
-  }
-
-  &:last-child {
-    border: none;
-  }
-}
-</style>

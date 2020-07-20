@@ -3,7 +3,7 @@ import { parse } from './file'
 
 interface Header {
   name: string
-  start: number
+  offset: number
   length: number
   type: {
     byteView?: {}
@@ -16,9 +16,8 @@ interface Header {
 }
 
 interface StateColumn {
-  idx: number
-  idx99: string
-  idx100: string
+  offset: number
+  colNum99: string
   selected: boolean
   header: number
   dataEnd: boolean
@@ -38,7 +37,7 @@ export const state = Vue.observable({
 const IMPORT_HDRS: Header[] = [
   {
     name: 'Id',
-    start: 0,
+    offset: 0,
     length: 4,
     type: {
       byteView: {}
@@ -46,7 +45,7 @@ const IMPORT_HDRS: Header[] = [
   },
   {
     name: 'ItemClassesKey',
-    start: 4,
+    offset: 4,
     length: 8,
     type: {
       byteView: {}
@@ -54,7 +53,7 @@ const IMPORT_HDRS: Header[] = [
   },
   {
     name: 'Unknown0',
-    start: 12,
+    offset: 12,
     length: 199,
     type: {
       byteView: {}
@@ -107,22 +106,33 @@ export function stateFromRows (rows: DataRow[], padRowNum: number, rowNumStart: 
 
 export function stateColumns (total: number, colNumStart: number) {
   return new Array(total).fill(undefined)
-    .map((_, idx) => {
-      return {
-        idx: idx,
-        idx99: String((idx + colNumStart) % 100).padStart(2, '0'),
-        idx100: String(Math.floor((idx + colNumStart) / 100)),
-        selected: false,
-        header: 0,
-        dataEnd: false
-      }
-    })
+    .map((_, idx) => ({
+      offset: idx,
+      colNum99: String((idx + colNumStart) % 100).padStart(2, '0'),
+      // colNum100: String(Math.floor((idx + colNumStart) / 100)),
+      selected: false,
+      header: 0,
+      dataEnd: false
+    } as StateColumn))
 }
 
 export function selectColsByHeader (header: Header, cols: StateColumn[]) {
-  const colIdx = cols.findIndex(col => col.idx === header.start)
-  for (let i = colIdx; i < (header.start + header.length); i += 1) {
+  const colIdx = cols.findIndex(col => col.offset === header.offset)
+  for (let i = colIdx; i < (header.offset + header.length); i += 1) {
     cols[i].selected = true
+  }
+}
+
+export function toggleColsBetween (cols: StateColumn[], a: number, b: number) {
+  const start = Math.min(a, b)
+  const end = Math.max(a, b)
+
+  for (const col of cols) {
+    if (col.offset >= start && col.offset <= end) {
+      if (!col.header) {
+        col.selected = !col.selected
+      }
+    }
   }
 }
 
@@ -133,7 +143,7 @@ export function clearColumnSelection (cols: StateColumn[]) {
 }
 
 export function createHeaderFromSelected (cols: StateColumn[], headers: Header[]) {
-  const start = cols.findIndex(col => col.selected)
+  const offset = cols.find(col => col.selected)!.offset
   const selected = cols.filter(col => col.selected)
   const length = selected.length
 
@@ -141,14 +151,14 @@ export function createHeaderFromSelected (cols: StateColumn[], headers: Header[]
 
   const header: Header = {
     name: 'New Column',
-    start,
+    offset,
     length,
     type: {
       byteView: {}
     }
   }
   headers.push(header)
-  headers.sort((a, b) => a.start - b.start)
+  headers.sort((a, b) => a.offset - b.offset)
 
   return header
 }
@@ -171,7 +181,7 @@ export function getRowFormating (columns: StateColumn[]) {
 
   function colToFmt (col: StateColumn) {
     return {
-      offset: col.idx,
+      offset: col.offset,
       length: col.header || 1,
       selected: col.selected,
       dataEnd: col.dataEnd
