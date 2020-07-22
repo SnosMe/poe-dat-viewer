@@ -13,10 +13,8 @@ export default {
 }
 </script>
 
-<style lang="postcss">
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+<style lang="scss">
+@import '@/styles/quasar.variables';
 
 #app {
   height: 100vh;
@@ -32,19 +30,19 @@ export default {
   height: 100%;
 }
 
-.vue-recycle-scroller__item-wrapper {
-  overflow: visible !important;
-}
+.flex-1 { flex: 1 1 0%; }
+.flex-shrink-0 { flex-shrink: 0; }
 
-.vue-recycle-scroller__slot {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  @apply shadow;
-  display: inline-block;
-}
+.min-h-0 { min-height: 0; }
+.min-w-0 { min-width: 0; }
+.h-full { height: 100%; }
 
-.vue-recycle-scroller.ready.direction-vertical .vue-recycle-scroller__item-view {
-  width: auto !important;
-}
+.q-px-px { padding-right: 1px; padding-left: 1px; }
+.q-mx-px { margin-right: 1px; margin-left: 1px; }
+.q-mr-px { margin-right: 1px; }
+
+.font-sans { font-family: $font-sans; }
+.font-mono { font-family: $font-mono; }
+
+.border-b { border-bottom: 1px solid currentColor; }
 </style>

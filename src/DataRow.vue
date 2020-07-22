@@ -1,6 +1,6 @@
 <template>
-  <div class="inline-flex">
-    <div class="whitespace-pre sticky left-0 bg-gray-100 text-blue-600 px-1 border-r">{{ row.rowNum }}</div>
+  <div class="flex inline no-wrap">
+    <div class="viewer-rownum">{{ row.rowNum }}</div>
     <!-- eslint-disable-next-line vue/require-v-for-key -->
     <div v-for="part in formatted"
       class="viewer-row"
@@ -28,21 +28,35 @@ export default {
 }
 </script>
 
-<style lang="postcss">
+<style lang="scss">
+@import '@/styles/quasar.variables';
+
 .viewer-row {
   white-space: pre;
   padding: 0 0.5ch;
+  z-index: -2;
 
   &.viewer-row-border {
-    @apply border-r border-red-500;
+    border-right: 1px solid $grey-5;
   }
 
   &.viewer-row-selected {
-    @apply bg-blue-200;
+    background: $blue-2;
   }
 
   &:last-child {
     border: none;
   }
+}
+
+.viewer-rownum {
+  white-space: pre;
+  position: sticky;
+  left: 0;
+  z-index: -1;
+  padding: 0 0.25rem;
+  background: $grey-1;
+  color: $blue-8;
+  border-right: 1px solid $blue-grey-1;
 }
 </style>

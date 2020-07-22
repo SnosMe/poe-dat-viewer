@@ -1,48 +1,57 @@
 <template>
   <div v-if="!parsed">UPLOAD FILE</div>
   <div v-else class="layout-column">
-    <div class="flex justify-between bg-gray-800 text-gray-100 p-2 shadow" style="z-index: 1;">
-      <div class="truncate mr-1">{{ parsed.name }}</div>
-      <button class="hover:bg-gray-600 rounded px-2">Settings</button>
+    <div class="app-titlebar">
+      <div class="ellipsis q-mr-xs">{{ parsed.name }}</div>
+      <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
-    <div class="flex bg-gray-800 text-gray-100 p-2">
+    <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
       <template v-if="selections.length === 0">
-        <div class="text-gray-500 italic">No bytes selected</div>
+        <div class="text-blue-grey-4 text-italic">No bytes selected</div>
       </template>
       <template v-else-if="selections.length === 1">
-        <button class="bg-gray-700 hover:bg-gray-600 rounded px-2">Define column</button>
+        <q-btn padding="0 sm" label="Define column" no-caps color="blue-grey-8" />
       </template>
       <template v-else-if="selections.length > 1">
-        <div class="text-gray-400 pr-1">Selections</div>
+        <div class="text-blue-grey-2 q-pr-xs">Selections</div>
         <!-- eslint-disable-next-line vue/require-v-for-key -->
         <div v-for="sel in selections"
-          class="px-1 mr-1 font-mono bg-gray-200 text-gray-900 rounded"
+          class="q-px-xs q-mr-xs font-mono bg-blue-grey-2 text-blue-grey-10 rounded-borders"
           >{{ sel }}</div>
       </template>
     </div>
-    <div class="flex min-h-0">
-      <div class="layout-column min-w-0">
-        <virtual-list class="flex-1 font-mono overflow-auto"
-          data-key="rowId"
-          :data-sources="parsed.rows"
-          :data-component="rowComponent"
-          :extra-props="{ variableData: parsed.variableData, format: rowFormat }"
-          :estimate-size="24"
-          :keeps="7"
-          header-class="sticky top-0"
-          :header-style="{ 'z-index': 1 }">
-          <template #header>
-            <viewer-head
-              :headers="headers"
-              :columns="columns"
-              :row-number-length="rowNumberLength" />
-          </template>
-        </virtual-list>
-        <div class="bg-gray-800 text-gray-100 p-2 text-sm">
-          <div>Made by Alexander Drozdov, v1.0.0 <a class="border-b" href="https://github.com/SnosMe/pogo-analyze-ui">GitHub</a></div>
+    <div class="flex min-h-0 flex-1">
+      <div class="layout-column min-w-0 flex-1">
+        <q-scroll-area
+          class="flex-1"
+          id="viewer-fancy-scroll"
+        >
+          <!-- class="flex-1 font-mono scroll" -->
+          <q-virtual-scroll
+            class="font-mono"
+            :items="parsed.rows"
+            :virtual-scroll-item-size="24"
+            scroll-target="#viewer-fancy-scroll > .scroll"
+            >
+            <template #before>
+              <viewer-head
+                :headers="headers"
+                :columns="columns"
+                :row-number-length="rowNumberLength" />
+            </template>
+            <template v-slot="{ item }">
+              <data-row
+                :source="item"
+                :variable-data="parsed.variableData"
+                :format="rowFormat" />
+            </template>
+          </q-virtual-scroll>
+        </q-scroll-area>
+        <div class="bg-blue-grey-9 q-pa-sm text-white text-body2">
+          <div>Made by Alexander Drozdov, v1.0.0 <a class="q-link text-white border-b" href="https://github.com/SnosMe/pogo-analyze-ui">GitHub</a></div>
         </div>
       </div>
-      <div class="overflow-y-scroll flex-shrink-0">
+      <div class="flex-shrink-0">
         <header-props />
       </div>
     </div>
@@ -50,7 +59,6 @@
 </template>
 
 <script>
-import VirtualList from 'vue-virtual-scroll-list'
 import { parse } from './file'
 import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
@@ -58,7 +66,7 @@ import HeaderProps from './HeaderProps'
 import { state, importFile, getRowFormating, getColumnSelections, removeHeader } from './Viewer'
 
 export default {
-  components: { VirtualList, ViewerHead, HeaderProps },
+  components: { ViewerHead, HeaderProps, DataRow },
   created () {
     importFile()
   },
@@ -80,3 +88,17 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+@import '@/styles/quasar.variables';
+
+.app-titlebar {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background: $blue-grey-9;
+  color: $grey-1;
+  box-shadow: $shadow-1;
+  z-index: 1;
+}
+</style>

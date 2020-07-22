@@ -1,23 +1,21 @@
 <template>
-  <div class="inline-flex bg-gray-200 shadow relative">
-    <div
-      class="bg-gray-200 sticky whitespace-pre select-none px-1 mr-px"
-      style="z-index: 1; top: 0; left: 0"
+  <div class="viewer-sticky-head">
+    <div class="viewer-col-rownum"
       >{{ ''.padStart(rowNumberLength) }}</div>
     <!-- // -->
     <div>
-      <div class="inline-flex">
+      <div class="flex inline no-wrap">
         <!-- eslint-disable-next-line vue/require-v-for-key -->
         <button v-for="col in headers"
           class="viewer-col viewer-col-border"
           :style="{ width: `${col.length * 3}ch` }"
           @click="editHeader(col)">
-          <span v-if="col.name === null" class="">{{ '\u00a0' }}</span>
-          <span v-else-if="col.name === ''" class="bg-gray-600 text-gray-200 rounded px-px">?</span>
+          <span v-if="col.name === null">{{ '\u00a0' }}</span>
+          <span v-else-if="col.name === ''" class="bg-blue-grey-6 text-grey-2 rounded-borders q-px-px">?</span>
           <template v-else>{{ col.name }}</template>
         </button>
       </div>
-      <div class="inline-flex">
+      <div class="flex inline no-wrap">
         <button v-for="col in columns" :key="col.offset"
           class="viewer-col"
           :class="{
@@ -90,17 +88,21 @@ export default {
       }
     },
     editHeader (header) {
-      if (header.name !== null) {
-        state.editHeader = header
-      }
+      state.editHeader = header
     }
   }
 }
 </script>
 
-<style lang="postcss">
+<style lang="scss">
+@import '@/styles/quasar.variables';
+
 .viewer-col {
-  @apply text-gray-600;
+  color: $blue-grey-6;
+  background: $grey-2;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   text-align: center;
   box-sizing: content-box;
   height: 3ch;
@@ -109,20 +111,46 @@ export default {
   overflow: hidden;
 
   &.viewer-col-border {
-    @apply border-r border-red-500;
+    border-right: 1px solid $grey-5;
   }
 
   &:hover {
-    @apply bg-blue-400;
+    background: $blue-4;
+    color: $blue-1;
   }
 
   &.viewer-col-selected {
-    @apply bg-blue-500;
-    @apply text-blue-100;
+    background: $blue-6;
+    color: $blue-1;
+  }
+
+  &.viewer-col-selected.viewer-col-border {
+    /* @TODO: &.viewer-col-border ~ &.viewer-col-selected (dataEnd -> dataStart) */
+    border-right-color: $blue-8;
   }
 
   &:last-child {
     border: none;
   }
+}
+
+.viewer-col-rownum {
+  background: $grey-2;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  user-select: none;
+  white-space: pre;
+  padding: 0 0.25rem;
+  margin-right: 1px;
+}
+
+.viewer-sticky-head {
+  display: inline-flex;
+  background: $grey-2;
+  box-shadow: $shadow-1;
+  position: sticky;
+  top: 0;
 }
 </style>

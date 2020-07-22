@@ -1,0 +1,24 @@
+// ---
+
+$font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-mono: Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+$space-base: 1rem;
+$body-font-size: 1rem;
+$typography-font-family: $font-sans;
+
+$button-font-size: inherit;
+$button-line-height: inherit;
+
+$primary   : #027BE3;
+$secondary : #26A69A;
+$accent    : #9C27B0;
+
+$dark      : #1D1D1D;
+
+$positive  : #21BA45;
+$negative  : #C10015;
+$info      : #31CCEC;
+$warning   : #F2C037;
+
+@import '~quasar-variables-styl'
