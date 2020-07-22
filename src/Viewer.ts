@@ -2,22 +2,23 @@ import Vue from 'vue'
 import { parse } from './file'
 
 interface Header {
-  name: string
+  name: string | null
   offset: number
   length: number
   type: {
     byteView?: {}
-    array?: {}
+    refArray?: {}
     boolean?: {}
     integer?: { unsigned: boolean, nullable: boolean }
     decimal?: {}
-    string?: {}
+    refString?: {}
   }
 }
 
 interface StateColumn {
   offset: number
   colNum99: string
+  colNum100: string
   selected: boolean
   header: number
   dataEnd: boolean
@@ -31,7 +32,8 @@ export const state = Vue.observable({
   parsed: null,
   rowIndexing: 0,
   colIndexing: 0,
-  rowNumberLength: -1
+  rowNumberLength: -1,
+  editHeader: null
 })
 
 const IMPORT_HDRS: Header[] = [
@@ -52,7 +54,7 @@ const IMPORT_HDRS: Header[] = [
     }
   },
   {
-    name: 'Unknown0',
+    name: null,
     offset: 12,
     length: 199,
     type: {
@@ -110,6 +112,7 @@ export function stateColumns (total: number, colNumStart: number) {
       offset: idx,
       colNum99: String((idx + colNumStart) % 100).padStart(2, '0'),
       // colNum100: String(Math.floor((idx + colNumStart) / 100)),
+      colNum100: String(idx + colNumStart).padStart(2, '0'),
       selected: false,
       header: 0,
       dataEnd: false
@@ -223,4 +226,69 @@ export function formatRow (row: DataRow, fmt: RowPartFormat[]) {
       text: hexDump
     } as RowPart
   })
+}
+
+export function getColumnSelections (columns: readonly StateColumn[]) {
+  const ranges: StateColumn[][] = []
+
+  let idx = columns.findIndex(col => col.selected)
+  let last: StateColumn
+  if (idx < 0) {
+    return ranges
+  } else {
+    last = columns[idx]
+    ranges.push([last])
+  }
+
+  for (idx += 1; idx < columns.length; idx += 1) {
+    if (columns[idx].selected) {
+      const curr = columns[idx]
+      if ((curr.offset - last.offset) === 1) {
+        ranges[ranges.length - 1].push(curr)
+      } else {
+        ranges.push([curr])
+      }
+      last = curr
+    }
+  }
+
+  return ranges
+}
+
+export function removeHeader (header: Header, headers: Header[], columns: StateColumn[]) {
+  if (!header.type.byteView) {
+    throw new Error('TODO: toggle byteView first')
+  }
+
+  header.name = null
+  header.type = {
+    byteView: {}
+  }
+
+  for (let idx = 0; idx < (headers.length - 1); idx += 1) {
+    const merged = mergeHeaders(headers[idx], headers[idx + 1])
+    if (merged) {
+      for (const col of columns) {
+        if (col.offset === (headers[idx].offset + headers[idx].length - 1)) {
+          col.dataEnd = false
+        }
+      }
+      headers.splice(idx, 2, merged)
+    }
+  }
+}
+
+function mergeHeaders (h1: Header, h2: Header) {
+  if (h1.name === null && h2.name === null) {
+    return {
+      name: null,
+      offset: h1.offset,
+      length: h1.length + h2.length,
+      type: {
+        byteView: {}
+      }
+    } as Header
+  }
+
+  return false
 }

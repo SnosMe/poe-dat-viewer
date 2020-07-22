@@ -11,7 +11,11 @@
         <button v-for="col in headers"
           class="viewer-col viewer-col-border"
           :style="{ width: `${col.length * 3}ch` }"
-          >{{ col.name }}</button>
+          @click="editHeader(col)">
+          <span v-if="col.name === null" class="">{{ '\u00a0' }}</span>
+          <span v-else-if="col.name === ''" class="bg-gray-600 text-gray-200 rounded px-px">?</span>
+          <template v-else>{{ col.name }}</template>
+        </button>
       </div>
       <div class="inline-flex">
         <button v-for="col in columns" :key="col.offset"
@@ -32,7 +36,7 @@
 </template>
 
 <script>
-import { toggleColsBetween } from './Viewer'
+import { toggleColsBetween, state } from './Viewer'
 
 export default {
   props: {
@@ -83,6 +87,11 @@ export default {
 
       if (e.type === 'touchstart' || e.type === 'touchmove') {
         e.preventDefault()
+      }
+    },
+    editHeader (header) {
+      if (header.name !== null) {
+        state.editHeader = header
       }
     }
   }
