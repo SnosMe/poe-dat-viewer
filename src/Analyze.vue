@@ -1,8 +1,8 @@
 <template>
-  <div v-if="!parsed">UPLOAD FILE</div>
+  <div v-if="!datFile">UPLOAD FILE</div>
   <div v-else class="layout-column">
     <div class="app-titlebar">
-      <div class="ellipsis q-mr-xs">{{ parsed.name }}</div>
+      <div class="ellipsis q-mr-xs">{{ datFile.name }}</div>
       <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
@@ -29,7 +29,7 @@
           <!-- class="flex-1 font-mono scroll" -->
           <q-virtual-scroll
             class="font-mono"
-            :items="parsed.rows"
+            :items="rows"
             :virtual-scroll-item-size="24"
             scroll-target="#viewer-fancy-scroll > .scroll"
             >
@@ -39,10 +39,9 @@
                 :columns="columns"
                 :row-number-length="rowNumberLength" />
             </template>
-            <template v-slot="{ item }">
+            <template v-slot="{ index }">
               <data-row
-                :source="item"
-                :variable-data="parsed.variableData"
+                :row-idx="index"
                 :format="rowFormat" />
             </template>
           </q-virtual-scroll>
@@ -59,11 +58,10 @@
 </template>
 
 <script>
-import { parse } from './file'
 import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
-import { state, importFile, getRowFormating, getColumnSelections, removeHeader } from './Viewer'
+import { state, importFile, getRowFormating, getColumnSelections } from './Viewer'
 
 export default {
   components: { ViewerHead, HeaderProps, DataRow },
@@ -84,6 +82,9 @@ export default {
       return getColumnSelections(this.columns).map(range =>
         range.map(col => col.colNum100).join(' ')
       )
+    },
+    rows () {
+      return new Array(this.datFile.rowCount).fill(undefined)
     }
   }
 }

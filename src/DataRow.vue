@@ -1,6 +1,6 @@
 <template>
   <div class="flex inline no-wrap">
-    <div class="viewer-rownum">{{ row.rowNum }}</div>
+    <div class="viewer-rownum">{{ rowNum }}</div>
     <!-- eslint-disable-next-line vue/require-v-for-key -->
     <div v-for="part in formatted"
       class="viewer-row"
@@ -13,16 +13,17 @@
 </template>
 
 <script>
-import { formatRow } from './Viewer'
+import { formatRow, state } from './Viewer'
 
 export default {
-  props: ['source', 'format', 'variableData'],
+  props: ['rowIdx', 'format'],
   computed: {
-    row () {
-      return this.source
-    },
     formatted () {
-      return formatRow(this.row.data, this.format)
+      return formatRow(this.rowIdx, this.format, state.datFile)
+    },
+    rowNum () {
+      return String(this.rowIdx + state.config.rowNumStart)
+        .padStart(state.rowNumberLength, ' ')
     }
   }
 }

@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { parse } from './file'
+import { importDatFile, DatFile } from './dat-file'
 
 interface Header {
   name: string | null
@@ -24,16 +24,18 @@ interface StateColumn {
   dataEnd: boolean
 }
 
-type DataRow = Uint8Array
-
 export const state = Vue.observable({
   headers: [] as Header[],
   columns: [] as StateColumn[],
-  parsed: null,
+  datFile: null as DatFile | null,
   rowIndexing: 0,
   colIndexing: 0,
   rowNumberLength: -1,
-  editHeader: null
+  editHeader: null as Header | null,
+  config: {
+    rowNumStart: 0,
+    colNumStart: 0
+  }
 })
 
 const IMPORT_HDRS: Header[] = [
@@ -64,20 +66,13 @@ const IMPORT_HDRS: Header[] = [
 ]
 
 const ROW_NUM_MIN_LENGTH = 4
-const ROW_NUM_START = 0
-const COL_NUM_START = 0
 
-export function importFile () {
-  const parsed = parse()
-  const rowNumLen = calcRowNumLength(parsed.rows, ROW_NUM_START, ROW_NUM_MIN_LENGTH)
+export async function importFile () {
+  const parsed = await importDatFile('BaseItemTypes')
+  const rowNumLen = calcRowNumLength(parsed.rowCount, state.config.rowNumStart, ROW_NUM_MIN_LENGTH)
 
-  state.parsed = Object.freeze({
-    name: parsed.name,
-    rows: stateFromRows(parsed.rows, rowNumLen, ROW_NUM_START),
-    variableData: parsed.variableData
-  }) as any
-
-  state.columns = stateColumns(parsed.rows[0].length, COL_NUM_START) as any
+  state.datFile = parsed
+  state.columns = stateColumns(parsed.rowLength, state.config.colNumStart)
 
   for (const importedHeader of IMPORT_HDRS) {
     selectColsByHeader(importedHeader, state.columns)
@@ -89,18 +84,9 @@ export function importFile () {
   state.rowNumberLength = rowNumLen
 }
 
-export function calcRowNumLength (rows: DataRow[], rowNumStart: number, minLength: number) {
-  const maxLen = String(rows.length - 1 + rowNumStart).length
+export function calcRowNumLength (rowCount: number, rowNumStart: number, minLength: number) {
+  const maxLen = String(rowCount - 1 + rowNumStart).length
   return Math.max(maxLen, minLength)
-}
-
-export function stateFromRows (rows: DataRow[], padRowNum: number, rowNumStart: number) {
-  return rows.map((data, idx) =>
-    ({
-      rowId: idx,
-      rowNum: String(idx + rowNumStart).padStart(padRowNum, ' '),
-      data: data
-    }))
 }
 
 export function stateColumns (total: number, colNumStart: number) {
@@ -208,7 +194,12 @@ export function getRowFormating (columns: StateColumn[]) {
   return fmt
 }
 
-export function formatRow (row: DataRow, fmt: RowPartFormat[]) {
+export function formatRow (rowIdx: number, fmt: RowPartFormat[], datFile: DatFile) {
+  const row = datFile.dataFixed.subarray(
+    rowIdx * datFile.rowLength,
+    rowIdx * datFile.rowLength + datFile.rowLength
+  )
+
   return fmt.map(fmt => {
     const slice = Array.from(
       row.subarray(fmt.offset, fmt.offset + fmt.length)
