@@ -68,7 +68,7 @@ const IMPORT_HDRS: Header[] = [
 const ROW_NUM_MIN_LENGTH = 4
 
 export async function importFile () {
-  const parsed = await importDatFile('BaseItemTypes')
+  const parsed = await importDatFile('Russian/BaseItemTypes')
   const rowNumLen = calcRowNumLength(parsed.rowCount, state.config.rowNumStart, ROW_NUM_MIN_LENGTH)
 
   state.datFile = parsed
@@ -82,6 +82,138 @@ export async function importFile () {
   }
 
   state.rowNumberLength = rowNumLen
+
+  setTimeout(() => analyze(state.datFile!), 105)
+}
+
+interface ColumnStats {
+  bFE: number
+  b00: number
+  b01: number
+  bMax: number
+  refString: {
+    empty: number
+    n1: number
+    n2: number
+  } | false
+  refArray: {
+    boolean: boolean
+    short: boolean
+    long: boolean
+    longLong: boolean
+    string: boolean
+  } | false
+}
+
+function analyze (datFile: DatFile) {
+  console.log('Begin analysis')
+  console.time('Analysis')
+
+  const isValidVariableOffset = (offset: number) =>
+    offset < datFile.readerVariable.byteLength && offset >= 4
+
+  const stats = new Array(datFile.rowLength).fill(undefined)
+    .map(_ => ({
+      bFE: 0,
+      b00: 0,
+      b01: 0,
+      bMax: 0,
+      refString: {
+        empty: 0,
+        n1: 0,
+        n2: 0
+      }
+    } as ColumnStats))
+
+  for (let bi = 0; bi < datFile.rowLength; bi += 1) {
+    const stat = stats[bi]
+    const sLong = (datFile.rowLength - bi) >= 4
+    const sLongLong = (datFile.rowLength - bi) >= 8
+
+    if (!sLong) {
+      stat.refString = false
+    }
+
+    for (let ri = 0; ri < datFile.rowCount; ri += 1) {
+      const row = ri * datFile.rowLength
+
+      const byte = datFile.dataFixed[row + bi]
+      if (byte === 0xfe) {
+        stat.bFE += 1
+      } else if (byte === 0x00) {
+        stat.b00 += 1
+      } else if (byte === 0x01) {
+        stat.b01 += 1
+      }
+      stat.bMax = Math.max(stat.bMax, byte)
+
+      // !!! <LE> = true !!!
+
+      if (stat.refString) {
+        const varOffset = datFile.readerFixed.getUint32(row + bi, true)
+        const stringLen = isValidVariableOffset(varOffset) &&
+          isStringAtOffset(varOffset, datFile.readerVariable)
+
+        if (stringLen === false) {
+          stat.refString = false
+        } else {
+          if (stringLen === 0) {
+            stat.refString.empty += 1
+          } else if (stringLen === 1) {
+            stat.refString.n1 += 1
+          } else if (stringLen === 2) {
+            stat.refString.n2 += 1
+          }
+        }
+      }
+    }
+  }
+
+  // for (let bi = 0; bi < datFile.rowLength; bi += 1) {
+  //   const stat = stats[bi]
+  // }
+
+  // @TODO: if len not whole div on 2, then at least 1 boolean col
+
+  console.timeEnd('Analysis')
+  console.table(stats)
+}
+
+function isStringAtOffset (offset: number, data: DataView) {
+  let idx = offset
+  let strLen = 0
+  while (true) {
+    if ((idx + 3) >= data.byteLength) {
+      return false
+    }
+    const c1 = data.getUint16(idx, true)
+    const c2 = data.getUint16(idx + 2, true)
+    if (c1 === 0x00 && c2 === 0x00) {
+      break
+    }
+    // + 0000 = 00000
+    // + D7FF = 55295
+    // h D800 = 55296
+    // h DBFF = 56319
+    // l DC00 = 56320
+    // l DFFF = 57343
+    // + E000 = 57344
+    // + FFFF = 65535
+    if (c1 > 0xD7FF && c1 < 0xE000) {
+      if (c1 > 0xDBFF) {
+        return false
+      }
+      if (c2 < 0xDC00 || c2 > 0xDFFF) {
+        return false
+      } else {
+        idx += 4
+      }
+    } else {
+      idx += 2
+    }
+    strLen += 1
+  }
+  return strLen
 }
 
 export function calcRowNumLength (rowCount: number, rowNumStart: number, minLength: number) {
