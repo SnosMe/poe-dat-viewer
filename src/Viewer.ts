@@ -29,7 +29,7 @@ interface StateColumn {
     b00: boolean
     nullable: boolean
     bMax: string
-}
+  }
 }
 
 export const state = Vue.observable({
@@ -78,7 +78,7 @@ const IMPORT_HDRS: Header[] = [
     length: 4,
     type: {
       byteView: {}
-  }
+    }
   },
   {
     name: 'Name',
@@ -184,7 +184,7 @@ export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
 
   for (let idx = 0; idx < columnStats.length; idx += 1) {
     const stat = columnStats[idx]
-      if (stat.refString) {
+    if (stat.refString) {
       columns[idx + 0].stats.string = true
       columns[idx + 1].stats.string = true
       columns[idx + 2].stats.string = true
@@ -199,14 +199,14 @@ export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
       columns[idx + 5].stats.array = true
       columns[idx + 6].stats.array = true
       columns[idx + 7].stats.array = true
-  }
+    }
     if (stat.nullableLong) {
       columns[idx + 0].stats.nullable = true
       columns[idx + 1].stats.nullable = true
       columns[idx + 2].stats.nullable = true
       columns[idx + 3].stats.nullable = true
-}
-}
+    }
+  }
 
   return columns
 }
@@ -237,23 +237,64 @@ export function clearColumnSelection (columns: StateColumn[]) {
   }
 }
 
-export function createHeaderFromSelected (cols: StateColumn[], headers: Header[]) {
-  const offset = cols.find(col => col.selected)!.offset
-  const selected = cols.filter(col => col.selected)
-  const length = selected.length
-
-  selected[selected.length - 1].dataEnd = true
-
-  const header: Header = {
-    name: 'New Column',
-    offset,
-    length,
-    type: {
-      byteView: {}
+function removeHeadersAtOffsets (offsets: number[], headers: Header[], columns: StateColumn[]) {
+  for (let idx = 0; idx < headers.length;) {
+    const header = headers[idx]
+    if (
+      header.name != null && offsets.some(offset =>
+        offset >= header.offset &&
+        offset < header.offset + header.length
+      )) {
+      removeHeader(header, headers, columns)
+    } else {
+      idx += 1
     }
   }
-  headers.push(header)
-  headers.sort((a, b) => a.offset - b.offset)
+}
+
+export function createHeaderFromSelected (columns: StateColumn[], headers: Header[]) {
+  const selections = getColumnSelections(columns)
+  if (selections.length === 0) {
+    throw new Error('No bytes selected')
+  } else if (selections.length > 1) {
+    throw new Error('Cannot create header from non-contiguous selection')
+  }
+  const selected = selections[0]
+
+  removeHeadersAtOffsets(selected.map(col => col.offset), headers, columns)
+
+  const emptyHeader = headers.find(header =>
+    selected[0].offset >= header.offset &&
+    selected[0].offset + selected.length <= header.offset + header.length
+  )!
+
+  let updatedHeaders: Header[] = [
+    {
+      name: null,
+      offset: emptyHeader.offset,
+      length: selected[0].offset - emptyHeader.offset,
+      type: { byteView: {} }
+    }, {
+      name: '',
+      offset: selected[0].offset,
+      length: selected.length,
+      type: { byteView: {} }
+    }, {
+      name: null,
+      offset: selected[0].offset + selected.length,
+      length: emptyHeader.length - (selected[0].offset - emptyHeader.offset + selected.length),
+      type: { byteView: {} }
+    }
+  ]
+  const header = updatedHeaders[1]
+
+  updatedHeaders = updatedHeaders.filter(header => header.length)
+  headers.splice(headers.indexOf(emptyHeader), 1, ...updatedHeaders)
+  for (const col of columns) {
+    if (updatedHeaders.some(header => col.offset === header.offset)) {
+      col.dataStart = true
+    }
+  }
 
   return header
 }
@@ -352,6 +393,10 @@ export function getColumnSelections (columns: readonly StateColumn[]) {
 }
 
 export function removeHeader (header: Header, headers: Header[], columns: StateColumn[]) {
+  if (header.name == null) {
+    throw new Error('Cannot remove empty header')
+  }
+
   if (!header.type.byteView) {
     throw new Error('TODO: toggle byteView first')
   }
@@ -361,15 +406,17 @@ export function removeHeader (header: Header, headers: Header[], columns: StateC
     byteView: {}
   }
 
-  for (let idx = 0; idx < (headers.length - 1); idx += 1) {
-    const merged = mergeHeaders(headers[idx], headers[idx + 1])
+  for (let idx = 0; idx < (headers.length - 1);) {
+    const merged = mergeEmptyHeaders(headers[idx], headers[idx + 1])
     if (merged) {
       for (const col of columns) {
-        if (col.offset === (headers[idx].offset + headers[idx].length - 1)) {
-          col.dataEnd = false
+        if (col.offset === headers[idx + 1].offset) {
+          col.dataStart = false
         }
       }
       headers.splice(idx, 2, merged)
+    } else {
+      idx += 1
     }
   }
 }

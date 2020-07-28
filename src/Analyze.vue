@@ -10,7 +10,7 @@
         <div class="text-blue-grey-4 text-italic">No bytes selected</div>
       </template>
       <template v-else-if="selections.length === 1">
-        <q-btn padding="0 sm" label="Define column" no-caps color="blue-grey-8" />
+        <q-btn @click="defineColumn" padding="0 sm" label="Define column" no-caps color="blue-grey-8" />
       </template>
       <template v-else-if="selections.length > 1">
         <div class="text-blue-grey-2 q-pr-xs">Selections</div>
@@ -61,7 +61,7 @@
 import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
-import { state, importFile, getRowFormating, getColumnSelections } from './Viewer'
+import { state, importFile, getRowFormating, getColumnSelections, createHeaderFromSelected, clearColumnSelection } from './Viewer'
 
 export default {
   components: { ViewerHead, HeaderProps, DataRow },
@@ -85,6 +85,12 @@ export default {
     },
     rows () {
       return new Array(this.datFile.rowCount).fill(undefined)
+    }
+  },
+  methods: {
+    defineColumn () {
+      state.editHeader = createHeaderFromSelected(state.columns, state.headers)
+      clearColumnSelection(state.columns)
     }
   }
 }

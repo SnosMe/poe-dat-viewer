@@ -32,14 +32,14 @@
         />
       </div>
       <div class="flex justify-end q-mt-lg">
-        <q-btn padding="0 sm" label="Remove" no-caps flat color="negative" />
+        <q-btn @click="remove" padding="0 sm" label="Remove" no-caps flat color="negative" />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { state as Viewer, isHeaderTypeUnknown } from './Viewer'
+import { state, isHeaderTypeUnknown, removeHeader } from './Viewer'
 
 export default {
   data () {
@@ -49,7 +49,7 @@ export default {
   },
   computed: {
     header () {
-      return Viewer.editHeader
+      return state.editHeader
     },
     dataType: {
       get () {
@@ -104,6 +104,10 @@ export default {
       } else if (type === 'boolean') {
         this.$set(this.header.type, 'boolean', {})
       }
+    },
+    remove () {
+      removeHeader(state.editHeader, state.headers, state.columns)
+      state.editHeader = null
     }
   }
 }
