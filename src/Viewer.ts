@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import { importDatFile, DatFile } from './dat-file'
+import { analyze, ColumnStats } from './analysis'
 
 interface Header {
   name: string | null
@@ -20,14 +21,22 @@ interface StateColumn {
   colNum99: string
   colNum100: string
   selected: boolean
-  header: number
-  dataEnd: boolean
+  header: Header | null
+  dataStart: boolean
+  stats: {
+    string: boolean
+    array: boolean
+    b00: boolean
+    nullable: boolean
+    bMax: string
+}
 }
 
 export const state = Vue.observable({
   headers: [] as Header[],
   columns: [] as StateColumn[],
   datFile: null as DatFile | null,
+  columnStats: [] as ColumnStats[],
   rowIndexing: 0,
   colIndexing: 0,
   rowNumberLength: -1,
@@ -56,9 +65,65 @@ const IMPORT_HDRS: Header[] = [
     }
   },
   {
-    name: null,
+    name: 'Width',
     offset: 12,
-    length: 199,
+    length: 4,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'Height',
+    offset: 16,
+    length: 4,
+    type: {
+      byteView: {}
+  }
+  },
+  {
+    name: 'Name',
+    offset: 20,
+    length: 4,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'InheritsFrom',
+    offset: 24,
+    length: 4,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'DropLevel',
+    offset: 28,
+    length: 4,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'FlavourTextKey',
+    offset: 32,
+    length: 8,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'Implicit_ModsKeys',
+    offset: 40,
+    length: 8,
+    type: {
+      byteView: {}
+    }
+  },
+  {
+    name: 'Unknown1',
+    offset: 48,
+    length: 4,
     type: {
       byteView: {}
     }
@@ -72,7 +137,16 @@ export async function importFile () {
   const rowNumLen = calcRowNumLength(parsed.rowCount, state.config.rowNumStart, ROW_NUM_MIN_LENGTH)
 
   state.datFile = parsed
-  state.columns = stateColumns(parsed.rowLength, state.config.colNumStart)
+  state.columnStats = analyze(state.datFile)
+  state.columns = stateColumns(state.columnStats, state.config.colNumStart)
+  state.headers = [{
+    name: null,
+    offset: 0,
+    length: parsed.rowLength,
+    type: {
+      byteView: {}
+    }
+  }]
 
   for (const importedHeader of IMPORT_HDRS) {
     selectColsByHeader(importedHeader, state.columns)
@@ -82,138 +156,6 @@ export async function importFile () {
   }
 
   state.rowNumberLength = rowNumLen
-
-  setTimeout(() => analyze(state.datFile!), 105)
-}
-
-interface ColumnStats {
-  bFE: number
-  b00: number
-  b01: number
-  bMax: number
-  refString: {
-    empty: number
-    n1: number
-    n2: number
-  } | false
-  refArray: {
-    boolean: boolean
-    short: boolean
-    long: boolean
-    longLong: boolean
-    string: boolean
-  } | false
-}
-
-function analyze (datFile: DatFile) {
-  console.log('Begin analysis')
-  console.time('Analysis')
-
-  const isValidVariableOffset = (offset: number) =>
-    offset < datFile.readerVariable.byteLength && offset >= 4
-
-  const stats = new Array(datFile.rowLength).fill(undefined)
-    .map(_ => ({
-      bFE: 0,
-      b00: 0,
-      b01: 0,
-      bMax: 0,
-      refString: {
-        empty: 0,
-        n1: 0,
-        n2: 0
-      }
-    } as ColumnStats))
-
-  for (let bi = 0; bi < datFile.rowLength; bi += 1) {
-    const stat = stats[bi]
-    const sLong = (datFile.rowLength - bi) >= 4
-    const sLongLong = (datFile.rowLength - bi) >= 8
-
-    if (!sLong) {
-      stat.refString = false
-    }
-
-    for (let ri = 0; ri < datFile.rowCount; ri += 1) {
-      const row = ri * datFile.rowLength
-
-      const byte = datFile.dataFixed[row + bi]
-      if (byte === 0xfe) {
-        stat.bFE += 1
-      } else if (byte === 0x00) {
-        stat.b00 += 1
-      } else if (byte === 0x01) {
-        stat.b01 += 1
-      }
-      stat.bMax = Math.max(stat.bMax, byte)
-
-      // !!! <LE> = true !!!
-
-      if (stat.refString) {
-        const varOffset = datFile.readerFixed.getUint32(row + bi, true)
-        const stringLen = isValidVariableOffset(varOffset) &&
-          isStringAtOffset(varOffset, datFile.readerVariable)
-
-        if (stringLen === false) {
-          stat.refString = false
-        } else {
-          if (stringLen === 0) {
-            stat.refString.empty += 1
-          } else if (stringLen === 1) {
-            stat.refString.n1 += 1
-          } else if (stringLen === 2) {
-            stat.refString.n2 += 1
-          }
-        }
-      }
-    }
-  }
-
-  // for (let bi = 0; bi < datFile.rowLength; bi += 1) {
-  //   const stat = stats[bi]
-  // }
-
-  // @TODO: if len not whole div on 2, then at least 1 boolean col
-
-  console.timeEnd('Analysis')
-  console.table(stats)
-}
-
-function isStringAtOffset (offset: number, data: DataView) {
-  let idx = offset
-  let strLen = 0
-  while (true) {
-    if ((idx + 3) >= data.byteLength) {
-      return false
-    }
-    const c1 = data.getUint16(idx, true)
-    const c2 = data.getUint16(idx + 2, true)
-    if (c1 === 0x00 && c2 === 0x00) {
-      break
-    }
-    // + 0000 = 00000
-    // + D7FF = 55295
-    // h D800 = 55296
-    // h DBFF = 56319
-    // l DC00 = 56320
-    // l DFFF = 57343
-    // + E000 = 57344
-    // + FFFF = 65535
-    if (c1 > 0xD7FF && c1 < 0xE000) {
-      if (c1 > 0xDBFF) {
-        return false
-      }
-      if (c2 < 0xDC00 || c2 > 0xDFFF) {
-        return false
-      } else {
-        idx += 4
-      }
-    } else {
-      idx += 2
-    }
-    strLen += 1
-  }
-  return strLen
 }
 
 export function calcRowNumLength (rowCount: number, rowNumStart: number, minLength: number) {
@@ -221,17 +163,52 @@ export function calcRowNumLength (rowCount: number, rowNumStart: number, minLeng
   return Math.max(maxLen, minLength)
 }
 
-export function stateColumns (total: number, colNumStart: number) {
-  return new Array(total).fill(undefined)
-    .map((_, idx) => ({
+export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
+  const columns = new Array(columnStats.length).fill(undefined)
+    .map<StateColumn>((_, idx) => ({
       offset: idx,
       colNum99: String((idx + colNumStart) % 100).padStart(2, '0'),
       // colNum100: String(Math.floor((idx + colNumStart) / 100)),
       colNum100: String(idx + colNumStart).padStart(2, '0'),
       selected: false,
-      header: 0,
-      dataEnd: false
-    } as StateColumn))
+      header: null,
+      dataStart: false,
+      stats: {
+        string: false,
+        array: false,
+        b00: columnStats[idx].b00,
+        bMax: columnStats[idx].bMax.toString(16).padStart(2, '0'),
+        nullable: false
+      }
+    }))
+
+  for (let idx = 0; idx < columnStats.length; idx += 1) {
+    const stat = columnStats[idx]
+      if (stat.refString) {
+      columns[idx + 0].stats.string = true
+      columns[idx + 1].stats.string = true
+      columns[idx + 2].stats.string = true
+      columns[idx + 3].stats.string = true
+    }
+    if (stat.refArray) {
+      columns[idx + 0].stats.array = true
+      columns[idx + 1].stats.array = true
+      columns[idx + 2].stats.array = true
+      columns[idx + 3].stats.array = true
+      columns[idx + 4].stats.array = true
+      columns[idx + 5].stats.array = true
+      columns[idx + 6].stats.array = true
+      columns[idx + 7].stats.array = true
+  }
+    if (stat.nullableLong) {
+      columns[idx + 0].stats.nullable = true
+      columns[idx + 1].stats.nullable = true
+      columns[idx + 2].stats.nullable = true
+      columns[idx + 3].stats.nullable = true
+}
+}
+
+  return columns
 }
 
 export function selectColsByHeader (header: Header, cols: StateColumn[]) {
@@ -247,15 +224,15 @@ export function toggleColsBetween (cols: StateColumn[], a: number, b: number) {
 
   for (const col of cols) {
     if (col.offset >= start && col.offset <= end) {
-      if (!col.header) {
+      if (!col.header || col.header.type.byteView) {
         col.selected = !col.selected
       }
     }
   }
 }
 
-export function clearColumnSelection (cols: StateColumn[]) {
-  for (const col of cols) {
+export function clearColumnSelection (columns: StateColumn[]) {
+  for (const col of columns) {
     col.selected = false
   }
 }
@@ -285,13 +262,13 @@ interface RowPartFormat {
   offset: number
   length: number
   selected: boolean
-  dataEnd: boolean
+  dataStart: boolean
 }
 
 interface RowPart {
   text: string
   selected: boolean
-  dataEnd: boolean
+  dataStart: boolean
 }
 
 export function getRowFormating (columns: StateColumn[]) {
@@ -300,9 +277,9 @@ export function getRowFormating (columns: StateColumn[]) {
   function colToFmt (col: StateColumn) {
     return {
       offset: col.offset,
-      length: col.header || 1,
+      length: 1, // @TODO: col.header?.length
       selected: col.selected,
-      dataEnd: col.dataEnd
+      dataStart: col.dataStart
     }
   }
 
@@ -312,10 +289,9 @@ export function getRowFormating (columns: StateColumn[]) {
   columns.reduce((last, curr) => {
     if (
       last.selected === curr.selected &&
-      last.dataEnd === false
+      curr.dataStart === false
     ) {
       last.length += 1
-      last.dataEnd = curr.dataEnd
     } else {
       last = colToFmt(curr)
       fmt.push(last)
@@ -332,7 +308,7 @@ export function formatRow (rowIdx: number, fmt: RowPartFormat[], datFile: DatFil
     rowIdx * datFile.rowLength + datFile.rowLength
   )
 
-  return fmt.map(fmt => {
+  return fmt.map<RowPart>(fmt => {
     const slice = Array.from(
       row.subarray(fmt.offset, fmt.offset + fmt.length)
     )
@@ -342,9 +318,9 @@ export function formatRow (rowIdx: number, fmt: RowPartFormat[], datFile: DatFil
 
     return {
       selected: fmt.selected,
-      dataEnd: fmt.dataEnd,
+      dataStart: fmt.dataStart,
       text: hexDump
-    } as RowPart
+    }
   })
 }
 
@@ -398,7 +374,7 @@ export function removeHeader (header: Header, headers: Header[], columns: StateC
   }
 }
 
-function mergeHeaders (h1: Header, h2: Header) {
+function mergeEmptyHeaders (h1: Header, h2: Header): Header | false {
   if (h1.name === null && h2.name === null) {
     return {
       name: null,
@@ -407,7 +383,7 @@ function mergeHeaders (h1: Header, h2: Header) {
       type: {
         byteView: {}
       }
-    } as Header
+    }
   }
 
   return false
