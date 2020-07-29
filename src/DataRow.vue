@@ -5,8 +5,8 @@
     <div v-for="part in formatted"
       class="viewer-row"
       :class="{
-        'viewer-row-border': part.dataEnd,
-        'viewer-row-selected': part.selected
+        'viewer-row--border': part.dataStart,
+        'viewer-row--selected': part.selected
       }"
       >{{ part.text }}</div>
   </div>
@@ -37,15 +37,15 @@ export default {
   padding: 0 0.5ch;
   z-index: -2;
 
-  &.viewer-row-border {
-    border-right: 1px solid $grey-5;
+  &.viewer-row--border {
+    border-left: 1px solid $grey-5;
   }
 
-  &.viewer-row-selected {
+  &.viewer-row--selected {
     background: $blue-2;
   }
 
-  &:last-child {
+  &:nth-child(2) {
     border: none;
   }
 }

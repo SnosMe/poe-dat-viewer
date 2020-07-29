@@ -3,12 +3,12 @@
     <div class="viewer-col-rownum"
       >{{ ''.padStart(rowNumberLength) }}</div>
     <!-- // -->
-    <div>
+    <div style="display: flex; flex-direction: column;">
       <div class="flex inline no-wrap">
         <!-- eslint-disable-next-line vue/require-v-for-key -->
         <button v-for="col in headers"
-          class="viewer-col viewer-col-border"
-          :style="{ width: `${col.length * 3}ch` }"
+          class="viewer-col viewer-col--border"
+          :style="{ width: `${col.length * 3 - 1}ch` }"
           @click="editHeader(col)">
           <span v-if="col.name === null">{{ '\u00a0' }}</span>
           <span v-else-if="col.name === ''" class="bg-blue-grey-6 text-grey-2 rounded-borders q-px-px">?</span>
@@ -19,15 +19,42 @@
         <button v-for="col in columns" :key="col.offset"
           class="viewer-col"
           :class="{
-            'viewer-col-border': col.dataEnd,
-            'viewer-col-selected': col.selected
+            'viewer-col--border': col.dataStart,
+            'viewer-col--selected': col.selected
           }"
-          style="width: 3ch"
           @mousedown="selectColumn(col.offset, $event)"
           @mouseenter="selectColumn(col.offset, $event)"
           @touchstart="selectColumn(col.offset, $event)"
           @touchmove="selectColumn(col.offset, $event)"
           >{{ col.colNum99 }}</button>
+      </div>
+      <div class="flex inline no-wrap">
+        <div v-for="col in columns" :key="col.offset"
+          class="viewer-col-stat"
+          :class="{
+            'viewer-col-stat--border': col.dataStart,
+            'viewer-col-stat--selected': col.selected
+          }"
+        >
+          <div v-if="col.stats.string"
+            class="viewer-col-stat_indicator bg-brown-4"
+            style="top: 0ch;" />
+          <div v-if="col.stats.array"
+            class="viewer-col-stat_indicator bg-teal-4"
+            style="top: 1ch;" />
+          <div v-if="col.stats.b00"
+            class="viewer-col-stat_indicator bg-grey-10"
+            style="top: 2ch;" />
+          <div v-else-if="col.stats.nullable"
+            class="viewer-col-stat_indicator bg-pink-4"
+            style="top: 2ch;" />
+          <div v-if="col.selected"
+            class="viewer-col-stat_indicator bg-grey-10"
+            style="top: 0ch; height: 3ch; opacity: 0.25;" />
+          <div
+            class="viewer-col-stat_max"
+            style="top: 0ch; height: 3ch;">{{ col.stats.bMax }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -102,16 +129,15 @@ export default {
   background: $grey-2;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 0 0.5ch;
   text-align: center;
   box-sizing: content-box;
-  height: 3ch;
   line-height: 3ch;
   white-space: nowrap;
   overflow: hidden;
 
-  &.viewer-col-border {
-    border-right: 1px solid $grey-5;
+  &.viewer-col--border {
+    border-left: 1px solid $grey-5;
   }
 
   &:hover {
@@ -119,18 +145,67 @@ export default {
     color: $blue-1;
   }
 
-  &.viewer-col-selected {
+  &.viewer-col--selected {
     background: $blue-6;
     color: $blue-1;
   }
 
-  &.viewer-col-selected.viewer-col-border {
-    /* @TODO: &.viewer-col-border ~ &.viewer-col-selected (dataEnd -> dataStart) */
-    border-right-color: $blue-8;
+  &.viewer-col--selected.viewer-col--border,
+  &.viewer-col--selected + &.viewer-col--border {
+    border-left-color: $blue-8;
   }
 
-  &:last-child {
-    border: none;
+  &:first-child { border: none; }
+  &:focus { outline: 0; }
+}
+
+.viewer-col-stat {
+  color: $blue-grey-6;
+  background: $grey-2;
+  box-sizing: content-box;
+  width: 3%;
+  height: 3ch;
+  position: relative;
+
+  &.viewer-col-stat--border {
+    border-left: 1px solid $grey-5;
+  }
+
+  &.viewer-col-stat--selected + &.viewer-col-stat--border {
+    border-left-color: $grey-6;
+  }
+  &.viewer-col-stat--selected.viewer-col-stat--border {
+    border-left-color: $grey-5;
+  }
+
+  &:first-child { border: none; }
+}
+
+.viewer-col-stat_indicator {
+  position: absolute;
+  width: 3ch;
+  height: 1ch;
+  z-index: 1;
+
+  .viewer-col-stat--border:not(:first-child) > & {
+    width: calc(3ch + 1px);
+    margin-left: -1px;
+  }
+}
+
+.viewer-col-stat_max {
+  visibility: hidden;
+  text-align: center;
+  cursor: default;
+  line-height: 3ch;
+  z-index: 1;
+  position: relative;
+  color: $grey-1;
+  text-shadow: 0 0 0.5ch rgba(0,0,0,0.7);
+  background: #757575b0;
+
+  div:hover > .viewer-col-stat > & {
+    visibility: visible;
   }
 }
 
@@ -139,7 +214,7 @@ export default {
   position: sticky;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 2;
   user-select: none;
   white-space: pre;
   padding: 0 0.25rem;

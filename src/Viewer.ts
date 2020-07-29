@@ -4,8 +4,8 @@ import { analyze, ColumnStats } from './analysis'
 
 interface Header {
   name: string | null
-  offset: number
-  length: number
+  readonly offset: number
+  readonly length: number
   type: {
     byteView?: {}
     ref?: { array: boolean }
@@ -17,13 +17,13 @@ interface Header {
 }
 
 interface StateColumn {
-  offset: number
-  colNum99: string
-  colNum100: string
+  readonly offset: number
+  readonly colNum99: string
+  readonly colNum100: string
   selected: boolean
   header: Header | null
   dataStart: boolean
-  stats: {
+  readonly stats: {
     string: boolean
     array: boolean
     b00: boolean
