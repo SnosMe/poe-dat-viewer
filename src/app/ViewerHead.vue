@@ -61,7 +61,8 @@
 </template>
 
 <script>
-import { toggleColsBetween, state } from './Viewer'
+import { state } from './viewer/Viewer'
+import { toggleColsBetween } from './viewer/selection'
 
 export default {
   props: {

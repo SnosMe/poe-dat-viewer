@@ -13,7 +13,8 @@
 </template>
 
 <script>
-import { formatRow, state } from './Viewer'
+import { state } from './viewer/Viewer'
+import { formatRow } from './viewer/formatting'
 
 export default {
   props: ['rowIdx', 'format'],

@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import Analyze from './Analyze'
+import Analyze from './app/Analyze'
 
 export default {
   name: 'App',

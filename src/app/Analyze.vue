@@ -61,7 +61,10 @@
 import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
-import { state, importFile, getRowFormating, getColumnSelections, createHeaderFromSelected, clearColumnSelection } from './Viewer'
+import { state, importFile } from './viewer/Viewer'
+import { getColumnSelections, clearColumnSelection } from './viewer/selection'
+import { getRowFormating } from './viewer/formatting'
+import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
   components: { ViewerHead, HeaderProps, DataRow },

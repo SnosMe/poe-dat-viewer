@@ -39,7 +39,8 @@
 </template>
 
 <script>
-import { state, isHeaderTypeUnknown, removeHeader } from './Viewer'
+import { state } from './viewer/Viewer'
+import { isHeaderTypeUnknown, removeHeader } from './viewer/headers'
 
 export default {
   data () {
