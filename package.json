@@ -1,6 +1,6 @@
 {
-  "name": "pogo-analyze-ui",
-  "version": "0.1.0",
+  "name": "poe-dat-viewer",
+  "version": "1.0.0-alpha",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

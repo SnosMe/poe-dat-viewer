@@ -47,7 +47,7 @@
           </q-virtual-scroll>
         </q-scroll-area>
         <div class="bg-blue-grey-9 q-pa-sm text-white text-body2">
-          <div>Made by Alexander Drozdov, v1.0.0 <a class="q-link text-white border-b" href="https://github.com/SnosMe/pogo-analyze-ui">GitHub</a></div>
+          <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
         </div>
       </div>
       <div class="flex-shrink-0">
@@ -88,6 +88,9 @@ export default {
     },
     rows () {
       return new Array(this.datFile.rowCount).fill(undefined)
+    },
+    appVersion () {
+      return process.env.APP_VERSION
     }
   },
   methods: {
