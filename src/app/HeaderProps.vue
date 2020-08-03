@@ -21,9 +21,10 @@
       <div class="q-mb-sm q-pl-sm">
         <div class="q-mb-xs flex items-baseline justify-between">
           <span>Data type</span>
-          <q-btn v-if="!isTypeUnknown"
+          <q-btn v-if="!isTypeUnknown" @click="clearDataType"
             padding="0 sm" label="clear" no-caps flat color="blue-grey-7" class="border-b" />
         </div>
+        <div class="font-mono bg-grey-3 q-py-xs q-px-sm q-mr-sm text-blue-8 rounded-borders">Ref -> ?[]</div>
         <q-option-group dense size="xs"
           v-if="isTypeUnknown"
           :value="undefined"
@@ -67,10 +68,24 @@ export default {
       const opts = []
 
       const len = this.header.length
-      if (len === 8 || len === 4) {
-        opts.push({ label: 'Reference', value: 'reference' })
+      if (len === 8) {
+        if (this.stats.refArray) {
+          opts.push({ label: 'Array', value: 'reference' })
+        } else {
+          opts.push({ label: 'Array (invalid data)', value: 'reference', disable: true })
+        }
       } else {
-        opts.push({ label: 'Reference (invalid size)', value: 'reference', disable: true })
+        opts.push({ label: 'Array (invalid size)', value: 'reference', disable: true })
+      }
+
+      if (len === 4) {
+        if (this.stats.refString) {
+          opts.push({ label: 'String', value: 'reference' })
+        } else {
+          opts.push({ label: 'String (invalid data)', value: 'reference', disable: true })
+        }
+      } else {
+        opts.push({ label: 'String (invalid size)', value: 'reference', disable: true })
       }
 
       if (len === 8 || len === 4 || len === 2 || len === 1) {
@@ -86,24 +101,42 @@ export default {
       }
 
       if (len === 1) {
-        opts.push({ label: 'Boolean', value: 'boolean' })
+        if (this.stats.bMax > 0x01) {
+          opts.push({ label: 'Boolean (invalid data)', value: 'boolean', disable: true })
+        } else {
+          opts.push({ label: 'Boolean', value: 'boolean' })
+        }
       } else {
         opts.push({ label: 'Boolean (invalid size)', value: 'boolean', disable: true })
       }
 
       return opts
+    },
+    stats () {
+      return state.columnStats[this.header.offset]
     }
   },
   methods: {
     handleDataTypeChange (type) {
+      const header = this.header
       if (type === 'reference') {
-        this.$set(this.header.type, 'ref', { array: this.header.length !== 4 })
+        if (header.length === 4) {
+          this.$set(header.type, 'ref', { array: false })
+          this.$set(header.type, 'string', {})
+        } else {
+          this.$set(header.type, 'ref', { array: true })
+        }
       } else if (type === 'integer') {
-        this.$set(this.header.type, 'integer', { unsigned: true, nullable: false, size: this.header.length })
+        this.$set(header.type, 'integer', { unsigned: true, nullable: header.length >= 4, size: header.length })
       } else if (type === 'decimal') {
-        this.$set(this.header.type, 'decimal', { size: this.header.length })
+        this.$set(header.type, 'decimal', { size: header.length })
       } else if (type === 'boolean') {
-        this.$set(this.header.type, 'boolean', {})
+        this.$set(header.type, 'boolean', {})
+      }
+    },
+    clearDataType () {
+      this.header.type = {
+        byteView: {}
       }
     },
     remove () {
