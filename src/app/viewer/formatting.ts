@@ -23,6 +23,12 @@ export function getRowFormating (columns: StateColumn[]) {
   const fmt: RowPartFormat[] = []
 
   function colToFmt (col: StateColumn) {
+    /* subscribe to Vue reactivity */
+    // eslint-disable-next-line no-unused-expressions
+    col.header?.type.integer?.nullable
+    // eslint-disable-next-line no-unused-expressions
+    col.header?.type.integer?.unsigned
+
     return {
       offset: col.offset,
       length: 1,

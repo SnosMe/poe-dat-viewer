@@ -35,6 +35,14 @@
             v-model="arrayType"
             :options="arrayTypeOpts" />
         </div>
+        <div class="q-mt-sm" v-if="header.type.integer">
+          <q-toggle label="Unsigned" dense size="xs"
+            @input="recacheAfterOptChange"
+            v-model="header.type.integer.unsigned" />
+          <q-toggle label="Nullable" dense size="xs" class="q-ml-md"
+            @input="recacheAfterOptChange"
+            v-model="header.type.integer.nullable" />
+        </div>
       </div>
     </div>
   </div>
@@ -177,9 +185,9 @@ export default {
         } else if (type === 'integer_2') {
           this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 2 })
         } else if (type === 'integer_4') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: true, size: 4 })
+          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 4 })
         } else if (type === 'integer_8') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: true, size: 8 })
+          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 8 })
         } else if (type === 'decimal_4') {
           this.$set(header.type, 'decimal', { size: 4 })
         } else if (type === 'decimal_8') {
@@ -193,6 +201,9 @@ export default {
     }
   },
   methods: {
+    recacheAfterOptChange () {
+      cacheHeaderDataView(this.header, state.datFile)
+    },
     remove () {
       this.setByteViewMode(true)
       removeHeader(state.editHeader, state.headers, state.columns)

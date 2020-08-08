@@ -10,7 +10,8 @@ import {
   QBtnGroup,
   QInput,
   QBtnToggle,
-  QOptionGroup
+  QOptionGroup,
+  QToggle
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -22,7 +23,8 @@ Vue.use(Quasar, {
     QBtnGroup,
     QScrollArea,
     QVirtualScroll,
-    QBtn
+    QBtn,
+    QToggle
   },
   directives: {
   },
