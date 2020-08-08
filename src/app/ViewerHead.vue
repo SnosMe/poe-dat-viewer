@@ -93,11 +93,25 @@ export default {
     selectStart (offset) {
       this.selectionStart = offset
       this.colsBeforeSelection = Object.freeze(
-        JSON.parse(JSON.stringify(this.columns))
+        this.columns.map(col => ({ selected: col.selected }))
       )
       toggleColsBetween(this.columns, this.selectionStart, this.selectionStart)
     },
     selectContinue (offset) {
+      if (this.selectionStart === undefined) return
+
+      const len = offset - this.selectionStart
+      if (len >= 4) {
+        offset = this.selectionStart + 7
+      } else if (len >= 2) {
+        offset = this.selectionStart + 3
+      }
+      if (len <= -4) {
+        offset = this.selectionStart - 7
+      } else if (len <= -2) {
+        offset = this.selectionStart - 3
+      }
+
       this.columns.forEach((col, idx) => {
         col.selected = this.colsBeforeSelection[idx].selected
       })
