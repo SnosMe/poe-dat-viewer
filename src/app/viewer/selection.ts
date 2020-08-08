@@ -14,7 +14,7 @@ export function toggleColsBetween (cols: StateColumn[], a: number, b: number) {
 
   for (const col of cols) {
     if (col.offset >= start && col.offset <= end) {
-      if (!col.header || col.header.type.byteView) {
+      if (!col.header) {
         col.selected = !col.selected
       }
     }

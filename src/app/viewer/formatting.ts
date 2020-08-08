@@ -105,7 +105,7 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
         text = `[${value.join(', ')}]`
         color = 3
       } else if (header.type.string) {
-        text = `[${value.map(_ => '"' + _ + '"').join(', ')}]`
+        text = `[${(value as string[]).map(_ => '"' + _ + '"').join(', ')}]`
         color = 1
       } else if (header.type.integer || header.type.decimal) {
         text = `[${value.join(', ')}]`
