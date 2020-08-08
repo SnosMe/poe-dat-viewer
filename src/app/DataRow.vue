@@ -6,7 +6,10 @@
       class="viewer-row"
       :class="{
         'viewer-row--border': part.dataStart,
-        'viewer-row--selected': part.selected
+        'viewer-row--selected': part.selected,
+        'text-purple-10': part.color === 1,
+        'text-green-9': part.color === 2,
+        'text-pink-6': part.color === 3
       }"
       :style="{ width: `calc(var(--ppc) * ${part.width})` }"
       >{{ part.text }}</div>

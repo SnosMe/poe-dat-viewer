@@ -112,3 +112,19 @@ export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
 
   return columns
 }
+
+export function disableByteView (header: Header, columns: StateColumn[]) {
+  header.type.byteView = undefined
+  const colIdx = columns.findIndex(col => col.offset === header.offset)
+  columns.splice(colIdx + 1, header.length - 1)
+  columns[colIdx].header = header
+  columns[colIdx].selected = false
+}
+
+export function enableByteView (header: Header, columns: StateColumn[], columnStats: ColumnStats[]) {
+  header.type.byteView = {}
+  const colIdx = columns.findIndex(col => col.offset === header.offset)
+  const fresh = stateColumns(columnStats, Number(columns[0].colNum99))
+  columns.splice(colIdx + 1, 0, ...fresh.slice(header.offset + 1, header.offset + header.length))
+  columns[colIdx].header = null
+}

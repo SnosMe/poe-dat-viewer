@@ -13,6 +13,15 @@ export interface Header {
     decimal?: { size: number }
     string?: {}
   }
+  cachedView?: Readonly<{
+    // stats: [] @TODO
+    // entriesRaw: [] ??
+    length: number
+    entries: Array<[
+      string, // value
+      number // color
+    ]>
+  }>
 }
 
 function removeHeadersAtOffsets (offsets: number[], headers: Header[], columns: StateColumn[]) {
@@ -119,14 +128,4 @@ function mergeEmptyHeaders (h1: Header, h2: Header): Header | false {
   }
 
   return false
-}
-
-export function isHeaderTypeUnknown (header: Header) {
-  return !(
-    header.type.ref ||
-    header.type.boolean ||
-    header.type.integer ||
-    header.type.decimal ||
-    header.type.string
-  )
 }

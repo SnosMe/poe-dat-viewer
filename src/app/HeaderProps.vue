@@ -10,138 +10,203 @@
       <div class="q-mb-md q-mt-sm q-px-sm">
         <q-input label="Name" placeholder="unnamed" v-model.trim="header.name" outlined />
       </div>
-      <div v-if="!isTypeUnknown"
+      <div
         class="q-mb-sm q-pl-sm flex no-wrap items-baseline">
         <div class="q-mb-xs q-mr-sm">View mode</div>
         <q-btn-group unelevated>
-          <q-btn label="Bytes" padding="0 sm" no-caps color="primary" text-color="white" class="q-mr-px" />
-          <q-btn label="Data" padding="0 sm" no-caps color="blue-grey-1" text-color="black" />
+          <q-btn label="Bytes" @click="setByteViewMode(true)"
+            padding="0 sm" no-caps :color="header.type.byteView ? 'primary' : 'blue-grey-1'" :text-color="header.type.byteView ? 'white' : 'black'" class="q-mr-px" />
+          <q-btn label="Data" @click="setByteViewMode(false)" :disable="!dataType"
+            padding="0 sm" no-caps :color="header.type.byteView ? 'blue-grey-1' : 'primary'" :text-color="header.type.byteView ? 'black' : 'white'" />
         </q-btn-group>
       </div>
       <div class="q-mb-sm q-pl-sm">
         <div class="q-mb-xs flex items-baseline justify-between">
           <span>Data type</span>
-          <q-btn v-if="!isTypeUnknown" @click="clearDataType"
-            padding="0 sm" label="clear" no-caps flat color="blue-grey-7" class="border-b" />
+          <q-btn @click="remove"
+            padding="0 sm" label="Remove" no-caps flat color="negative" />
         </div>
-        <div class="font-mono bg-grey-3 q-py-xs q-px-sm q-mr-sm text-blue-8 rounded-borders">Ref -> ?[]</div>
         <q-option-group dense size="xs"
-          v-if="isTypeUnknown"
-          :value="undefined"
-          @input="handleDataTypeChange"
-          :options="dataTypeOpts"
-        />
-      </div>
-      <div class="flex justify-end q-mt-lg">
-        <q-btn @click="remove" padding="0 sm" label="Remove" no-caps flat color="negative" />
+          v-model="dataType"
+          :options="dataTypeOpts" />
+        <div v-if="arrayTypeOpts.length" class="q-mt-sm">
+          <div>of ...</div>
+          <q-option-group dense size="xs"
+            v-model="arrayType"
+            :options="arrayTypeOpts" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { state } from './viewer/Viewer'
-import { isHeaderTypeUnknown, removeHeader } from './viewer/headers'
+import { state, disableByteView, enableByteView } from './viewer/Viewer'
+import { removeHeader } from './viewer/headers'
+import { cacheHeaderDataView } from './viewer/formatting'
 
 export default {
-  data () {
-    return {
-      tmp1: undefined
-    }
-  },
   computed: {
     header () {
       return state.editHeader
-    },
-    dataType: {
-      get () {
-        return this.tmp1
-      },
-      set (value) {
-        this.tmp1 = value
-      }
-    },
-    isTypeUnknown () {
-      return isHeaderTypeUnknown(this.header)
     },
     dataTypeOpts () {
       const opts = []
 
       const len = this.header.length
-      if (len === 8) {
-        if (this.stats.refArray) {
-          opts.push({ label: 'Array', value: 'reference' })
-        } else {
-          opts.push({ label: 'Array (invalid data)', value: 'reference', disable: true })
-        }
-      } else {
-        opts.push({ label: 'Array (invalid size)', value: 'reference', disable: true })
+      if (len === 8 && this.stats.refArray) {
+        opts.push({ label: 'Array', value: 'reference' })
       }
-
-      if (len === 4) {
-        if (this.stats.refString) {
-          opts.push({ label: 'String', value: 'reference' })
-        } else {
-          opts.push({ label: 'String (invalid data)', value: 'reference', disable: true })
-        }
-      } else {
-        opts.push({ label: 'String (invalid size)', value: 'reference', disable: true })
+      if (len === 4 && this.stats.refString) {
+        opts.push({ label: 'String', value: 'reference' })
       }
-
       if (len === 8 || len === 4 || len === 2 || len === 1) {
         opts.push({ label: 'Integer', value: 'integer' })
-      } else {
-        opts.push({ label: 'Integer (invalid size)', value: 'integer', disable: true })
       }
-
       if (len === 8 || len === 4) {
         opts.push({ label: 'Decimal', value: 'decimal' })
-      } else {
-        opts.push({ label: 'Decimal (invalid size)', value: 'decimal', disable: true })
+      }
+      if (len === 1 && this.stats.bMax <= 0x01) {
+        opts.push({ label: 'Boolean', value: 'boolean' })
       }
 
-      if (len === 1) {
-        if (this.stats.bMax > 0x01) {
-          opts.push({ label: 'Boolean (invalid data)', value: 'boolean', disable: true })
-        } else {
-          opts.push({ label: 'Boolean', value: 'boolean' })
-        }
-      } else {
-        opts.push({ label: 'Boolean (invalid size)', value: 'boolean', disable: true })
+      return opts
+    },
+    arrayTypeOpts () {
+      const opts = []
+
+      if (!this.header.type.ref || !this.header.type.ref.array) {
+        return opts
       }
+
+      const array = this.stats.refArray
+      if (array.string) {
+        opts.push({ label: 'String', value: 'string' })
+      }
+      if (array.longLong) {
+        opts.push({ label: 'Integer - 8 bytes', value: 'integer_8' })
+      }
+      if (array.long) {
+        opts.push({ label: 'Integer - 4 bytes', value: 'integer_4' })
+      }
+      if (array.short) {
+        opts.push({ label: 'Integer - 2 bytes', value: 'integer_2' })
+      }
+      if (array.longLong) {
+        opts.push({ label: 'Decimal - 8 bytes', value: 'decimal_8' })
+      }
+      if (array.long) {
+        opts.push({ label: 'Decimal - 4 bytes', value: 'decimal_4' })
+      }
+      if (array.boolean) {
+        opts.push({ label: 'Boolean', value: 'boolean' })
+      }
+      opts.push({ label: 'Integer - byte', value: 'integer_1' })
 
       return opts
     },
     stats () {
       return state.columnStats[this.header.offset]
+    },
+    dataType: {
+      get () {
+        const type = this.header.type
+        if (type.ref) {
+          return 'reference'
+        } else if (type.integer) {
+          return 'integer'
+        } else if (type.decimal) {
+          return 'decimal'
+        } else if (type.boolean) {
+          return 'boolean'
+        } else {
+          return undefined
+        }
+      },
+      set (type) {
+        this.setByteViewMode(true)
+        const header = this.header
+        header.type = {
+          byteView: {}
+        }
+        if (type === 'reference') {
+          if (header.length === 4) {
+            this.$set(header.type, 'ref', { array: false })
+            this.$set(header.type, 'string', {})
+          } else {
+            this.$set(header.type, 'ref', { array: true })
+            return
+          }
+        } else if (type === 'integer') {
+          this.$set(header.type, 'integer', { unsigned: true, nullable: header.length >= 4, size: header.length })
+        } else if (type === 'decimal') {
+          this.$set(header.type, 'decimal', { size: header.length })
+        } else if (type === 'boolean') {
+          this.$set(header.type, 'boolean', {})
+        }
+        cacheHeaderDataView(header, state.datFile)
+        this.setByteViewMode(false)
+      }
+    },
+    arrayType: {
+      get () {
+        const type = this.header.type
+        if (type.string) {
+          return 'string'
+        } else if (type.integer) {
+          return `integer_${type.integer.size}`
+        } else if (type.decimal) {
+          return `decimal_${type.decimal.size}`
+        } else if (type.boolean) {
+          return 'boolean'
+        } else {
+          return undefined
+        }
+      },
+      set (type) {
+        this.setByteViewMode(true)
+        const header = this.header
+        header.type = {
+          byteView: {},
+          ref: { array: true }
+        }
+        if (type === 'string') {
+          this.$set(header.type, 'string', {})
+        } else if (type === 'integer_1') {
+          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 1 })
+        } else if (type === 'integer_2') {
+          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 2 })
+        } else if (type === 'integer_4') {
+          this.$set(header.type, 'integer', { unsigned: true, nullable: true, size: 4 })
+        } else if (type === 'integer_8') {
+          this.$set(header.type, 'integer', { unsigned: true, nullable: true, size: 8 })
+        } else if (type === 'decimal_4') {
+          this.$set(header.type, 'decimal', { size: 4 })
+        } else if (type === 'decimal_8') {
+          this.$set(header.type, 'decimal', { size: 8 })
+        } else if (type === 'boolean') {
+          this.$set(header.type, 'boolean', {})
+        }
+        cacheHeaderDataView(header, state.datFile)
+        this.setByteViewMode(false)
+      }
     }
   },
   methods: {
-    handleDataTypeChange (type) {
-      const header = this.header
-      if (type === 'reference') {
-        if (header.length === 4) {
-          this.$set(header.type, 'ref', { array: false })
-          this.$set(header.type, 'string', {})
-        } else {
-          this.$set(header.type, 'ref', { array: true })
-        }
-      } else if (type === 'integer') {
-        this.$set(header.type, 'integer', { unsigned: true, nullable: header.length >= 4, size: header.length })
-      } else if (type === 'decimal') {
-        this.$set(header.type, 'decimal', { size: header.length })
-      } else if (type === 'boolean') {
-        this.$set(header.type, 'boolean', {})
-      }
-    },
-    clearDataType () {
-      this.header.type = {
-        byteView: {}
-      }
-    },
     remove () {
       removeHeader(state.editHeader, state.headers, state.columns)
       state.editHeader = null
+    },
+    setByteViewMode (byteView) {
+      if (byteView) {
+        if (!this.header.type.byteView) {
+          enableByteView(this.header, state.columns, state.columnStats)
+        }
+      } else {
+        if (this.header.type.byteView) {
+          disableByteView(this.header, state.columns)
+        }
+      }
     }
   }
 }
