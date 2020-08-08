@@ -22,7 +22,7 @@ function readInteger (data: DataView, offset: number, size: number, nullable: bo
   }
   if (typeof value === 'bigint') {
     if (value > Number.MAX_SAFE_INTEGER) {
-      console.warn('Coercing BigInt to IEEE 754')
+      // console.warn('Coercing BigInt to IEEE 754')
     }
     value = Number(value)
   }
@@ -79,26 +79,26 @@ function readArray (offset: number, header: Header, datFile: DatFile) {
   const out = Array(arrayLength).fill(undefined)
 
   if (type.boolean) {
-    out.map((_, idx) =>
+    return out.map((_, idx) =>
       readBoolean(datFile.dataVariable, varOffset + (1 * idx))
     )
   }
   if (type.string) {
-    out.map((_, idx) =>
+    return out.map((_, idx) =>
       readString(datFile.dataVariable, varOffset + (4 * idx))
     )
   }
   if (type.integer) {
-    out.map((_, idx) =>
+    return out.map((_, idx) =>
       readInteger(datFile.readerVariable, varOffset + (type.integer!.size * idx), type.integer!.size, type.integer!.nullable, type.integer!.unsigned)
     )
   }
   if (type.decimal) {
-    out.map((_, idx) =>
+    return out.map((_, idx) =>
       readDecimal(datFile.readerVariable, varOffset + (type.decimal!.size * idx), type.decimal!.size)
     )
   }
-  return out
+  return out as never
 }
 
 export function readCellValue (offset: number, header: Header, datFile: DatFile) {
