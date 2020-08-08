@@ -9,11 +9,13 @@ const STRING_TERMINATOR = [0x00, 0x00, 0x00, 0x00]
 function readInteger (data: DataView, offset: number, size: number, nullable: boolean, unsigned: boolean): number | null {
   let value!: number | bigint
   if (size === 1 && unsigned) value = data.getUint8(offset)
-  if (size === 2 && unsigned) value = data.getUint16(offset, true)
-  if (size === 4 && unsigned) value = data.getUint32(offset, true)
-  if (size === 4 && !unsigned) value = data.getInt32(offset, true)
-  if (size === 8 && unsigned) value = data.getBigUint64(offset, true)
-  if (size === 8 && !unsigned) value = data.getBigInt64(offset, true)
+  else if (size === 2 && unsigned) value = data.getUint16(offset, true)
+  else if (size === 4 && unsigned) value = data.getUint32(offset, true)
+  else if (size === 8 && unsigned) value = data.getBigUint64(offset, true)
+  else if (size === 1 && !unsigned) value = data.getInt8(offset)
+  else if (size === 2 && !unsigned) value = data.getInt16(offset, true)
+  else if (size === 4 && !unsigned) value = data.getInt32(offset, true)
+  else if (size === 8 && !unsigned) value = data.getBigInt64(offset, true)
 
   if (nullable) {
     if (value === INT32_NULL || value === INT64_NULL) {
