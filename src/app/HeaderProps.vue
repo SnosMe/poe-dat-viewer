@@ -194,6 +194,7 @@ export default {
   },
   methods: {
     remove () {
+      this.setByteViewMode(true)
       removeHeader(state.editHeader, state.headers, state.columns)
       state.editHeader = null
     },

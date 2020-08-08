@@ -90,9 +90,8 @@ export function removeHeader (header: Header, headers: Header[], columns: StateC
   if (header.name == null) {
     throw new Error('Cannot remove empty header')
   }
-
   if (!header.type.byteView) {
-    throw new Error('TODO: toggle byteView first')
+    throw new Error('Cannot remove header in data view mode')
   }
 
   header.name = null
