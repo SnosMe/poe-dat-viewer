@@ -8,6 +8,7 @@
         'viewer-row--border': part.dataStart,
         'viewer-row--selected': part.selected
       }"
+      :style="{ width: `calc(var(--ppc) * ${part.width})` }"
       >{{ part.text }}</div>
   </div>
 </template>
@@ -35,8 +36,12 @@ export default {
 
 .viewer-row {
   white-space: pre;
-  padding: 0 0.5ch;
+  padding: 0 calc(var(--ppc) / 2);
   z-index: -2;
+  box-sizing: content-box;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
   &.viewer-row--border {
     border-left: 1px solid $grey-5;

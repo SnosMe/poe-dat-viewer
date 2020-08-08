@@ -8,7 +8,7 @@
         <!-- eslint-disable-next-line vue/require-v-for-key -->
         <button v-for="col in headers"
           class="viewer-col viewer-col--border"
-          :style="{ width: `${col.length * 3 - 1}ch` }"
+          :style="{ width: calcHeaderWidth(col) }"
           @click="editHeader(col)">
           <span v-if="col.name === null">{{ '\u00a0' }}</span>
           <span v-else-if="col.name === ''" class="bg-blue-grey-6 text-grey-2 rounded-borders q-px-px">?</span>
@@ -22,6 +22,7 @@
             'viewer-col--border': col.dataStart,
             'viewer-col--selected': col.selected
           }"
+          :style="{ width: `calc(var(--ppc) * ${col.header ? col.header.cachedView.length : 2})` }"
           @mousedown="selectColumn(col.offset, $event)"
           @mouseenter="selectColumn(col.offset, $event)"
           @touchstart="selectColumn(col.offset, $event)"
@@ -35,25 +36,28 @@
             'viewer-col-stat--border': col.dataStart,
             'viewer-col-stat--selected': col.selected
           }"
+          :style="{ width: `calc(var(--ppc) * ${col.header ? col.header.cachedView.length + 1 : 3})` }"
         >
-          <div v-if="col.stats.string"
-            class="viewer-col-stat_indicator bg-brown-4"
-            style="top: 0ch;" />
-          <div v-if="col.stats.array"
-            class="viewer-col-stat_indicator bg-teal-4"
-            style="top: 1ch;" />
-          <div v-if="col.stats.b00"
-            class="viewer-col-stat_indicator bg-grey-10"
-            style="top: 2ch;" />
-          <div v-else-if="col.stats.nullable"
-            class="viewer-col-stat_indicator bg-pink-4"
-            style="top: 2ch;" />
-          <div v-if="col.selected"
-            class="viewer-col-stat_indicator bg-grey-10"
-            style="top: 0ch; height: 3ch; opacity: 0.25;" />
-          <div
-            class="viewer-col-stat_max"
-            style="top: 0ch; height: 3ch;">{{ col.stats.bMax }}</div>
+          <template v-if="!col.header">
+            <div v-if="col.stats.string"
+              class="viewer-col-stat_indicator bg-brown-4"
+              style="top: 0;" />
+            <div v-if="col.stats.array"
+              class="viewer-col-stat_indicator bg-teal-4"
+              style="top: var(--ppc);" />
+            <div v-if="col.stats.b00"
+              class="viewer-col-stat_indicator bg-grey-10"
+              style="top: calc(var(--ppc) * 2);" />
+            <div v-else-if="col.stats.nullable"
+              class="viewer-col-stat_indicator bg-pink-4"
+              style="top: calc(var(--ppc) * 2);" />
+            <div v-if="col.selected"
+              class="viewer-col-stat_indicator bg-grey-10"
+              style="top: 0; height: calc(var(--ppc) * 3); opacity: 0.25;" />
+            <div
+              class="viewer-col-stat_max"
+              style="top: 0; height: calc(var(--ppc) * 3);">{{ col.stats.bMax }}</div>
+          </template>
         </div>
       </div>
     </div>
@@ -117,6 +121,12 @@ export default {
     },
     editHeader (header) {
       state.editHeader = header
+    },
+    calcHeaderWidth (header) {
+      const width = header.type.byteView
+        ? header.length * 3 - 1
+        : header.cachedView.length
+      return `calc(var(--ppc) * ${width})`
     }
   }
 }
@@ -130,10 +140,10 @@ export default {
   background: $grey-2;
   border: none;
   cursor: pointer;
-  padding: 0 0.5ch;
+  padding: 0 calc(var(--ppc) / 2);
   text-align: center;
   box-sizing: content-box;
-  line-height: 3ch;
+  line-height: calc(var(--ppc) * 3);
   white-space: nowrap;
   overflow: hidden;
 
@@ -164,8 +174,7 @@ export default {
   color: $blue-grey-6;
   background: $grey-2;
   box-sizing: content-box;
-  width: 3%;
-  height: 3ch;
+  height: calc(var(--ppc) * 3);
   position: relative;
 
   &.viewer-col-stat--border {
@@ -184,12 +193,12 @@ export default {
 
 .viewer-col-stat_indicator {
   position: absolute;
-  width: 3ch;
-  height: 1ch;
+  width: calc(var(--ppc) * 3);
+  height: var(--ppc);
   z-index: 1;
 
   .viewer-col-stat--border:not(:first-child) > & {
-    width: calc(3ch + 1px);
+    width: calc(var(--ppc) * 3 + 1px);
     margin-left: -1px;
   }
 }
@@ -198,7 +207,7 @@ export default {
   visibility: hidden;
   text-align: center;
   cursor: default;
-  line-height: 3ch;
+  line-height: calc(var(--ppc) * 3);
   z-index: 1;
   position: relative;
   color: $grey-1;

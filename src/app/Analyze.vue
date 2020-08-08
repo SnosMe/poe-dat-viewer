@@ -23,12 +23,12 @@
     <div class="flex min-h-0 flex-1">
       <div class="layout-column min-w-0 flex-1">
         <q-scroll-area
-          class="flex-1"
+          class="flex-1 font-mono"
+          style="--ppc: 8px; letter-spacing: calc(var(--ppc) - 1ch);"
           id="viewer-fancy-scroll"
         >
           <!-- class="flex-1 font-mono scroll" -->
           <q-virtual-scroll
-            class="font-mono"
             :items="rows"
             :virtual-scroll-item-size="24"
             scroll-target="#viewer-fancy-scroll > .scroll"
