@@ -39,9 +39,6 @@
           <q-toggle label="Unsigned" dense size="xs"
             @input="recacheAfterOptChange"
             v-model="header.type.integer.unsigned" />
-          <q-toggle label="Nullable" dense size="xs" class="q-ml-md"
-            @input="recacheAfterOptChange"
-            v-model="header.type.integer.nullable" />
         </div>
       </div>
     </div>
@@ -169,7 +166,7 @@ export default {
             this.$set(header.type, 'key', { foreign: true })
           }
         } else if (type === 'integer') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: header.length >= 4, size: header.length })
+          this.$set(header.type, 'integer', { unsigned: true, size: header.length })
         } else if (type === 'decimal') {
           this.$set(header.type, 'decimal', { size: header.length })
         } else if (type === 'boolean') {
@@ -210,13 +207,13 @@ export default {
         } else if (type === 'key_self') {
           this.$set(header.type, 'key', { foreign: false })
         } else if (type === 'integer_1') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 1 })
+          this.$set(header.type, 'integer', { unsigned: true, size: 1 })
         } else if (type === 'integer_2') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 2 })
+          this.$set(header.type, 'integer', { unsigned: true, size: 2 })
         } else if (type === 'integer_4') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 4 })
+          this.$set(header.type, 'integer', { unsigned: true, size: 4 })
         } else if (type === 'integer_8') {
-          this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 8 })
+          this.$set(header.type, 'integer', { unsigned: true, size: 8 })
         } else if (type === 'decimal_4') {
           this.$set(header.type, 'decimal', { size: 4 })
         } else if (type === 'decimal_8') {

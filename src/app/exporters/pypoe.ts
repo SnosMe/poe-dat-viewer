@@ -28,35 +28,25 @@ function getPypoeFieldType (header: Header): ExporterFieldType {
   const size = integer?.size || decimal?.size || header.length
 
   if (integer) {
-    if (size === 1 && integer.unsigned && !integer.nullable && !array) return 'ubyte'
-    if (size === 2 && integer.unsigned && !integer.nullable && !array) return 'ushort'
-    if (size === 4 && integer.unsigned && !integer.nullable && !array) return 'uint'
-    if (size === 8 && integer.unsigned && !integer.nullable && !array) return 'ulong'
+    if (size === 1 && integer.unsigned && !array) return 'ubyte'
+    if (size === 2 && integer.unsigned && !array) return 'ushort'
+    if (size === 4 && integer.unsigned && !array) return 'uint'
+    if (size === 8 && integer.unsigned && !array) return 'ulong'
 
-    if (size === 1 && !integer.unsigned && !integer.nullable && !array) return 'byte'
-    if (size === 2 && !integer.unsigned && !integer.nullable && !array) return 'short'
-    if (size === 4 && !integer.unsigned && !integer.nullable && !array) return 'int'
-    if (size === 8 && !integer.unsigned && !integer.nullable && !array) return 'long'
+    if (size === 1 && !integer.unsigned && !array) return 'byte'
+    if (size === 2 && !integer.unsigned && !array) return 'short'
+    if (size === 4 && !integer.unsigned && !array) return 'int'
+    if (size === 8 && !integer.unsigned && !array) return 'long'
 
-    if (size === 1 && integer.unsigned && !integer.nullable && array) return 'ref|list|ubyte'
-    if (size === 2 && integer.unsigned && !integer.nullable && array) return 'ref|list|ushort'
-    if (size === 4 && integer.unsigned && !integer.nullable && array) return 'ref|list|uint'
-    if (size === 8 && integer.unsigned && !integer.nullable && array) return 'ref|list|ulong'
+    if (size === 1 && integer.unsigned && array) return 'ref|list|ubyte'
+    if (size === 2 && integer.unsigned && array) return 'ref|list|ushort'
+    if (size === 4 && integer.unsigned && array) return 'ref|list|uint'
+    if (size === 8 && integer.unsigned && array) return 'ref|list|ulong'
 
-    if (size === 1 && !integer.unsigned && !integer.nullable && array) return 'ref|list|byte'
-    if (size === 2 && !integer.unsigned && !integer.nullable && array) return 'ref|list|short'
-    if (size === 4 && !integer.unsigned && !integer.nullable && array) return 'ref|list|int'
-    if (size === 8 && !integer.unsigned && !integer.nullable && array) return 'ref|list|long'
-
-    if (size === 1 && integer.unsigned && integer.nullable && !array) return 'ubyte'
-    if (size === 2 && integer.unsigned && integer.nullable && !array) return 'ushort'
-    if (size === 4 && integer.unsigned && integer.nullable && !array) return 'uint'
-    if (size === 8 && integer.unsigned && integer.nullable && !array) return 'ulong'
-
-    if (size === 1 && !integer.unsigned && integer.nullable && !array) return 'byte'
-    if (size === 2 && !integer.unsigned && integer.nullable && !array) return 'short'
-    if (size === 4 && !integer.unsigned && integer.nullable && !array) return 'int'
-    if (size === 8 && !integer.unsigned && integer.nullable && !array) return 'long'
+    if (size === 1 && !integer.unsigned && array) return 'ref|list|byte'
+    if (size === 2 && !integer.unsigned && array) return 'ref|list|short'
+    if (size === 4 && !integer.unsigned && array) return 'ref|list|int'
+    if (size === 8 && !integer.unsigned && array) return 'ref|list|long'
   }
 
   if (decimal) {

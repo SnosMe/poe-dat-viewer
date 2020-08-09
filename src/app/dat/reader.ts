@@ -7,23 +7,17 @@ export const INT64_NULL = 0xfefefefefefefefe
 const TEXT_DECODER = new TextDecoder('utf-16le')
 const STRING_TERMINATOR = [0x00, 0x00, 0x00, 0x00]
 
-function readInteger (data: BinaryReader, offset: number, size: number, nullable: boolean, unsigned: boolean): number | null {
-  let value!: number
-  if (size === 1 && unsigned) value = data.getUint8(offset)
-  else if (size === 2 && unsigned) value = data.getUint16(offset)
-  else if (size === 4 && unsigned) value = data.getUint32(offset)
-  else if (size === 8 && unsigned) value = Number(data.getBigUint64(offset))
-  else if (size === 1 && !unsigned) value = data.getInt8(offset)
-  else if (size === 2 && !unsigned) value = data.getInt16(offset)
-  else if (size === 4 && !unsigned) value = data.getInt32(offset)
-  else if (size === 8 && !unsigned) value = Number(data.getBigInt64(offset))
+function readInteger (data: BinaryReader, offset: number, size: number, unsigned: boolean): number | null {
+  if (size === 1 && unsigned) return data.getUint8(offset)
+  else if (size === 2 && unsigned) return data.getUint16(offset)
+  else if (size === 4 && unsigned) return data.getUint32(offset)
+  else if (size === 8 && unsigned) return Number(data.getBigUint64(offset))
+  else if (size === 1 && !unsigned) return data.getInt8(offset)
+  else if (size === 2 && !unsigned) return data.getInt16(offset)
+  else if (size === 4 && !unsigned) return data.getInt32(offset)
+  else if (size === 8 && !unsigned) return Number(data.getBigInt64(offset))
 
-  if (nullable) {
-    if (value === (size === 4 ? INT32_NULL : INT64_NULL)) {
-      return null
-    }
-  }
-  return value
+  return undefined as never
 }
 
 function readDecimal (data: BinaryReader, offset: number, size: number): number {
@@ -71,7 +65,7 @@ function readScalar (offset: number, header: Header, datFile: DatFile) {
     return readString(datFile.dataVariable, varOffset)
   }
   if (type.integer) {
-    return readInteger(datFile.readerFixed, offset, type.integer.size, type.integer.nullable, type.integer.unsigned)
+    return readInteger(datFile.readerFixed, offset, type.integer.size, type.integer.unsigned)
   }
   if (type.decimal) {
     return readDecimal(datFile.readerFixed, offset, type.decimal.size)
@@ -108,7 +102,7 @@ function readArray (offset: number, header: Header, datFile: DatFile) {
   }
   if (type.integer) {
     return out.map((_, idx) =>
-      readInteger(datFile.readerVariable, varOffset + (type.integer!.size * idx), type.integer!.size, type.integer!.nullable, type.integer!.unsigned)
+      readInteger(datFile.readerVariable, varOffset + (type.integer!.size * idx), type.integer!.size, type.integer!.unsigned)
     )
   }
   if (type.decimal) {

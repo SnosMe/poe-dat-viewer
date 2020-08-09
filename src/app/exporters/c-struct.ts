@@ -28,35 +28,25 @@ function getClangFieldType (header: Header): ExporterFieldType {
   const size = integer?.size || decimal?.size || header.length
 
   if (integer) {
-    if (size === 1 && integer.unsigned && !integer.nullable && !array) return 'uint8_t'
-    if (size === 2 && integer.unsigned && !integer.nullable && !array) return 'uint16_t'
-    if (size === 4 && integer.unsigned && !integer.nullable && !array) return 'uint32_t'
-    if (size === 8 && integer.unsigned && !integer.nullable && !array) return 'uint64_t'
+    if (size === 1 && integer.unsigned && !array) return 'uint8_t'
+    if (size === 2 && integer.unsigned && !array) return 'uint16_t'
+    if (size === 4 && integer.unsigned && !array) return 'uint32_t'
+    if (size === 8 && integer.unsigned && !array) return 'uint64_t'
 
-    if (size === 1 && !integer.unsigned && !integer.nullable && !array) return 'int8_t'
-    if (size === 2 && !integer.unsigned && !integer.nullable && !array) return 'int16_t'
-    if (size === 4 && !integer.unsigned && !integer.nullable && !array) return 'int32_t'
-    if (size === 8 && !integer.unsigned && !integer.nullable && !array) return 'int64_t'
+    if (size === 1 && !integer.unsigned && !array) return 'int8_t'
+    if (size === 2 && !integer.unsigned && !array) return 'int16_t'
+    if (size === 4 && !integer.unsigned && !array) return 'int32_t'
+    if (size === 8 && !integer.unsigned && !array) return 'int64_t'
 
-    if (size === 1 && integer.unsigned && !integer.nullable && array) return 'struct { size_t size; uint8_t* offset; }'
-    if (size === 2 && integer.unsigned && !integer.nullable && array) return 'struct { size_t size; uint16_t* offset; }'
-    if (size === 4 && integer.unsigned && !integer.nullable && array) return 'struct { size_t size; uint32_t* offset; }'
-    if (size === 8 && integer.unsigned && !integer.nullable && array) return 'struct { size_t size; uint64_t* offset; }'
+    if (size === 1 && integer.unsigned && array) return 'struct { size_t size; uint8_t* offset; }'
+    if (size === 2 && integer.unsigned && array) return 'struct { size_t size; uint16_t* offset; }'
+    if (size === 4 && integer.unsigned && array) return 'struct { size_t size; uint32_t* offset; }'
+    if (size === 8 && integer.unsigned && array) return 'struct { size_t size; uint64_t* offset; }'
 
-    if (size === 1 && !integer.unsigned && !integer.nullable && array) return 'struct { size_t size; int8_t* offset; }'
-    if (size === 2 && !integer.unsigned && !integer.nullable && array) return 'struct { size_t size; int16_t* offset; }'
-    if (size === 4 && !integer.unsigned && !integer.nullable && array) return 'struct { size_t size; int32_t* offset; }'
-    if (size === 8 && !integer.unsigned && !integer.nullable && array) return 'struct { size_t size; int64_t* offset; }'
-
-    if (size === 1 && integer.unsigned && integer.nullable && !array) return 'uint8_t'
-    if (size === 2 && integer.unsigned && integer.nullable && !array) return 'uint16_t'
-    if (size === 4 && integer.unsigned && integer.nullable && !array) return 'uint32_t'
-    if (size === 8 && integer.unsigned && integer.nullable && !array) return 'uint64_t'
-
-    if (size === 1 && !integer.unsigned && integer.nullable && !array) return 'int8_t'
-    if (size === 2 && !integer.unsigned && integer.nullable && !array) return 'int16_t'
-    if (size === 4 && !integer.unsigned && integer.nullable && !array) return 'int32_t'
-    if (size === 8 && !integer.unsigned && integer.nullable && !array) return 'int64_t'
+    if (size === 1 && !integer.unsigned && array) return 'struct { size_t size; int8_t* offset; }'
+    if (size === 2 && !integer.unsigned && array) return 'struct { size_t size; int16_t* offset; }'
+    if (size === 4 && !integer.unsigned && array) return 'struct { size_t size; int32_t* offset; }'
+    if (size === 8 && !integer.unsigned && array) return 'struct { size_t size; int64_t* offset; }'
   }
 
   if (decimal) {

@@ -9,7 +9,7 @@ export interface Header {
     byteView?: {}
     ref?: { array: boolean }
     boolean?: {}
-    integer?: { unsigned: boolean, nullable: boolean, size: number }
+    integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
     string?: {}
     key?: { foreign: boolean }
