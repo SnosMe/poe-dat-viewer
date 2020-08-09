@@ -27,6 +27,7 @@ function getPogoFieldType (header: Header): ExporterFieldType {
   const decimal = header.type.decimal
   const string = header.type.string
   const array = header.type.ref?.array
+  const key = header.type.key
   const size = integer?.size || decimal?.size || header.length
 
   if (integer) {
@@ -49,9 +50,6 @@ function getPogoFieldType (header: Header): ExporterFieldType {
     if (size === 2 && !integer.unsigned && array) return '[]uint16' // N/A '[]int16'
     if (size === 4 && !integer.unsigned && array) return '[]int32'
     if (size === 8 && !integer.unsigned && array) return '[]int64'
-
-    // if (size === 4 && !integer.unsigned && integer.nullable && !array) return '*int32'
-    // if (size === 8 && !integer.unsigned && integer.nullable && !array) return '*int64'
   }
 
   if (decimal) {
@@ -68,6 +66,14 @@ function getPogoFieldType (header: Header): ExporterFieldType {
 
   if (string) {
     return array ? '[]string' : 'string'
+  }
+
+  if (key && key.foreign) {
+    return array ? '[]int64' : '*int64'
+  }
+
+  if (key && !key.foreign) {
+    return array ? '[]int32' : '*int32'
   }
 
   return { byte: 'uint8' }

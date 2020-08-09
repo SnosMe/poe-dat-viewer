@@ -25,6 +25,7 @@ function getClangFieldType (header: Header): ExporterFieldType {
   const decimal = header.type.decimal
   const string = header.type.string
   const array = header.type.ref?.array
+  const key = header.type.key
   const size = integer?.size || decimal?.size || header.length
 
   if (integer) {
@@ -63,6 +64,14 @@ function getClangFieldType (header: Header): ExporterFieldType {
 
   if (string) {
     return array ? 'struct { size_t size; char16_t** offset; }' : 'char16_t*'
+  }
+
+  if (key && key.foreign) {
+    return array ? 'struct { size_t size; struct { size_t rid; void* unknown; } *offset; }' : '{ size_t rid; void* unknown; }'
+  }
+
+  if (key && !key.foreign) {
+    return array ? 'struct { size_t size; size_t* offset; }' : 'size_t'
   }
 
   return { byte: 'uint8_t' }

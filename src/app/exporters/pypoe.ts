@@ -25,6 +25,7 @@ function getPypoeFieldType (header: Header): ExporterFieldType {
   const decimal = header.type.decimal
   const string = header.type.string
   const array = header.type.ref?.array
+  const key = header.type.key
   const size = integer?.size || decimal?.size || header.length
 
   if (integer) {
@@ -63,6 +64,14 @@ function getPypoeFieldType (header: Header): ExporterFieldType {
 
   if (string) {
     return array ? 'ref|list|ref|string' : 'ref|string'
+  }
+
+  if (key && key.foreign) {
+    return array ? 'ref|list|ulong' : 'ulong'
+  }
+
+  if (key && !key.foreign) {
+    return array ? 'ref|list|ref|generic' : 'ref|generic'
   }
 
   return { byte: 'ubyte' }
