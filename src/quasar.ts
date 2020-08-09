@@ -11,7 +11,18 @@ import {
   QInput,
   QBtnToggle,
   QOptionGroup,
-  QToggle
+  QToggle,
+  QDialog,
+  ClosePopup,
+  QCard,
+  QCardActions,
+  QCardSection,
+  QSpace,
+  QTab,
+  QTabs,
+  QTabPanel,
+  QTabPanels,
+  QSeparator
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -24,9 +35,20 @@ Vue.use(Quasar, {
     QScrollArea,
     QVirtualScroll,
     QBtn,
-    QToggle
+    QToggle,
+    QDialog,
+    QCard,
+    QCardActions,
+    QCardSection,
+    QSpace,
+    QTab,
+    QTabs,
+    QTabPanel,
+    QTabPanels,
+    QSeparator
   },
   directives: {
+    ClosePopup
   },
   plugins: {
   },

@@ -5,20 +5,29 @@
       <div class="ellipsis q-mr-xs">{{ datFile.name }}</div>
       <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
+    <q-dialog v-model="exportSchemaDialog">
+      <export-schema />
+    </q-dialog>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
-      <template v-if="selections.length === 0">
-        <div class="text-blue-grey-4 text-italic">No bytes selected</div>
-      </template>
-      <template v-else-if="selections.length === 1">
-        <q-btn @click="defineColumn" padding="0 sm" label="Define column" no-caps color="blue-grey-8" />
-      </template>
-      <template v-else-if="selections.length > 1">
-        <div class="text-blue-grey-2 q-pr-xs">Selections</div>
-        <!-- eslint-disable-next-line vue/require-v-for-key -->
-        <div v-for="sel in selections"
-          class="q-px-xs q-mr-xs font-mono bg-blue-grey-2 text-blue-grey-10 rounded-borders"
-          >{{ sel }}</div>
-      </template>
+      <div class="flex no-wrap">
+        <template v-if="selections.length === 0">
+          <div class="text-blue-grey-4 text-italic">No bytes selected</div>
+        </template>
+        <template v-else-if="selections.length === 1">
+          <q-btn @click="defineColumn" padding="0 sm" label="Define column" no-caps color="blue-grey-8" />
+        </template>
+        <template v-else-if="selections.length > 1">
+          <div class="text-blue-grey-2 q-pr-xs">Selections</div>
+          <!-- eslint-disable-next-line vue/require-v-for-key -->
+          <div v-for="sel in selections"
+            class="q-px-xs q-mr-xs font-mono bg-blue-grey-2 text-blue-grey-10 rounded-borders"
+            >{{ sel }}</div>
+        </template>
+      </div>
+      <q-space />
+      <div class="flex no-wrap">
+        <q-btn @click="exportSchemaDialog = true" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
+      </div>
     </div>
     <div class="flex min-h-0 flex-1">
       <div class="layout-column min-w-0 flex-1">
@@ -61,13 +70,14 @@
 import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
+import ExportSchema from './ExportSchema'
 import { state, importFile } from './viewer/Viewer'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow },
+  components: { ViewerHead, HeaderProps, DataRow, ExportSchema },
   created () {
     importFile()
   },
