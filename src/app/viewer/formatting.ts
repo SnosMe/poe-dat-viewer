@@ -106,7 +106,7 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
     let text = ''
     let color = 0
 
-    if (Array.isArray(value)) {
+    if (Array.isArray(value) && header.type.ref?.array) {
       if (header.type.boolean) {
         text = `[${value.join(', ')}]`
         color = 3
@@ -115,6 +115,13 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
         color = 1
       } else if (header.type.integer || header.type.decimal) {
         text = `[${value.join(', ')}]`
+        color = 2
+      } else if (header.type.key) {
+        if (header.type.key.foreign) {
+          text = `[${(value as Array<[number, number]>).map(rowIdx => `<${rowIdx[0]}, ${rowIdx[1]}>`).join(', ')}]`
+        } else {
+          text = `[${(value as number[]).map(rowIdx => `<${rowIdx}, self>`).join(', ')}]`
+        }
         color = 2
       }
     } else {
@@ -135,6 +142,18 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
           color = 3
         } else {
           text = String(value)
+          color = 2
+        }
+      } else if (header.type.key) {
+        if (value === null) {
+          text = 'null'
+          color = 3
+        } else {
+          if (header.type.key.foreign) {
+            text = `<${(value as unknown as [number, number])[0]}, ${(value as unknown as [number, number])[1]}>`
+          } else {
+            text = `<${value}, self>`
+          }
           color = 2
         }
       }

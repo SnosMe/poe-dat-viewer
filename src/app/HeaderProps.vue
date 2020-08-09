@@ -69,6 +69,12 @@ export default {
       if (len === memsize && this.stats.refString) {
         opts.push({ label: 'String', value: 'reference' })
       }
+      if (len === memsize && this.stats.keySelf) {
+        opts.push({ label: 'Key (self)', value: 'key' })
+      }
+      if (len === memsize * 2) {
+        opts.push({ label: 'Key (foreign)', value: 'key' })
+      }
       if (len === 8 || len === 4 || len === 2 || len === 1) {
         opts.push({ label: 'Integer', value: 'integer' })
       }
@@ -91,6 +97,12 @@ export default {
       const array = this.stats.refArray
       if (array.string) {
         opts.push({ label: 'String', value: 'string' })
+      }
+      if (array.keySelf) {
+        opts.push({ label: 'Key (self)', value: 'key_self' })
+      }
+      if (array.keyForeign) {
+        opts.push({ label: 'Key (foreign)', value: 'key_foreign' })
       }
       if (array.longLong) {
         opts.push({ label: 'Integer - 8 bytes', value: 'integer_8' })
@@ -122,6 +134,8 @@ export default {
         const type = this.header.type
         if (type.ref) {
           return 'reference'
+        } else if (type.key) {
+          return 'key'
         } else if (type.integer) {
           return 'integer'
         } else if (type.decimal) {
@@ -147,6 +161,13 @@ export default {
             this.$set(header.type, 'ref', { array: true })
             return
           }
+        } else if (type === 'key') {
+          const memsize = state.datFile.memsize
+          if (header.length === memsize) {
+            this.$set(header.type, 'key', { foreign: false })
+          } else {
+            this.$set(header.type, 'key', { foreign: true })
+          }
         } else if (type === 'integer') {
           this.$set(header.type, 'integer', { unsigned: true, nullable: header.length >= 4, size: header.length })
         } else if (type === 'decimal') {
@@ -163,6 +184,8 @@ export default {
         const type = this.header.type
         if (type.string) {
           return 'string'
+        } else if (type.key) {
+          return (type.key.foreign) ? 'key_foreign' : 'key_self'
         } else if (type.integer) {
           return `integer_${type.integer.size}`
         } else if (type.decimal) {
@@ -182,6 +205,10 @@ export default {
         }
         if (type === 'string') {
           this.$set(header.type, 'string', {})
+        } else if (type === 'key_foreign') {
+          this.$set(header.type, 'key', { foreign: true })
+        } else if (type === 'key_self') {
+          this.$set(header.type, 'key', { foreign: false })
         } else if (type === 'integer_1') {
           this.$set(header.type, 'integer', { unsigned: true, nullable: false, size: 1 })
         } else if (type === 'integer_2') {

@@ -6,6 +6,7 @@ export interface ColumnStats {
   b01: boolean
   bMax: number
   nullableMemsize: boolean
+  keySelf: boolean
   refString: boolean
   refArray: {
     boolean: boolean
@@ -13,6 +14,8 @@ export interface ColumnStats {
     long: boolean
     longLong: boolean
     string: boolean
+    keySelf: boolean
+    keyForeign: boolean
   } | false
   memsize: number
 }
@@ -27,13 +30,16 @@ export function analyze (datFile: DatFile) {
       b01: true,
       bMax: 0,
       nullableMemsize: false,
+      keySelf: true,
       refString: true,
       refArray: {
         boolean: true,
         short: true,
         long: true,
         longLong: true,
-        string: true
+        string: true,
+        keyForeign: true,
+        keySelf: true
       },
       memsize: datFile.memsize
     }))
@@ -45,6 +51,7 @@ export function analyze (datFile: DatFile) {
 
     if (!sMem) {
       stat.refString = false
+      stat.keySelf = false
     }
 
     if (!sMemMem) {
@@ -72,6 +79,13 @@ export function analyze (datFile: DatFile) {
           isStringAtOffset(varOffset, datFile.readerVariable)
       }
 
+      if (stat.keySelf) {
+        const rowIdx = datFile.readerFixed.getSizeT(row + bi)
+        if (rowIdx !== (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)) {
+          stat.keySelf = (rowIdx < datFile.rowCount)
+        }
+      }
+
       if (stat.refArray) {
         const arrayLength = datFile.readerFixed.getSizeT(row + bi)
         const varOffset = datFile.readerFixed.getSizeT(row + bi + datFile.memsize)
@@ -91,11 +105,22 @@ export function analyze (datFile: DatFile) {
             isValidVariableOffset(varOffset + (8 * arrayLength))
           stat.refArray.string = stat.refArray.string &&
             isValidVariableOffset(varOffset + (datFile.memsize * arrayLength))
+          stat.refArray.keySelf = stat.refArray.keySelf &&
+            isValidVariableOffset(varOffset + (datFile.memsize * arrayLength))
+          stat.refArray.keyForeign = stat.refArray.keyForeign &&
+            isValidVariableOffset(varOffset + ((datFile.memsize * 2) * arrayLength))
 
           for (let idx = 0; idx < arrayLength && stat.refArray.string; idx += 1) {
             const strOffset = datFile.readerVariable.getSizeT(varOffset + (datFile.memsize * idx))
             stat.refArray.string = isValidVariableOffset(strOffset) &&
               isStringAtOffset(strOffset, datFile.readerVariable)
+          }
+
+          for (let idx = 0; idx < arrayLength && stat.refArray.keySelf; idx += 1) {
+            const rowIdx = datFile.readerVariable.getSizeT(varOffset + (datFile.memsize * idx))
+            if (rowIdx !== (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)) {
+              stat.refArray.keySelf = (rowIdx < datFile.rowCount)
+            }
           }
 
           for (let idx = 0; idx < arrayLength && stat.refArray.boolean; idx += 1) {

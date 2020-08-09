@@ -12,6 +12,7 @@ export interface Header {
     integer?: { unsigned: boolean, nullable: boolean, size: number }
     decimal?: { size: number }
     string?: {}
+    key?: { foreign: boolean }
   }
   cachedView?: Readonly<{
     // stats: [] @TODO

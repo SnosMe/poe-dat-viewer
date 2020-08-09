@@ -47,6 +47,20 @@ function readBoolean (data: Uint8Array, offset: number): boolean {
   return Boolean(data[offset])
 }
 
+function isNULL (value: number, memsize: number) {
+  return value === (memsize === 4 ? INT32_NULL : INT64_NULL)
+}
+
+function readKeySelf (data: BinaryReader, offset: number): number | null {
+  const rowIdx = data.getSizeT(offset)
+  return isNULL(rowIdx, data.memsize) ? null : rowIdx
+}
+
+function readKeyForeign (data: BinaryReader, offset: number): [number, number] | null {
+  const rowIdx = [data.getSizeT(offset), data.getSizeT(offset + data.memsize)] as [number, number]
+  return isNULL(rowIdx[0], data.memsize) ? null : rowIdx
+}
+
 function readScalar (offset: number, header: Header, datFile: DatFile) {
   const { type } = header
   if (type.boolean) {
@@ -61,6 +75,13 @@ function readScalar (offset: number, header: Header, datFile: DatFile) {
   }
   if (type.decimal) {
     return readDecimal(datFile.readerFixed, offset, type.decimal.size)
+  }
+  if (type.key) {
+    if (type.key.foreign) {
+      return readKeyForeign(datFile.readerFixed, offset)
+    } else {
+      return readKeySelf(datFile.readerFixed, offset)
+    }
   }
   return undefined as never
 }
@@ -93,6 +114,13 @@ function readArray (offset: number, header: Header, datFile: DatFile) {
   if (type.decimal) {
     return out.map((_, idx) =>
       readDecimal(datFile.readerVariable, varOffset + (type.decimal!.size * idx), type.decimal!.size)
+    )
+  }
+  if (type.key) {
+    return out.map((_, idx) =>
+      (type.key!.foreign)
+        ? readKeyForeign(datFile.readerVariable, varOffset + ((datFile.memsize * 2) * idx))
+        : readKeySelf(datFile.readerVariable, varOffset + (datFile.memsize * idx))
     )
   }
   return out as never
