@@ -61,11 +61,12 @@ export default {
     dataTypeOpts () {
       const opts = []
 
+      const memsize = state.datFile.memsize
       const len = this.header.length
-      if (len === 8 && this.stats.refArray) {
+      if (len === memsize * 2 && this.stats.refArray) {
         opts.push({ label: 'Array', value: 'reference' })
       }
-      if (len === 4 && this.stats.refString) {
+      if (len === memsize && this.stats.refString) {
         opts.push({ label: 'String', value: 'reference' })
       }
       if (len === 8 || len === 4 || len === 2 || len === 1) {
@@ -138,7 +139,8 @@ export default {
           byteView: {}
         }
         if (type === 'reference') {
-          if (header.length === 4) {
+          const memsize = state.datFile.memsize
+          if (header.length === memsize) {
             this.$set(header.type, 'ref', { array: false })
             this.$set(header.type, 'string', {})
           } else {

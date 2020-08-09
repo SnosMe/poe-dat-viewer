@@ -100,13 +100,18 @@ export default {
     selectContinue (offset) {
       if (this.selectionStart === undefined) return
 
+      const memsize = state.datFile.memsize
       const len = offset - this.selectionStart
-      if (len >= 4) {
+      if (len >= memsize) {
+        offset = this.selectionStart + (memsize * 2 - 1)
+      } else if (len >= 4) {
         offset = this.selectionStart + 7
       } else if (len >= 2) {
         offset = this.selectionStart + 3
       }
-      if (len <= -4) {
+      if (len <= -memsize) {
+        offset = this.selectionStart - (memsize * 2 - 1)
+      } else if (len <= -4) {
         offset = this.selectionStart - 7
       } else if (len <= -2) {
         offset = this.selectionStart - 3

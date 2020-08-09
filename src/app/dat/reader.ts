@@ -1,41 +1,36 @@
 import { Header } from '../viewer/headers'
-import { DatFile } from './dat-file'
+import { DatFile, BinaryReader } from './dat-file'
 
-const INT32_NULL = 0xfefefefe
-const INT64_NULL = BigInt('0xfefefefefefefefe')
+export const INT32_NULL = 0xfefefefe
+export const INT64_NULL = 0xfefefefefefefefe
+// TODO negative NULL
 const TEXT_DECODER = new TextDecoder('utf-16le')
 const STRING_TERMINATOR = [0x00, 0x00, 0x00, 0x00]
 
-function readInteger (data: DataView, offset: number, size: number, nullable: boolean, unsigned: boolean): number | null {
-  let value!: number | bigint
+function readInteger (data: BinaryReader, offset: number, size: number, nullable: boolean, unsigned: boolean): number | null {
+  let value!: number
   if (size === 1 && unsigned) value = data.getUint8(offset)
-  else if (size === 2 && unsigned) value = data.getUint16(offset, true)
-  else if (size === 4 && unsigned) value = data.getUint32(offset, true)
-  else if (size === 8 && unsigned) value = data.getBigUint64(offset, true)
+  else if (size === 2 && unsigned) value = data.getUint16(offset)
+  else if (size === 4 && unsigned) value = data.getUint32(offset)
+  else if (size === 8 && unsigned) value = Number(data.getBigUint64(offset))
   else if (size === 1 && !unsigned) value = data.getInt8(offset)
-  else if (size === 2 && !unsigned) value = data.getInt16(offset, true)
-  else if (size === 4 && !unsigned) value = data.getInt32(offset, true)
-  else if (size === 8 && !unsigned) value = data.getBigInt64(offset, true)
+  else if (size === 2 && !unsigned) value = data.getInt16(offset)
+  else if (size === 4 && !unsigned) value = data.getInt32(offset)
+  else if (size === 8 && !unsigned) value = Number(data.getBigInt64(offset))
 
   if (nullable) {
-    if (value === INT32_NULL || value === INT64_NULL) {
+    if (value === (size === 4 ? INT32_NULL : INT64_NULL)) {
       return null
     }
-  }
-  if (typeof value === 'bigint') {
-    if (value > Number.MAX_SAFE_INTEGER) {
-      // console.warn('Coercing BigInt to IEEE 754')
-    }
-    value = Number(value)
   }
   return value
 }
 
-function readDecimal (data: DataView, offset: number, size: number): number {
+function readDecimal (data: BinaryReader, offset: number, size: number): number {
   if (size === 4) {
-    return data.getFloat32(offset, true)
+    return data.getFloat32(offset)
   } else if (size === 8) {
-    return data.getFloat64(offset, true)
+    return data.getFloat64(offset)
   }
   return undefined as never
 }
@@ -58,7 +53,7 @@ function readScalar (offset: number, header: Header, datFile: DatFile) {
     return readBoolean(datFile.dataFixed, offset)
   }
   if (type.string) {
-    const varOffset = datFile.readerFixed.getUint32(offset, true)
+    const varOffset = datFile.readerFixed.getSizeT(offset)
     return readString(datFile.dataVariable, varOffset)
   }
   if (type.integer) {
@@ -72,8 +67,8 @@ function readScalar (offset: number, header: Header, datFile: DatFile) {
 
 function readArray (offset: number, header: Header, datFile: DatFile) {
   const { type } = header
-  const arrayLength = datFile.readerFixed.getUint32(offset, true)
-  const varOffset = datFile.readerFixed.getUint32(offset + 4, true)
+  const arrayLength = datFile.readerFixed.getSizeT(offset)
+  const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
 
   if (arrayLength === 0) {
     return []
@@ -87,7 +82,7 @@ function readArray (offset: number, header: Header, datFile: DatFile) {
   }
   if (type.string) {
     return out.map((_, idx) =>
-      readString(datFile.dataVariable, varOffset + (4 * idx))
+      readString(datFile.dataVariable, varOffset + (datFile.memsize * idx))
     )
   }
   if (type.integer) {

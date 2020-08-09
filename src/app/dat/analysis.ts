@@ -1,10 +1,11 @@
-import { DatFile } from './dat-file'
+import { DatFile, BinaryReader } from './dat-file'
+import { INT32_NULL, INT64_NULL } from './reader'
 
 export interface ColumnStats {
   b00: boolean
   b01: boolean
   bMax: number
-  nullableLong: boolean
+  nullableMemsize: boolean
   refString: boolean
   refArray: {
     boolean: boolean
@@ -13,6 +14,7 @@ export interface ColumnStats {
     longLong: boolean
     string: boolean
   } | false
+  memsize: number
 }
 
 export function analyze (datFile: DatFile) {
@@ -24,7 +26,7 @@ export function analyze (datFile: DatFile) {
       b00: true,
       b01: true,
       bMax: 0,
-      nullableLong: false,
+      nullableMemsize: false,
       refString: true,
       refArray: {
         boolean: true,
@@ -32,19 +34,20 @@ export function analyze (datFile: DatFile) {
         long: true,
         longLong: true,
         string: true
-      }
+      },
+      memsize: datFile.memsize
     }))
 
   for (let bi = 0; bi < datFile.rowLength; bi += 1) {
     const stat = stats[bi]
-    const sLong = (datFile.rowLength - bi) >= 4
-    const sLongLong = (datFile.rowLength - bi) >= 8
+    const sMem = (datFile.rowLength - bi) >= datFile.memsize
+    const sMemMem = (datFile.rowLength - bi) >= datFile.memsize * 2
 
-    if (!sLong) {
+    if (!sMem) {
       stat.refString = false
     }
 
-    if (!sLongLong) {
+    if (!sMemMem) {
       stat.refArray = false
     }
 
@@ -56,22 +59,22 @@ export function analyze (datFile: DatFile) {
       stat.b01 = stat.b01 && (byte === 0x01)
       stat.bMax = Math.max(stat.bMax, byte)
 
-      if (!stat.nullableLong && sLong) {
-        stat.nullableLong = (
+      if (!stat.nullableMemsize && sMem) {
+        stat.nullableMemsize = (
           byte === 0xfe &&
-          datFile.readerFixed.getUint32(row + bi, true) === 0xfefefefe
+          datFile.readerFixed.getSizeT(row + bi) === (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)
         )
       }
 
       if (stat.refString) {
-        const varOffset = datFile.readerFixed.getUint32(row + bi, true)
+        const varOffset = datFile.readerFixed.getSizeT(row + bi)
         stat.refString = isValidVariableOffset(varOffset) &&
           isStringAtOffset(varOffset, datFile.readerVariable)
       }
 
       if (stat.refArray) {
-        const arrayLength = datFile.readerFixed.getUint32(row + bi, true)
-        const varOffset = datFile.readerFixed.getUint32(row + bi + 4, true)
+        const arrayLength = datFile.readerFixed.getSizeT(row + bi)
+        const varOffset = datFile.readerFixed.getSizeT(row + bi + datFile.memsize)
         if (
           !isValidVariableOffset(varOffset) ||
           !isValidVariableOffset(varOffset + (1 * arrayLength))
@@ -87,10 +90,10 @@ export function analyze (datFile: DatFile) {
           stat.refArray.longLong = stat.refArray.longLong &&
             isValidVariableOffset(varOffset + (8 * arrayLength))
           stat.refArray.string = stat.refArray.string &&
-            isValidVariableOffset(varOffset + (4 * arrayLength))
+            isValidVariableOffset(varOffset + (datFile.memsize * arrayLength))
 
           for (let idx = 0; idx < arrayLength && stat.refArray.string; idx += 1) {
-            const strOffset = datFile.readerVariable.getUint32(varOffset + (4 * idx), true)
+            const strOffset = datFile.readerVariable.getSizeT(varOffset + (datFile.memsize * idx))
             stat.refArray.string = isValidVariableOffset(strOffset) &&
               isStringAtOffset(strOffset, datFile.readerVariable)
           }
@@ -119,13 +122,13 @@ export function analyze (datFile: DatFile) {
   return stats
 }
 
-function isStringAtOffset (offset: number, data: DataView) {
+function isStringAtOffset (offset: number, data: BinaryReader) {
   while (true) {
     if ((offset + 3) >= data.byteLength) {
       return false
     }
-    const c1 = data.getUint16(offset, true)
-    const c2 = data.getUint16(offset + 2, true)
+    const c1 = data.getUint16(offset)
+    const c2 = data.getUint16(offset + 2)
     if (c1 === 0x0000 && c2 === 0x0000) {
       break
     }

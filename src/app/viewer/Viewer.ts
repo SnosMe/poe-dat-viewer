@@ -88,26 +88,19 @@ export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
   for (let idx = 0; idx < columnStats.length; idx += 1) {
     const stat = columnStats[idx]
     if (stat.refString) {
-      columns[idx + 0].stats.string = true
-      columns[idx + 1].stats.string = true
-      columns[idx + 2].stats.string = true
-      columns[idx + 3].stats.string = true
+      for (let k = 0; k < stat.memsize; k += 1) {
+        columns[idx + k].stats.string = true
+      }
     }
     if (stat.refArray) {
-      columns[idx + 0].stats.array = true
-      columns[idx + 1].stats.array = true
-      columns[idx + 2].stats.array = true
-      columns[idx + 3].stats.array = true
-      columns[idx + 4].stats.array = true
-      columns[idx + 5].stats.array = true
-      columns[idx + 6].stats.array = true
-      columns[idx + 7].stats.array = true
+      for (let k = 0; k < stat.memsize * 2; k += 1) {
+        columns[idx + k].stats.array = true
+      }
     }
-    if (stat.nullableLong) {
-      columns[idx + 0].stats.nullable = true
-      columns[idx + 1].stats.nullable = true
-      columns[idx + 2].stats.nullable = true
-      columns[idx + 3].stats.nullable = true
+    if (stat.nullableMemsize) {
+      for (let k = 0; k < stat.memsize; k += 1) {
+        columns[idx + k].stats.nullable = true
+      }
     }
   }
 
