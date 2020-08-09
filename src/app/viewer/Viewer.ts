@@ -32,6 +32,7 @@ export const state = Vue.observable({
   rowNumberLength: -1,
   editHeader: null as Header | null,
   exportSchemaDialog: false,
+  helpDialog: false,
   config: {
     rowNumStart: 0,
     colNumStart: 0

@@ -3,10 +3,15 @@
   <div v-else class="layout-column">
     <div class="app-titlebar">
       <div class="ellipsis q-mr-xs">{{ datFile.name }}</div>
+      <q-space />
+      <q-btn padding="0 sm" label="Help" no-caps flat @click="helpDialog = true" />
       <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
     <q-dialog v-model="exportSchemaDialog">
       <export-schema />
+    </q-dialog>
+    <q-dialog v-model="helpDialog">
+      <help-content />
     </q-dialog>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
       <div class="flex no-wrap">
@@ -71,13 +76,14 @@ import DataRow from './DataRow'
 import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
 import ExportSchema from './ExportSchema'
+import HelpContent from './HelpContent'
 import { state, importFile } from './viewer/Viewer'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow, ExportSchema },
+  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent },
   created () {
     importFile()
   },

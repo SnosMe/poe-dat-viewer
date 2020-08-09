@@ -22,7 +22,10 @@ import {
   QTabs,
   QTabPanel,
   QTabPanels,
-  QSeparator
+  QSeparator,
+  QMarkupTable,
+  QLinearProgress,
+  QBadge
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -45,7 +48,10 @@ Vue.use(Quasar, {
     QTabs,
     QTabPanel,
     QTabPanels,
-    QSeparator
+    QSeparator,
+    QMarkupTable,
+    QLinearProgress,
+    QBadge
   },
   directives: {
     ClosePopup
