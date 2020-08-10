@@ -25,7 +25,14 @@ import {
   QSeparator,
   QMarkupTable,
   QLinearProgress,
-  QBadge
+  QBadge,
+  QFile,
+  QSlideTransition,
+  QIcon,
+  QItem,
+  QItemSection,
+  QItemLabel,
+  QList
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -51,7 +58,14 @@ Vue.use(Quasar, {
     QSeparator,
     QMarkupTable,
     QLinearProgress,
-    QBadge
+    QBadge,
+    QFile,
+    QSlideTransition,
+    QIcon,
+    QItem,
+    QItemSection,
+    QItemLabel,
+    QList
   },
   directives: {
     ClosePopup

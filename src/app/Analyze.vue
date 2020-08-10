@@ -4,7 +4,8 @@
     <div class="app-titlebar">
       <div class="ellipsis q-mr-xs">{{ datFile.name }}</div>
       <q-space />
-      <q-btn padding="0 sm" label="Help" no-caps flat @click="helpDialog = true" />
+      <q-btn padding="0 sm" label="Import" no-caps flat @click="importDialog = true" class="q-mr-sm" />
+      <q-btn padding="0 sm" label="Help" no-caps flat @click="helpDialog = true" class="q-mr-sm" />
       <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
     <q-dialog v-model="exportSchemaDialog">
@@ -12,6 +13,9 @@
     </q-dialog>
     <q-dialog v-model="helpDialog">
       <help-content />
+    </q-dialog>
+    <q-dialog v-model="importDialog">
+      <import-dialog />
     </q-dialog>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
       <div class="flex no-wrap">
@@ -77,13 +81,14 @@ import ViewerHead from './ViewerHead'
 import HeaderProps from './HeaderProps'
 import ExportSchema from './ExportSchema'
 import HelpContent from './HelpContent'
+import ImportDialog from './ImportDialog'
 import { state, importFile } from './viewer/Viewer'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent },
+  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog },
   created () {
     importFile()
   },
