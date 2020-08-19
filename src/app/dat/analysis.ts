@@ -20,7 +20,7 @@ export interface ColumnStats {
   memsize: number
 }
 
-export function analyze (datFile: DatFile) {
+export async function analyze (datFile: DatFile) {
   const isValidVariableOffset = (offset: number) =>
     offset < datFile.readerVariable.byteLength && offset >= 4
 
@@ -44,6 +44,7 @@ export function analyze (datFile: DatFile) {
       memsize: datFile.memsize
     }))
 
+  let start = await new Promise<number>(resolve => requestAnimationFrame(ms => { resolve(ms) }))
   for (let bi = 0; bi < datFile.rowLength; bi += 1) {
     const stat = stats[bi]
     const sMem = (datFile.rowLength - bi) >= datFile.memsize
@@ -141,6 +142,10 @@ export function analyze (datFile: DatFile) {
           }
         }
       }
+    }
+
+    if ((performance.now() - start) >= 10) {
+      start = await new Promise<number>(resolve => requestAnimationFrame(ms => { resolve(ms) }))
     }
   }
 

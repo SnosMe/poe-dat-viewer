@@ -3,9 +3,9 @@
     <q-card-section>
       <div class="q-gutter-xs flex items-baseline">
         <q-input value="patch.poecdn.com/patch/" filled hint="Patch CDN" readonly dense style="width: 200px;" />
-        <q-input :value="''" filled hint="Patch #" dense placeholder="3.11.x.x.x" style="width: 100px;" />
-        <q-input :value="''" filled hint="Path inside GGPK" dense placeholder="/Data/BaseItemTypes.dat64" style="width: 250px;" />
-        <q-btn label="Import" color="primary" />
+        <q-input v-model.trim="poePatch" filled hint="Patch #" dense placeholder="3.11.x.x.x" style="width: 100px;" />
+        <q-input v-model.trim="ggpkPath" filled hint="Path inside GGPK" dense placeholder="/Data/BaseItemTypes.dat64" style="width: 250px;" />
+        <q-btn label="Import" color="primary" @click="cdnImport" :loading="isCdnImportRunning" />
       </div>
     </q-card-section>
     <q-separator />
@@ -16,80 +16,53 @@
           accept=".dat,.dat64"
           filled dense
           style="max-width: 250px"
+          @input="handleFile"
         />
         <q-space />
-        <div class="text-caption text-italic text-grey-7 q-mr-sm">0 MB stored</div>
+        <div class="text-caption text-italic text-grey-7 q-mr-sm">{{ (totalSize / 1000000).toFixed(2) }} MB stored</div>
         <q-btn label="Recent files" @click="showRecent = !showRecent"
           flat no-caps dense :icon-right="fasAngleDown" text-color="grey-8" />
       </div>
       <q-slide-transition>
         <div v-show="!showRecent">
           <div class="q-pt-sm">
-            Or import <a class="q-link text-primary" style="border-bottom: 1px dashed currentColor;" href="#">demo file</a>
+            Or import <a @click.prevent="importDemo" class="q-link text-primary" style="border-bottom: 1px dashed currentColor;" href="#">demo file</a>
           </div>
         </div>
       </q-slide-transition>
       <q-slide-transition>
         <div v-show="showRecent">
           <div class="q-pt-sm"><q-space /></div>
-          <q-list bordered class="rounded-borders q-mt-xs scroll" style="max-height: 40vh;">
-            <q-item-label header>Recent files</q-item-label>
-            <q-item>
-              <q-item-section top>
-                <div class="flex q-gutter-x-md items-center">
-                  <div class="flex-1">
-                    <q-item-label>
-                      <span class="text-weight-medium">Data/BaseItemTypes.dat</span>
-                      <span class="text-grey-8"> - 3.11.1.2.5</span>
-                    </q-item-label>
-                    <q-item-label caption>
-                      SHA-512: AEFC789474F0BBFE
-                    </q-item-label>
-                  </div>
+          <q-markup-table flat bordered class="q-mt-xs scroll" style="max-height: 40vh;">
+            <thead>
+              <tr><th class="text-left text-grey-7 no-border" colspan="4" style="font-size: 0.875rem; font-weight: normal;">Recent files</th></tr>
+            </thead>
+            <tbody>
+              <tr v-for="file of cacheFiles" :key="file.sha256">
+                <td class="text-left">
                   <div>
-                    <q-item-label>2012-09-12</q-item-label>
+                    <span class="text-weight-medium">{{ file.ggpkPath }}</span>
+                    <span v-if="file.patch" class="text-grey-8"> - {{ file.patch }}</span>
                   </div>
-                  <div>
-                    <q-item-label>2.5 MB</q-item-label>
+                  <div class="text-caption text-grey-8">
+                    SHA-256: {{ file.sha256.substr(0, 7) }}&mldr;
                   </div>
-                </div>
-              </q-item-section>
-              <q-item-section side>
-                <div class="text-grey-8 q-gutter-xs">
-                  <q-btn class="gt-xs" size="12px" dense label="Delete" outline />
-                  <q-btn size="12px" dense label="Open" color="primary" />
-                </div>
-              </q-item-section>
-            </q-item>
-            <q-separator />
-            <q-item>
-              <q-item-section top>
-                <div class="flex q-gutter-x-md items-center">
-                  <div class="flex-1">
-                    <q-item-label>
-                      <span class="text-weight-medium">Data/BaseItemTypes.dat</span>
-                      <span class="text-grey-8"> - 3.11.1.2.5</span>
-                    </q-item-label>
-                    <q-item-label caption>
-                      SHA-512: AEFC789474F0BBFE
-                    </q-item-label>
+                </td>
+                <td class="text-right">
+                  {{ file.cachedAt.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                </td>
+                <td class="text-right">
+                  {{ (file.size / 1000000).toFixed(2) }} MB
+                </td>
+                <td class="text-right">
+                  <div class="text-grey-8 q-gutter-xs">
+                    <q-btn @click="remove(file.sha256)" class="gt-xs" size="12px" dense label="Delete" outline />
+                    <q-btn @click="open(file.sha256)" size="12px" dense label="Open" color="primary" />
                   </div>
-                  <div>
-                    <q-item-label>2012-09-12</q-item-label>
-                  </div>
-                  <div>
-                    <q-item-label>2.5 MB</q-item-label>
-                  </div>
-                </div>
-              </q-item-section>
-              <q-item-section side>
-                <div class="text-grey-8 q-gutter-xs">
-                  <q-btn class="gt-xs" size="12px" dense label="Delete" outline />
-                  <q-btn size="12px" dense label="Open" color="primary" />
-                </div>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                </td>
+              </tr>
+            </tbody>
+          </q-markup-table>
         </div>
       </q-slide-transition>
     </q-card-section>
@@ -98,15 +71,80 @@
 
 <script>
 import { fasAngleDown, fasEraser } from '@quasar/extras/fontawesome-v5'
+import { getAllFilesMeta, deleteByHash } from './dat/file-cache'
+import { importFromPoeCdn, importFromFile, getByHash } from './dat/dat-file'
+import { viewerLoadDat, state } from './viewer/Viewer'
 
 export default {
-  created () {
+  async created () {
     this.fasAngleDown = fasAngleDown
-    this.ttt = fasEraser
+
+    this.cacheFiles = await getAllFilesMeta()
   },
   data () {
     return {
-      showRecent: false
+      showRecent: false,
+      poePatch: '',
+      ggpkPath: '',
+      isCdnImportRunning: false,
+      cacheFiles: []
+    }
+  },
+  computed: {
+    totalSize () {
+      return this.cacheFiles.reduce((total, file) => total + file.size, 0)
+    }
+  },
+  methods: {
+    async handleFile (e) {
+      try {
+        const datFile = await importFromFile(e)
+        this.commonImport(datFile)
+        this.cacheFiles = await getAllFilesMeta()
+        state.importDialog = false
+      } catch (e) {
+        this.$q.notify({ color: 'negative', message: e.message, progress: true })
+      }
+    },
+    async cdnImport () {
+      try {
+        this.isCdnImportRunning = true
+        const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
+        this.commonImport(datFile)
+        this.cacheFiles = await getAllFilesMeta()
+        state.importDialog = false
+      } catch (e) {
+        this.$q.notify({ color: 'negative', message: e.message, progress: true })
+      } finally {
+        this.isCdnImportRunning = false
+      }
+    },
+    async importDemo () {
+      // @TODO
+      const datFile = await importFromPoeCdn('3.11.1.6.2', 'Data/Russian/BaseItemTypes.dat')
+      this.commonImport(datFile)
+      this.cacheFiles = await getAllFilesMeta()
+      state.importDialog = false
+    },
+    async commonImport (datFile) {
+      try {
+        this.$q.loading.show({ delay: 0 })
+        await viewerLoadDat(datFile)
+      } catch (e) {
+        this.$q.notify({ color: 'negative', message: e.message, progress: true })
+        state.importDialog = true
+      } finally {
+        this.$q.loading.hide()
+      }
+    },
+    async remove (hash) {
+      await deleteByHash(hash)
+      this.cacheFiles = await getAllFilesMeta()
+    },
+    async open (hash) {
+      const datFile = await getByHash(hash)
+      this.commonImport(datFile)
+      state.importDialog = false
     }
   }
 }

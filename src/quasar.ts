@@ -32,7 +32,9 @@ import {
   QItem,
   QItemSection,
   QItemLabel,
-  QList
+  QList,
+  Notify,
+  Loading
 } from 'quasar'
 
 Vue.use(Quasar, {
@@ -71,6 +73,8 @@ Vue.use(Quasar, {
     ClosePopup
   },
   plugins: {
+    Notify,
+    Loading
   },
   iconSet: iconSet
 })

@@ -1,8 +1,7 @@
 <template>
-  <div v-if="!datFile">UPLOAD FILE</div>
-  <div v-else class="layout-column">
+  <div class="layout-column">
     <div class="app-titlebar">
-      <div class="ellipsis q-mr-xs">{{ datFile.name }}</div>
+      <div v-if="datFile" class="ellipsis q-mr-xs">{{ datFile.meta.ggpkPath }}</div>
       <q-space />
       <q-btn padding="0 sm" label="Import" no-caps flat @click="importDialog = true" class="q-mr-sm" />
       <q-btn padding="0 sm" label="Help" no-caps flat @click="helpDialog = true" class="q-mr-sm" />
@@ -35,7 +34,7 @@
       </div>
       <q-space />
       <div class="flex no-wrap">
-        <q-btn @click="exportSchemaDialog = true" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
+        <q-btn @click="exportSchemaDialog = true" :disable="!datFile" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
       </div>
     </div>
     <div class="flex min-h-0 flex-1">
@@ -46,6 +45,7 @@
           id="viewer-fancy-scroll"
         >
           <!-- class="flex-1 font-mono scroll" -->
+          <!-- TODO: REMOVE IT BEFORE BETA -->
           <q-virtual-scroll
             :items="rows"
             :virtual-scroll-item-size="24"
@@ -82,15 +82,24 @@ import HeaderProps from './HeaderProps'
 import ExportSchema from './ExportSchema'
 import HelpContent from './HelpContent'
 import ImportDialog from './ImportDialog'
-import { state, importFile } from './viewer/Viewer'
+import { state, viewerLoadDat } from './viewer/Viewer'
+import { getAllFilesMeta } from './dat/file-cache'
+import { getByHash } from './dat/dat-file'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
   components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog },
-  created () {
-    importFile()
+  async created () {
+    const files = await getAllFilesMeta()
+    if (files.length) {
+      this.$q.loading.show({ delay: 0 })
+      try {
+        await viewerLoadDat(await getByHash(files[0].sha256))
+      } catch (e) {}
+      this.$q.loading.hide()
+    }
   },
   data () {
     return state
@@ -108,7 +117,10 @@ export default {
       )
     },
     rows () {
-      return new Array(this.datFile.rowCount).fill(undefined)
+      if (this.datFile) {
+        return new Array(this.datFile.rowCount).fill(undefined)
+      }
+      return []
     },
     appVersion () {
       return process.env.APP_VERSION

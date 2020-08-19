@@ -1,7 +1,8 @@
 import { findSequence } from './reader'
+import * as FileCache from './file-cache'
 
 export interface DatFile {
-  name: string
+  meta: FileCache.FileMeta
   memsize: number
   rowCount: number
   rowLength: number
@@ -11,13 +12,20 @@ export interface DatFile {
   readerVariable: BinaryReader
 }
 
-export async function importDatFile (name: string): Promise<DatFile> {
-  const file = new Uint8Array(await loadFile(name))
+function initDatFile (filename: string, content: ArrayBuffer) {
+  if (content.byteLength < (4 + 8)) {
+    throw new Error('Invalid file size')
+  }
+
+  const file = new Uint8Array(content)
   const fileReader = new DataView(file.buffer)
-  const memsize = 4 // 4 or 8
+  const memsize = filename.endsWith('.dat64') ? 8 : 4
 
   const rowCount = fileReader.getUint32(0, true)
   const boundary = findBBBB(file)
+  if (boundary === -1) {
+    throw new Error('Invalid file: section with variable data not found')
+  }
   const rowLength = (boundary - 4) / rowCount
 
   const dataFixed = file.subarray(4, boundary)
@@ -26,8 +34,7 @@ export async function importDatFile (name: string): Promise<DatFile> {
   const readerFixed = new DataView(dataFixed.buffer, dataFixed.byteOffset, dataFixed.byteLength)
   const readerVariable = new DataView(dataVariable.buffer, dataVariable.byteOffset, dataVariable.byteLength)
 
-  return Object.freeze({
-    name,
+  return {
     memsize,
     rowCount,
     rowLength,
@@ -35,21 +42,44 @@ export async function importDatFile (name: string): Promise<DatFile> {
     dataVariable,
     readerFixed: new BinaryReader(memsize, readerFixed),
     readerVariable: new BinaryReader(memsize, readerVariable)
+  }
+}
+
+export async function importFromPoeCdn (patch: string, ggpkPath: string): Promise<DatFile> {
+  if (!ggpkPath.startsWith('/')) {
+    ggpkPath = '/' + ggpkPath
+  }
+
+  let file = await FileCache.findByPath(patch, ggpkPath)
+  if (!file) {
+    const FILE_URL = `http://patch.poecdn.com/patch/${patch}${ggpkPath}`
+    const res = await fetch(`https://cors-anywhere.herokuapp.com/${FILE_URL}`)
+    if (res.status !== 200) {
+      throw new Error(`patch.poecdn.com: ${res.status} ${res.statusText}`)
+    }
+    file = await FileCache.putFile(patch, ggpkPath, await res.arrayBuffer())
+  }
+  return Object.freeze({
+    meta: file.meta,
+    ...initDatFile(file.meta.ggpkPath, file.content)
   })
 }
 
-async function loadFile (name: string): Promise<ArrayBuffer> {
-  const FILE_URL = `http://patch.poecdn.com/patch/3.11.1.5.2/Data/${name}.dat`
+export async function importFromFile (upload: File) {
+  const file = await FileCache.putFile(null, upload.name, await upload.arrayBuffer())
+  return Object.freeze({
+    meta: file.meta,
+    ...initDatFile(file.meta.ggpkPath, file.content)
+  })
+}
 
-  const cache = await caches.open('poecdn')
-  let res = await cache.match(FILE_URL)
-  if (!res) {
-    res = await fetch(`https://cors-anywhere.herokuapp.com/${FILE_URL}`)
-    const buff = await res.arrayBuffer()
-    await cache.put(FILE_URL, new Response(buff))
-    return buff
-  } else {
-    return res.arrayBuffer()
+export async function getByHash (sha256: string) {
+  const file = await FileCache.findByHash(sha256)
+  if (file) {
+    return Object.freeze({
+      meta: file.meta,
+      ...initDatFile(file.meta.ggpkPath, file.content)
+    })
   }
 }
 

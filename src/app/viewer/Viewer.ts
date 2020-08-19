@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { importDatFile, DatFile } from '../dat/dat-file'
+import { DatFile } from '../dat/dat-file'
 import { analyze, ColumnStats } from '../dat/analysis'
 import { Header, createHeaderFromSelected } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
@@ -42,12 +42,11 @@ export const state = Vue.observable({
 
 const ROW_NUM_MIN_LENGTH = 4
 
-export async function importFile () {
-  const parsed = await importDatFile(IMPORT_DAT_NAME)
+export async function viewerLoadDat (parsed: DatFile) {
   const rowNumLen = calcRowNumLength(parsed.rowCount, state.config.rowNumStart, ROW_NUM_MIN_LENGTH)
 
+  state.columnStats = await analyze(parsed)
   state.datFile = parsed
-  state.columnStats = analyze(state.datFile)
   state.columns = stateColumns(state.columnStats, state.config.colNumStart)
   state.headers = [{
     name: null,

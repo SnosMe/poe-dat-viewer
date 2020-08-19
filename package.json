@@ -10,6 +10,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
+    "idb": "^5.0.4",
     "quasar": "^1.0.0",
     "vue": "^2.6.11"
   },
