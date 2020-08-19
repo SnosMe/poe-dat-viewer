@@ -129,14 +129,19 @@ export function readCellValue (offset: number, header: Header, datFile: DatFile)
 }
 
 export function findSequence (data: Uint8Array, sequence: number[], fromIndex = 0): number {
-  const idx = data.indexOf(sequence[0], fromIndex)
-  if (idx === -1 || (idx + sequence.length) > data.length) return -1
+  for (;;) {
+    const idx = data.indexOf(sequence[0], fromIndex)
+    if (idx === -1 || (idx + sequence.length) > data.length) return -1
 
-  for (let di = idx, si = 0; si < sequence.length; di += 1, si += 1) {
-    if (data[di] !== sequence[si]) {
-      return findSequence(data, sequence, di)
+    let matched = true
+    for (let di = idx, si = 0; si < sequence.length; di += 1, si += 1) {
+      if (data[di] !== sequence[si]) {
+        fromIndex = di
+        matched = false
+        break
+      }
     }
-  }
 
-  return idx
+    if (matched) return idx
+  }
 }
