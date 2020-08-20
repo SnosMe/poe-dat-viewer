@@ -1,7 +1,8 @@
 import { Header } from '../viewer/headers'
 import { ExporterFieldType, headerToFieldFormat } from './common'
+import { getNamePart } from '../dat/dat-file'
 
-export function exportToPogo (headers: Header[], name: string) {
+export function exportToPogo (headers: Header[], path: string) {
   let unknownNum = 0
   let undefinedNum = 0
 
@@ -18,7 +19,7 @@ export function exportToPogo (headers: Header[], name: string) {
     return `  ${field[0]} ${field[1]}`
   }).join('\n')
 
-  return `type ${name} struct {\n${fieldsText}\n}`
+  return `type ${getNamePart(path)} struct {\n${fieldsText}\n}`
 }
 
 function getPogoFieldType (header: Header): ExporterFieldType {

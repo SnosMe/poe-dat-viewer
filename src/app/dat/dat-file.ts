@@ -83,6 +83,10 @@ export async function getByHash (sha256: string) {
   }
 }
 
+export function getNamePart (path: string) {
+  return path.match(/[^/]+(?=\..+$)/)![0]
+}
+
 function findBBBB (data: Uint8Array): number {
   return findSequence(data, [0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb])
 }

@@ -46,16 +46,16 @@ export default {
   },
   computed: {
     pypoe () {
-      return exportToPypoe(state.headers, state.datFile.name)
+      return exportToPypoe(state.headers, state.datFile.meta.ggpkPath)
     },
     pogo () {
-      return exportToPogo(state.headers, state.datFile.name)
+      return exportToPogo(state.headers, state.datFile.meta.ggpkPath)
     },
     clang () {
-      return exportToClang(state.headers, state.datFile.name)
+      return exportToClang(state.headers, state.datFile.meta.ggpkPath)
     },
     json () {
-      return exportInternalState(state.headers, state.datFile.name)
+      return exportInternalState(state.headers, state.datFile.meta.ggpkPath)
     }
   }
 }
@@ -72,5 +72,6 @@ export default {
   margin-bottom: 16px;
   border-radius: 4px;
   background: $grey-9;
+  overflow-x: auto;
 }
 </style>

@@ -1,7 +1,8 @@
 import { Header } from '../viewer/headers'
 import { ExporterFieldType, headerToFieldFormat } from './common'
+import { getNamePart } from '../dat/dat-file'
 
-export function exportToClang (headers: Header[], name: string) {
+export function exportToClang (headers: Header[], path: string) {
   let unknownNum = 0
   let undefinedNum = 0
 
@@ -16,7 +17,7 @@ export function exportToClang (headers: Header[], name: string) {
     return `  ${field[1]} ${field[0]};`
   }).join('\n')
 
-  return `#include <stdbool.h>\n#include <stdint.h>\n#include <uchar.h>\n\n#pragma pack(push, 1)\ntypedef struct ${name} {\n${fieldsText}\n} ${name};\n#pragma pack(pop)`
+  return `#include <stdbool.h>\n#include <stdint.h>\n#include <uchar.h>\n\n#pragma pack(push, 1)\ntypedef struct ${getNamePart(path)} {\n${fieldsText}\n} ${getNamePart(path)};\n#pragma pack(pop)`
 }
 
 function getClangFieldType (header: Header): ExporterFieldType {
