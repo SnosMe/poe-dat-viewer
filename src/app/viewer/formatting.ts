@@ -165,7 +165,7 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
   if (header.type.ref?.array || header.type.string) {
     length = medianEntriesLength(entries)
   }
-  length = Math.max(length, (header.length * 3 - 1))
+  length = Math.max(length, (4 * 3 - 1))
 
   header.cachedView = Object.freeze({
     length,
@@ -174,7 +174,10 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
 }
 
 function medianEntriesLength (entries: Array<[string, number]>) {
-  const arr = entries.map(_ => _[0].length)
+  const arr = entries
+    .filter(_ => _[0] !== '[]' && _[0] !== 'null')
+    .map(_ => _[0].length)
+  if (!arr.length) return 0
   arr.sort((a, b) => a - b)
   const mid = Math.floor(arr.length / 2)
   return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2
