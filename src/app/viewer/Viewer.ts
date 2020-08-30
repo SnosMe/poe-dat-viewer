@@ -4,7 +4,7 @@ import { analyze, ColumnStats } from '../dat/analysis'
 import { Header, createHeaderFromSelected } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
 import { calcRowNumLength } from './formatting'
-import { IMPORT_HDRS, IMPORT_DAT_NAME } from './_test_data'
+import { DatSerializedHeader, getHeaderLength, validateImportedHeader } from '../exporters/internal'
 
 export interface StateColumn {
   readonly offset: number
@@ -22,33 +22,44 @@ export interface StateColumn {
   }
 }
 
-export const state = Vue.observable({
-  headers: [] as Header[],
-  columns: [] as StateColumn[],
-  datFile: null as DatFile | null,
-  columnStats: [] as ColumnStats[],
-  rowIndexing: 0,
-  colIndexing: 0,
-  rowNumberLength: -1,
-  editHeader: null as Header | null,
-  exportSchemaDialog: false,
-  helpDialog: false,
-  importDialog: true,
-  config: {
+export class App {
+  exportSchemaDialog = false
+  helpDialog = false
+  importDialog = true
+  config = {
     rowNumStart: 0,
     colNumStart: 0
   }
-})
+
+  viewers: Array<{ instance: Viewer }> = []
+
+  constructor () {
+    this.viewers.push({ instance: new Viewer(this) })
+  }
+}
 
 const ROW_NUM_MIN_LENGTH = 4
 
-export async function viewerLoadDat (parsed: DatFile) {
-  const rowNumLen = calcRowNumLength(parsed.rowCount, state.config.rowNumStart, ROW_NUM_MIN_LENGTH)
+class Viewer {
+  headers = [] as Header[]
+  columns = [] as StateColumn[]
+  datFile = null as DatFile | null
+  columnStats = [] as ColumnStats[]
+  rowNumberLength = -1
+  editHeader = null as Header | null
 
-  state.columnStats = await analyze(parsed)
-  state.datFile = parsed
-  state.columns = stateColumns(state.columnStats, state.config.colNumStart)
-  state.headers = [{
+  // eslint-disable-next-line no-useless-constructor
+  constructor (
+    private app: App
+  ) {}
+
+  async loadDat (parsed: DatFile) {
+    const { app } = this
+    this.columnStats = await analyze(parsed)
+    this.rowNumberLength = calcRowNumLength(parsed.rowCount, app.config.rowNumStart, ROW_NUM_MIN_LENGTH)
+    this.datFile = parsed
+    this.columns = this.stateColumns(this.columnStats)
+    this.headers = [{
     name: null,
     offset: 0,
     length: parsed.rowLength,
@@ -56,24 +67,16 @@ export async function viewerLoadDat (parsed: DatFile) {
       byteView: {}
     }
   }]
-
-  for (const importedHeader of IMPORT_HDRS) {
-    selectColsByHeader(importedHeader, state.columns)
-    const header = createHeaderFromSelected(state.columns, state.headers)
-    header.name = importedHeader.name
-    clearColumnSelection(state.columns)
-  }
-
-  state.rowNumberLength = rowNumLen
 }
 
-export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
+  stateColumns (columnStats: ColumnStats[]) {
+    const { app } = this
   const columns = new Array(columnStats.length).fill(undefined)
     .map<StateColumn>((_, idx) => ({
       offset: idx,
-      colNum99: String((idx + colNumStart) % 100).padStart(2, '0'),
-      // colNum100: String(Math.floor((idx + colNumStart) / 100)),
-      colNum100: String(idx + colNumStart).padStart(2, '0'),
+        colNum99: String((idx + app.config.colNumStart) % 100).padStart(2, '0'),
+        // colNum100: String(Math.floor((idx + this.app.config.colNumStart) / 100)),
+        colNum100: String(idx + app.config.colNumStart).padStart(2, '0'),
       selected: false,
       header: null,
       dataStart: false,
@@ -108,7 +111,8 @@ export function stateColumns (columnStats: ColumnStats[], colNumStart: number) {
   return columns
 }
 
-export function disableByteView (header: Header, columns: StateColumn[]) {
+  disableByteView (header: Header) {
+    const { columns } = this
   header.type.byteView = undefined
   const colIdx = columns.findIndex(col => col.offset === header.offset)
   columns.splice(colIdx + 1, header.length - 1)
@@ -116,10 +120,13 @@ export function disableByteView (header: Header, columns: StateColumn[]) {
   columns[colIdx].selected = false
 }
 
-export function enableByteView (header: Header, columns: StateColumn[], columnStats: ColumnStats[]) {
+  enableByteView (header: Header) {
+    const { columns, columnStats } = this
   header.type.byteView = {}
   const colIdx = columns.findIndex(col => col.offset === header.offset)
-  const fresh = stateColumns(columnStats, Number(columns[0].colNum99))
+    const fresh = this.stateColumns(columnStats)
   columns.splice(colIdx + 1, 0, ...fresh.slice(header.offset + 1, header.offset + header.length))
   columns[colIdx].header = null
 }
+}
+

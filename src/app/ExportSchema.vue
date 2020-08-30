@@ -32,13 +32,13 @@
 </template>
 
 <script>
-import { state } from './viewer/Viewer'
 import { exportToPogo } from './exporters/pogo'
 import { exportToPypoe } from './exporters/pypoe'
 import { exportToClang } from './exporters/c-struct'
 import { exportInternalState } from './exporters/internal'
 
 export default {
+  inject: ['viewer'],
   data () {
     return {
       format: 'pypoe'
@@ -46,16 +46,20 @@ export default {
   },
   computed: {
     pypoe () {
-      return exportToPypoe(state.headers, state.datFile.meta.ggpkPath)
+      const { headers, datFile } = this.viewer
+      return exportToPypoe(headers, datFile.meta.ggpkPath)
     },
     pogo () {
-      return exportToPogo(state.headers, state.datFile.meta.ggpkPath)
+      const { headers, datFile } = this.viewer
+      return exportToPogo(headers, datFile.meta.ggpkPath)
     },
     clang () {
-      return exportToClang(state.headers, state.datFile.meta.ggpkPath)
+      const { headers, datFile } = this.viewer
+      return exportToClang(headers, datFile.meta.ggpkPath)
     },
     json () {
-      return exportInternalState(state.headers, state.datFile.meta.ggpkPath)
+      const { headers, datFile } = this.viewer
+      return exportInternalState(headers, datFile.meta.ggpkPath)
     }
   }
 }

@@ -73,7 +73,6 @@
 import { fasAngleDown, fasEraser } from '@quasar/extras/fontawesome-v5'
 import { getAllFilesMeta, deleteByHash } from './dat/file-cache'
 import { importFromPoeCdn, importFromFile, getByHash } from './dat/dat-file'
-import { viewerLoadDat, state } from './viewer/Viewer'
 
 export default {
   async created () {
@@ -81,6 +80,7 @@ export default {
 
     this.cacheFiles = await getAllFilesMeta()
   },
+  inject: ['app', 'viewer'],
   data () {
     return {
       showRecent: false,
@@ -101,7 +101,7 @@ export default {
         const datFile = await importFromFile(e)
         this.commonImport(datFile)
         this.cacheFiles = await getAllFilesMeta()
-        state.importDialog = false
+        this.app.importDialog = false
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
       }
@@ -112,7 +112,7 @@ export default {
         const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
         this.commonImport(datFile)
         this.cacheFiles = await getAllFilesMeta()
-        state.importDialog = false
+        this.app.importDialog = false
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
       } finally {
@@ -124,15 +124,15 @@ export default {
       const datFile = await importFromPoeCdn('3.11.1.6.2', 'Data/Russian/BaseItemTypes.dat')
       this.commonImport(datFile)
       this.cacheFiles = await getAllFilesMeta()
-      state.importDialog = false
+      this.app.importDialog = false
     },
     async commonImport (datFile) {
       try {
         this.$q.loading.show({ delay: 0 })
-        await viewerLoadDat(datFile)
+        await this.viewer.loadDat(datFile)
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
-        state.importDialog = true
+        this.app.importDialog = true
       } finally {
         this.$q.loading.hide()
       }
@@ -144,7 +144,7 @@ export default {
     async open (hash) {
       const datFile = await getByHash(hash)
       this.commonImport(datFile)
-      state.importDialog = false
+      this.app.importDialog = false
     }
   }
 }

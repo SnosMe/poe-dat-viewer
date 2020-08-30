@@ -1,19 +1,19 @@
 <template>
   <div class="layout-column">
     <div class="app-titlebar">
-      <div v-if="datFile" class="ellipsis q-mr-xs">{{ datFile.meta.ggpkPath }}</div>
+      <div v-if="viewer.datFile" class="ellipsis q-mr-xs">{{ viewer.datFile.meta.ggpkPath }}</div>
       <q-space />
-      <q-btn padding="0 sm" label="Import" no-caps flat @click="importDialog = true" class="q-mr-sm" />
-      <q-btn padding="0 sm" label="Help" no-caps flat @click="helpDialog = true" class="q-mr-sm" />
+      <q-btn padding="0 sm" label="Import" no-caps flat @click="app.importDialog = true" class="q-mr-sm" />
+      <q-btn padding="0 sm" label="Help" no-caps flat @click="app.helpDialog = true" class="q-mr-sm" />
       <q-btn padding="0 sm" label="Settings" no-caps flat />
     </div>
-    <q-dialog v-model="exportSchemaDialog">
+    <q-dialog v-model="app.exportSchemaDialog">
       <export-schema />
     </q-dialog>
-    <q-dialog v-model="helpDialog">
+    <q-dialog v-model="app.helpDialog">
       <help-content />
     </q-dialog>
-    <q-dialog v-model="importDialog">
+    <q-dialog v-model="app.importDialog">
       <import-dialog />
     </q-dialog>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
@@ -34,7 +34,7 @@
       </div>
       <q-space />
       <div class="flex no-wrap">
-        <q-btn @click="exportSchemaDialog = true" :disable="!datFile" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
+        <q-btn @click="app.exportSchemaDialog = true" :disable="!viewer.datFile" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
       </div>
     </div>
     <div class="flex min-h-0 flex-1">
@@ -53,9 +53,8 @@
             >
             <template #before>
               <viewer-head
-                :headers="headers"
-                :columns="columns"
-                :row-number-length="rowNumberLength" />
+                :headers="viewer.headers"
+                :columns="viewer.columns" />
             </template>
             <template v-slot="{ index }">
               <data-row
@@ -82,7 +81,7 @@ import HeaderProps from './HeaderProps'
 import ExportSchema from './ExportSchema'
 import HelpContent from './HelpContent'
 import ImportDialog from './ImportDialog'
-import { state, viewerLoadDat } from './viewer/Viewer'
+import { App } from './viewer/Viewer'
 import { getAllFilesMeta } from './dat/file-cache'
 import { getByHash } from './dat/dat-file'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
@@ -96,29 +95,42 @@ export default {
     if (files.length) {
       this.$q.loading.show({ delay: 0 })
       try {
-        await viewerLoadDat(await getByHash(files[0].sha256))
-      } catch (e) {}
+        await this.viewer.loadDat(await getByHash(files[0].sha256))
+      } catch (e) {
+        console.error(e)
+      }
       this.$q.loading.hide()
     }
   },
+  provide () {
+    return {
+      viewer: this.viewer,
+      app: this.app
+    }
+  },
   data () {
-    return state
+    const app = new App()
+
+    return {
+      app: app,
+      viewer: app.viewers[0].instance
+    }
   },
   computed: {
     rowComponent () {
       return DataRow
     },
     rowFormat () {
-      return getRowFormating(this.columns)
+      return getRowFormating(this.viewer.columns)
     },
     selections () {
-      return getColumnSelections(this.columns).map(range =>
+      return getColumnSelections(this.viewer.columns).map(range =>
         range.map(col => col.colNum100).join(' ')
       )
     },
     rows () {
-      if (this.datFile) {
-        return new Array(this.datFile.rowCount).fill(undefined)
+      if (this.viewer.datFile) {
+        return new Array(this.viewer.datFile.rowCount).fill(undefined)
       }
       return []
     },
@@ -128,8 +140,9 @@ export default {
   },
   methods: {
     defineColumn () {
-      state.editHeader = createHeaderFromSelected(state.columns, state.headers)
-      clearColumnSelection(state.columns)
+      const { viewer } = this
+      viewer.editHeader = createHeaderFromSelected(viewer.columns, viewer.headers)
+      clearColumnSelection(viewer.columns)
     }
   }
 }

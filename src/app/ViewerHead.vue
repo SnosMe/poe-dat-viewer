@@ -1,7 +1,7 @@
 <template>
   <div class="viewer-sticky-head">
     <div class="viewer-col-rownum"
-      >{{ ''.padStart(rowNumberLength) }}</div>
+      >{{ ''.padStart(viewer.rowNumberLength) }}</div>
     <!-- // -->
     <div style="display: flex; flex-direction: column;">
       <div class="flex inline no-wrap">
@@ -65,15 +65,10 @@
 </template>
 
 <script>
-import { state } from './viewer/Viewer'
 import { toggleColsBetween } from './viewer/selection'
 
 export default {
   props: {
-    rowNumberLength: {
-      type: Number,
-      required: true
-    },
     headers: {
       type: Array,
       required: true
@@ -83,6 +78,7 @@ export default {
       required: true
     }
   },
+  inject: ['viewer'],
   data () {
     return {
       // selectionStart: 0,
@@ -100,7 +96,7 @@ export default {
     selectContinue (offset) {
       if (this.selectionStart === undefined) return
 
-      const memsize = state.datFile.memsize
+      const { memsize } = this.viewer.datFile
       const len = offset - this.selectionStart
       if (len >= memsize) {
         offset = this.selectionStart + (memsize * 2 - 1)
@@ -139,7 +135,7 @@ export default {
       }
     },
     editHeader (header) {
-      state.editHeader = header
+      this.viewer.editHeader = header
     },
     calcHeaderWidth (header) {
       const width = header.type.byteView

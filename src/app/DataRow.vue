@@ -17,18 +17,18 @@
 </template>
 
 <script>
-import { state } from './viewer/Viewer'
 import { formatRow } from './viewer/formatting'
 
 export default {
   props: ['rowIdx', 'format'],
+  inject: ['viewer', 'app'],
   computed: {
     formatted () {
-      return formatRow(this.rowIdx, this.format, state.datFile)
+      return formatRow(this.rowIdx, this.format, this.viewer.datFile)
     },
     rowNum () {
-      return String(this.rowIdx + state.config.rowNumStart)
-        .padStart(state.rowNumberLength, ' ')
+      return String(this.rowIdx + this.app.config.rowNumStart)
+        .padStart(this.viewer.rowNumberLength, ' ')
     }
   }
 }

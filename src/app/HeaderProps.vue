@@ -46,19 +46,19 @@
 </template>
 
 <script>
-import { state, disableByteView, enableByteView } from './viewer/Viewer'
 import { removeHeader } from './viewer/headers'
 import { cacheHeaderDataView } from './viewer/formatting'
 
 export default {
+  inject: ['viewer'],
   computed: {
     header () {
-      return state.editHeader
+      return this.viewer.editHeader
     },
     dataTypeOpts () {
       const opts = []
 
-      const memsize = state.datFile.memsize
+      const { memsize } = this.viewer.datFile
       const len = this.header.length
       if (len === memsize * 2 && this.stats.refArray) {
         opts.push({ label: 'Array', value: 'reference' })
@@ -124,7 +124,7 @@ export default {
       return opts
     },
     stats () {
-      return state.columnStats[this.header.offset]
+      return this.viewer.columnStats[this.header.offset]
     },
     dataType: {
       get () {
@@ -150,7 +150,7 @@ export default {
           byteView: {}
         }
         if (type === 'reference') {
-          const memsize = state.datFile.memsize
+          const { memsize } = this.viewer.datFile
           if (header.length === memsize) {
             this.$set(header.type, 'ref', { array: false })
             this.$set(header.type, 'string', {})
@@ -159,7 +159,7 @@ export default {
             return
           }
         } else if (type === 'key') {
-          const memsize = state.datFile.memsize
+          const { memsize } = this.viewer.datFile
           if (header.length === memsize) {
             this.$set(header.type, 'key', { foreign: false })
           } else {
@@ -172,7 +172,7 @@ export default {
         } else if (type === 'boolean') {
           this.$set(header.type, 'boolean', {})
         }
-        cacheHeaderDataView(header, state.datFile)
+        cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
       }
     },
@@ -221,28 +221,29 @@ export default {
         } else if (type === 'boolean') {
           this.$set(header.type, 'boolean', {})
         }
-        cacheHeaderDataView(header, state.datFile)
+        cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
       }
     }
   },
   methods: {
     recacheAfterOptChange () {
-      cacheHeaderDataView(this.header, state.datFile)
+      cacheHeaderDataView(this.header, this.viewer.datFile)
     },
     remove () {
+      const { viewer } = this
       this.setByteViewMode(true)
-      removeHeader(state.editHeader, state.headers, state.columns)
-      state.editHeader = null
+      removeHeader(viewer.editHeader, viewer.headers, viewer.columns)
+      viewer.editHeader = null
     },
     setByteViewMode (byteView) {
       if (byteView) {
         if (!this.header.type.byteView) {
-          enableByteView(this.header, state.columns, state.columnStats)
+          this.viewer.enableByteView(this.header)
         }
       } else {
         if (this.header.type.byteView) {
-          disableByteView(this.header, state.columns)
+          this.viewer.disableByteView(this.header)
         }
       }
     }
