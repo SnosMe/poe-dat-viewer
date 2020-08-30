@@ -73,6 +73,7 @@
 import { fasAngleDown, fasEraser } from '@quasar/extras/fontawesome-v5'
 import { getAllFilesMeta, deleteByHash } from './dat/file-cache'
 import { importFromPoeCdn, importFromFile, getByHash } from './dat/dat-file'
+import { IMPORT_HDRS } from './viewer/_test_data'
 
 export default {
   async created () {
@@ -110,7 +111,7 @@ export default {
       try {
         this.isCdnImportRunning = true
         const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
-        this.commonImport(datFile)
+        /* await */ this.commonImport(datFile)
         this.cacheFiles = await getAllFilesMeta()
         this.app.importDialog = false
       } catch (e) {
@@ -120,11 +121,21 @@ export default {
       }
     },
     async importDemo () {
-      // @TODO
-      const datFile = await importFromPoeCdn('3.11.1.6.2', 'Data/Russian/BaseItemTypes.dat')
-      this.commonImport(datFile)
-      this.cacheFiles = await getAllFilesMeta()
-      this.app.importDialog = false
+      try {
+        this.isCdnImportRunning = true
+        this.poePatch = '3.11.1.6.2'
+        this.ggpkPath = 'Data/Russian/BaseItemTypes.dat'
+        const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
+        await this.commonImport(datFile)
+        this.cacheFiles = await getAllFilesMeta()
+        this.viewer.tryImportHeaders(IMPORT_HDRS)
+        this.app.importDialog = false
+      } catch (e) {
+        this.$q.notify({ color: 'negative', message: e.message, progress: true })
+        this.$q.notify({ color: 'primary', message: 'You may need to adjust the patch version.' })
+      } finally {
+        this.isCdnImportRunning = false
+      }
     },
     async commonImport (datFile) {
       try {
@@ -143,7 +154,7 @@ export default {
     },
     async open (hash) {
       const datFile = await getByHash(hash)
-      this.commonImport(datFile)
+      /* await */ this.commonImport(datFile)
       this.app.importDialog = false
     }
   }

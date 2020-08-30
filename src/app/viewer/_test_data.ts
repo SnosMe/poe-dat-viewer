@@ -1,86 +1,54 @@
-import { Header } from './headers'
+import { DatSerializedHeader } from '../exporters/internal'
 
-export const IMPORT_DAT_NAME = 'Russian/BaseItemTypes'
-
-export const IMPORT_HDRS: Header[] = [
+export const IMPORT_HDRS: DatSerializedHeader[] = [
   {
     name: 'Id',
-    offset: 0,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'ItemClassesKey',
-    offset: 4,
     length: 8,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'Width',
-    offset: 12,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'Height',
-    offset: 16,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'Name',
-    offset: 20,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'InheritsFrom',
-    offset: 24,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'DropLevel',
-    offset: 28,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'FlavourTextKey',
-    offset: 32,
     length: 8,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'Implicit_ModsKeys',
-    offset: 40,
     length: 8,
-    type: {
-      byteView: {}
-    }
+    type: {}
   },
   {
     name: 'Unknown1',
-    offset: 48,
     length: 4,
-    type: {
-      byteView: {}
-    }
+    type: {}
   }
 ]
