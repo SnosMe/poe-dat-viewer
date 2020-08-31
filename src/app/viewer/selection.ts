@@ -3,8 +3,8 @@ import { Header } from './headers'
 
 export function selectColsByHeader (header: Header, cols: StateColumn[]) {
   const colIdx = cols.findIndex(col => col.offset === header.offset)
-  for (let i = colIdx; i < (header.offset + header.length); i += 1) {
-    cols[i].selected = true
+  for (let i = 0; i < header.length; i += 1) {
+    cols[colIdx + i].selected = true
   }
 }
 

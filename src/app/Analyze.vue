@@ -99,6 +99,12 @@ export default {
         const datFile = await getByHash(files[0].sha256)
         await this.viewer.loadDat(datFile)
         await this.viewer.tryImportHeaders(datFile.meta.headers)
+        this.$q.notify({
+          color: 'primary',
+          message: 'Previous session successfully restored',
+          caption: 'You can close Import dialog.',
+          timeout: 1250
+        })
       } catch (e) {
         console.error(e)
       }

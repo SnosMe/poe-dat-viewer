@@ -2,7 +2,7 @@ import { DatFile } from '../dat/dat-file'
 import { analyze, ColumnStats } from '../dat/analysis'
 import { Header, createHeaderFromSelected } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
-import { calcRowNumLength } from './formatting'
+import { calcRowNumLength, cacheHeaderDataView } from './formatting'
 import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
 import { updateFileHeaders } from '../dat/file-cache'
 import { CPUTask } from '../cpu-task'
@@ -140,6 +140,13 @@ class Viewer {
       header = createHeaderFromSelected(columns, headers)
       header.name = hdrSerialized.name
       clearColumnSelection(columns)
+
+      const type = hdrSerialized.type
+      if (type.boolean || type.decimal || type.integer || type.key || type.string) {
+        header.type = type
+        cacheHeaderDataView(header, this.datFile!)
+        this.disableByteView(header)
+      }
 
       offset += headerLength
 
