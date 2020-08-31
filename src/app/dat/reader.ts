@@ -1,9 +1,9 @@
 import { Header } from '../viewer/headers'
 import { DatFile, BinaryReader } from './dat-file'
 
-export const INT32_NULL = 0xfefefefe
-export const INT64_NULL = 0xfefefefefefefefe
-// TODO negative NULL
+const INT32_NULL = 0xfefefefe
+const INT64_NULL = 0xfefefefefefefefe
+
 const TEXT_DECODER = new TextDecoder('utf-16le')
 const STRING_TERMINATOR = [0x00, 0x00, 0x00, 0x00]
 
@@ -41,7 +41,7 @@ function readBoolean (data: Uint8Array, offset: number): boolean {
   return Boolean(data[offset])
 }
 
-function isNULL (value: number, memsize: number) {
+export function isNULL (value: number, memsize: number) {
   return value === (memsize === 4 ? INT32_NULL : INT64_NULL)
 }
 

@@ -1,5 +1,5 @@
 import { DatFile, BinaryReader } from './dat-file'
-import { INT32_NULL, INT64_NULL } from './reader'
+import { isNULL } from './reader'
 import { CPUTask } from '../cpu-task'
 
 export interface ColumnStats {
@@ -71,7 +71,7 @@ export async function analyze (datFile: DatFile) {
       if (!stat.nullableMemsize && sMem) {
         stat.nullableMemsize = (
           byte === 0xfe &&
-          datFile.readerFixed.getSizeT(row + bi) === (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)
+          isNULL(datFile.readerFixed.getSizeT(row + bi), datFile.memsize)
         )
       }
 
@@ -83,7 +83,7 @@ export async function analyze (datFile: DatFile) {
 
       if (stat.keySelf) {
         const rowIdx = datFile.readerFixed.getSizeT(row + bi)
-        if (rowIdx !== (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)) {
+        if (!isNULL(rowIdx, datFile.memsize)) {
           stat.keySelf = (rowIdx < datFile.rowCount)
         }
       }
@@ -120,7 +120,7 @@ export async function analyze (datFile: DatFile) {
 
           for (let idx = 0; idx < arrayLength && stat.refArray.keySelf; idx += 1) {
             const rowIdx = datFile.readerVariable.getSizeT(varOffset + (datFile.memsize * idx))
-            if (rowIdx !== (datFile.memsize === 4 ? INT32_NULL : INT64_NULL)) {
+            if (!isNULL(rowIdx, datFile.memsize)) {
               stat.refArray.keySelf = (rowIdx < datFile.rowCount)
             }
           }
