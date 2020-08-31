@@ -51,6 +51,7 @@
             :items="rows"
             :virtual-scroll-item-size="24"
             scroll-target="#viewer-fancy-scroll > .scroll"
+            style="min-width: min-content;"
             >
             <template #before>
               <viewer-head

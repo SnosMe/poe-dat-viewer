@@ -1,5 +1,5 @@
 <template>
-  <div class="flex inline no-wrap">
+  <div class="flex no-wrap">
     <div class="viewer-rownum">{{ rowNum }}</div>
     <!-- eslint-disable-next-line vue/require-v-for-key -->
     <div v-for="part in formatted"

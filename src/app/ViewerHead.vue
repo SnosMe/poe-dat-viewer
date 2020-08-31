@@ -4,7 +4,7 @@
       >{{ ''.padStart(viewer.rowNumberLength) }}</div>
     <!-- // -->
     <div style="display: flex; flex-direction: column;">
-      <div class="flex inline no-wrap">
+      <div class="flex no-wrap">
         <!-- eslint-disable-next-line vue/require-v-for-key -->
         <button v-for="col in headers"
           class="viewer-col viewer-col--border"
@@ -15,7 +15,7 @@
           <template v-else>{{ col.name }}</template>
         </button>
       </div>
-      <div class="flex inline no-wrap">
+      <div class="flex no-wrap">
         <button v-for="col in columns" :key="col.offset"
           class="viewer-col"
           :class="{
@@ -29,7 +29,7 @@
           @touchmove="selectColumn(col.offset, $event)"
           >{{ col.colNum99 }}</button>
       </div>
-      <div class="flex inline no-wrap">
+      <div class="flex no-wrap">
         <div v-for="col in columns" :key="col.offset"
           class="viewer-col-stat"
           :class="{
@@ -266,7 +266,7 @@ export default {
 }
 
 .viewer-sticky-head {
-  display: inline-flex;
+  display: flex;
   background: $grey-2;
   box-shadow: $shadow-1;
   position: sticky;
