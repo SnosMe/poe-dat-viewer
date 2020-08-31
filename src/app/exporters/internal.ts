@@ -49,7 +49,10 @@ export function getHeaderLength (header: DatSerializedHeader, memsize: number) {
   throw new Error('Corrupted header')
 }
 
-export function validateImportedHeader (header: Header, columns: ColumnStats[]): boolean {
+export function validateImportedHeader (
+  header: Pick<Header, 'type' | 'offset' | 'length'>,
+  columns: ColumnStats[]
+): boolean {
   const boolean = header.type.boolean
   const integer = header.type.integer
   const decimal = header.type.decimal

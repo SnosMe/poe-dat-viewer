@@ -124,12 +124,11 @@ class Viewer {
         continue
       }
 
-      let header: Header = {
-        name: null,
+      let header = {
         length: headerLength,
         offset: offset,
         type: hdrSerialized.type
-      }
+      } as Header
 
       const isValid = validateImportedHeader(header, columnStats)
       if (!isValid) {
