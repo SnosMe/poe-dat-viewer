@@ -1,5 +1,6 @@
 import { DatFile, BinaryReader } from './dat-file'
 import { INT32_NULL, INT64_NULL } from './reader'
+import { CPUTask } from '../cpu-task'
 
 export interface ColumnStats {
   b00: boolean
@@ -44,7 +45,7 @@ export async function analyze (datFile: DatFile) {
       memsize: datFile.memsize
     }))
 
-  let start = await new Promise<number>(resolve => requestAnimationFrame(ms => { resolve(ms) }))
+  let start = await CPUTask.yield()
   for (let bi = 0; bi < datFile.rowLength; bi += 1) {
     const stat = stats[bi]
     const sMem = (datFile.rowLength - bi) >= datFile.memsize
@@ -144,8 +145,8 @@ export async function analyze (datFile: DatFile) {
       }
     }
 
-    if ((performance.now() - start) >= 10) {
-      start = await new Promise<number>(resolve => requestAnimationFrame(ms => { resolve(ms) }))
+    if (CPUTask.mustYield(start)) {
+      start = await CPUTask.yield()
     }
   }
 

@@ -129,7 +129,7 @@ export default {
           await this.commonImport(datFile, false)
         }
         try {
-          this.viewer.tryImportHeaders(IMPORT_HDRS)
+          await this.viewer.tryImportHeaders(IMPORT_HDRS)
         } catch (e) { console.error(e) }
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
@@ -150,7 +150,7 @@ export default {
               datFile.meta.headers = headers
             }
           }
-          this.viewer.tryImportHeaders(datFile.meta.headers)
+          await this.viewer.tryImportHeaders(datFile.meta.headers)
         } catch (e) {
           this.$q.notify({ color: 'warning', message: e.message, progress: true })
         }

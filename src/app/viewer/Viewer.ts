@@ -5,6 +5,7 @@ import { selectColsByHeader, clearColumnSelection } from './selection'
 import { calcRowNumLength } from './formatting'
 import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
 import { updateFileHeaders } from '../dat/file-cache'
+import { CPUTask } from '../cpu-task'
 
 export interface StateColumn {
   readonly offset: number
@@ -111,8 +112,10 @@ class Viewer {
     return columns
   }
 
-  tryImportHeaders (serialized: DatSerializedHeader[]) {
+  async tryImportHeaders (serialized: DatSerializedHeader[]) {
     const { datFile, columns, columnStats, headers } = this
+    let start = await CPUTask.yield()
+
     let offset = 0
     for (const hdrSerialized of serialized) {
       const headerLength = getHeaderLength(hdrSerialized, datFile!.memsize)
@@ -139,6 +142,10 @@ class Viewer {
       clearColumnSelection(columns)
 
       offset += headerLength
+
+      if (CPUTask.mustYield(start)) {
+        start = await CPUTask.yield()
+      }
     }
   }
 

@@ -98,7 +98,7 @@ export default {
       try {
         const datFile = await getByHash(files[0].sha256)
         await this.viewer.loadDat(datFile)
-        this.viewer.tryImportHeaders(datFile.meta.headers)
+        await this.viewer.tryImportHeaders(datFile.meta.headers)
       } catch (e) {
         console.error(e)
       }
