@@ -174,6 +174,7 @@ export default {
         }
         cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
+        this.viewer.saveHeadersToFileCache()
       }
     },
     arrayType: {
@@ -223,18 +224,21 @@ export default {
         }
         cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
+        this.viewer.saveHeadersToFileCache()
       }
     }
   },
   methods: {
     recacheAfterOptChange () {
       cacheHeaderDataView(this.header, this.viewer.datFile)
+      this.viewer.saveHeadersToFileCache()
     },
     remove () {
       const { viewer } = this
       this.setByteViewMode(true)
       removeHeader(viewer.editHeader, viewer.headers, viewer.columns)
       viewer.editHeader = null
+      viewer.saveHeadersToFileCache()
     },
     setByteViewMode (byteView) {
       if (byteView) {

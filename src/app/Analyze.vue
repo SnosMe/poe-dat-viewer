@@ -96,7 +96,9 @@ export default {
     if (files.length) {
       this.$q.loading.show({ delay: 0 })
       try {
-        await this.viewer.loadDat(await getByHash(files[0].sha256))
+        const datFile = await getByHash(files[0].sha256)
+        await this.viewer.loadDat(datFile)
+        this.viewer.tryImportHeaders(datFile.meta.headers)
       } catch (e) {
         console.error(e)
       }
@@ -144,6 +146,7 @@ export default {
       const { viewer } = this
       viewer.editHeader = createHeaderFromSelected(viewer.columns, viewer.headers)
       clearColumnSelection(viewer.columns)
+      viewer.saveHeadersToFileCache()
     }
   }
 }

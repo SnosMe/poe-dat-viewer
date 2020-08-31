@@ -83,6 +83,17 @@ export async function getByHash (sha256: string) {
   }
 }
 
+export async function findLatestHeaders (typeName: string) {
+  let files = await FileCache.getAllFilesMeta()
+  files = files
+    .filter(file => getNamePart(file.ggpkPath) === typeName)
+    .filter(file => file.headers.length && (
+      file.headers.length > 1 || file.headers[0].name != null
+    ))
+  files.sort((a, b) => b.cachedAt.getTime() - a.cachedAt.getTime())
+  return files.length ? files[0].headers : undefined
+}
+
 export function getNamePart (path: string) {
   return path.match(/[^/]+(?=\..+$)/)![0]
 }

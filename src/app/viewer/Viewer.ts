@@ -1,10 +1,10 @@
-import Vue from 'vue'
 import { DatFile } from '../dat/dat-file'
 import { analyze, ColumnStats } from '../dat/analysis'
 import { Header, createHeaderFromSelected } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
 import { calcRowNumLength } from './formatting'
-import { DatSerializedHeader, getHeaderLength, validateImportedHeader } from '../exporters/internal'
+import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
+import { updateFileHeaders } from '../dat/file-cache'
 
 export interface StateColumn {
   readonly offset: number
@@ -116,6 +116,11 @@ class Viewer {
     let offset = 0
     for (const hdrSerialized of serialized) {
       const headerLength = getHeaderLength(hdrSerialized, datFile!.memsize)
+      if (hdrSerialized.name == null) {
+        offset += headerLength
+        continue
+      }
+
       let header: Header = {
         name: null,
         length: headerLength,
@@ -135,6 +140,13 @@ class Viewer {
 
       offset += headerLength
     }
+  }
+
+  async saveHeadersToFileCache () {
+    await updateFileHeaders(
+      serializeHeaders(this.headers),
+      this.datFile!.meta.sha256
+    )
   }
 
   disableByteView (header: Header) {

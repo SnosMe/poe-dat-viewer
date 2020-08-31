@@ -72,7 +72,7 @@
 <script>
 import { fasAngleDown, fasEraser } from '@quasar/extras/fontawesome-v5'
 import { getAllFilesMeta, deleteByHash } from './dat/file-cache'
-import { importFromPoeCdn, importFromFile, getByHash } from './dat/dat-file'
+import { importFromPoeCdn, importFromFile, getByHash, findLatestHeaders, getNamePart } from './dat/dat-file'
 import { IMPORT_HDRS } from './viewer/_test_data'
 
 export default {
@@ -100,9 +100,8 @@ export default {
     async handleFile (e) {
       try {
         const datFile = await importFromFile(e)
-        this.commonImport(datFile)
         this.cacheFiles = await getAllFilesMeta()
-        this.app.importDialog = false
+        await this.commonImport(datFile, true)
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
       }
@@ -111,9 +110,8 @@ export default {
       try {
         this.isCdnImportRunning = true
         const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
-        /* await */ this.commonImport(datFile)
         this.cacheFiles = await getAllFilesMeta()
-        this.app.importDialog = false
+        await this.commonImport(datFile, true)
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
       } finally {
@@ -122,14 +120,17 @@ export default {
     },
     async importDemo () {
       try {
-        this.isCdnImportRunning = true
         this.poePatch = '3.11.1.6.2'
         this.ggpkPath = 'Data/Russian/BaseItemTypes.dat'
-        const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
-        await this.commonImport(datFile)
-        this.cacheFiles = await getAllFilesMeta()
-        this.viewer.tryImportHeaders(IMPORT_HDRS)
-        this.app.importDialog = false
+        {
+          this.isCdnImportRunning = true
+          const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
+          this.cacheFiles = await getAllFilesMeta()
+          await this.commonImport(datFile, false)
+        }
+        try {
+          this.viewer.tryImportHeaders(IMPORT_HDRS)
+        } catch (e) { console.error(e) }
       } catch (e) {
         this.$q.notify({ color: 'negative', message: e.message, progress: true })
         this.$q.notify({ color: 'primary', message: 'You may need to adjust the patch version.' })
@@ -137,13 +138,23 @@ export default {
         this.isCdnImportRunning = false
       }
     },
-    async commonImport (datFile) {
+    async commonImport (datFile, findHeaders) {
       try {
         this.$q.loading.show({ delay: 0 })
         await this.viewer.loadDat(datFile)
-      } catch (e) {
-        this.$q.notify({ color: 'negative', message: e.message, progress: true })
-        this.app.importDialog = true
+        try {
+          if (findHeaders && !datFile.meta.headers.length) {
+            const headers = await findLatestHeaders(getNamePart(datFile.meta.ggpkPath))
+            if (headers) {
+              // NOTE: mutating headers after `viewer.loadDat(datFile)`
+              datFile.meta.headers = headers
+            }
+          }
+          this.viewer.tryImportHeaders(datFile.meta.headers)
+        } catch (e) {
+          this.$q.notify({ color: 'warning', message: e.message, progress: true })
+        }
+        this.app.importDialog = false
       } finally {
         this.$q.loading.hide()
       }
@@ -153,9 +164,12 @@ export default {
       this.cacheFiles = await getAllFilesMeta()
     },
     async open (hash) {
-      const datFile = await getByHash(hash)
-      /* await */ this.commonImport(datFile)
-      this.app.importDialog = false
+      try {
+        const datFile = await getByHash(hash)
+        await this.commonImport(datFile, false)
+      } catch (e) {
+        this.$q.notify({ color: 'negative', message: e.message, progress: true })
+      }
     }
   }
 }

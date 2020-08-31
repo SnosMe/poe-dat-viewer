@@ -22,7 +22,7 @@ export function exportInternalState (headers: Header[], path: string) {
   }, null, 2)
 }
 
-function serializeHeaders (headers: Header[]) {
+export function serializeHeaders (headers: Header[]) {
   return headers.map<DatSerializedHeader>(header => ({
     name: header.name,
     length: (header.type.ref || header.type.key) ? undefined : header.length,

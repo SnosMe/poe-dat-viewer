@@ -1,4 +1,5 @@
 import { openDB, DBSchema } from 'idb'
+import { DatSerializedHeader } from '../exporters/internal'
 
 export interface FileMeta {
   patch: string | null
@@ -6,6 +7,7 @@ export interface FileMeta {
   sha256: string
   size: number
   cachedAt: Date
+  headers: DatSerializedHeader[]
 }
 
 interface PoeDatViewerSchema extends DBSchema {
@@ -66,12 +68,16 @@ export async function putFile (
   const hash = Array.from(new Uint8Array(digest))
     .map(b => b.toString(16).padStart(2, '0')).join('')
 
-  const file = {
+  const existing = await findByHash(hash)
+  if (existing) return existing
+
+  const file: FileMeta = {
     ggpkPath,
     sha256: hash,
     cachedAt: new Date(),
     size: content.byteLength,
-    patch
+    patch,
+    headers: []
   }
 
   ;(await db).put('dat-files', file)
@@ -85,4 +91,18 @@ export async function putFile (
   }))
 
   return { content, meta: file }
+}
+
+export async function updateFileHeaders (
+  headers: DatSerializedHeader[],
+  fileHash: string
+) {
+  const file = await (await db).get('dat-files', fileHash)
+  if (!file) {
+    throw new Error('No file found')
+  }
+
+  file.headers = headers
+
+  ;(await db).put('dat-files', file)
 }
