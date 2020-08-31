@@ -18,6 +18,8 @@
         <div class="q-ml-sm">Octet is part of NULL</div>
       </div>
       <q-separator spaced />
+      <div>Mouse-over octet statistics bar to see the MAX byte value in column.</div>
+      <q-separator spaced />
       <div>Dat format has reserved <q-badge class="font-mono" color="grey-8">fe fe fe fe (x32)</q-badge> and <q-badge class="font-mono" color="grey-8">fe fe fe fe fe fe fe fe (x64)</q-badge> for NULL value.</div>
     </div>
     <q-markup-table>
