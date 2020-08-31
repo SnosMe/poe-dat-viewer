@@ -63,8 +63,9 @@
             </template>
           </q-virtual-scroll>
         </q-scroll-area>
-        <div class="bg-blue-grey-9 q-pa-sm text-white text-body2">
+        <div class="bg-blue-grey-9 q-pa-sm text-white text-body2 flex q-gutter-x-lg">
           <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
+          <a href="https://discord.gg/SJjBdT3" class="flex"><img src="@/assets/discord-badge.svg" /></a>
         </div>
       </div>
       <div class="flex-shrink-0">
