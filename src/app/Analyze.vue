@@ -63,7 +63,7 @@
             </template>
           </q-virtual-scroll>
         </q-scroll-area>
-        <div class="bg-blue-grey-9 q-pa-sm text-white text-body2 flex q-gutter-x-lg">
+        <div class="app-footer bg-blue-grey-9 q-pa-sm text-white text-body2 flex q-gutter-x-lg">
           <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
           <a href="https://discord.gg/SJjBdT3" class="flex"><img src="@/assets/discord-badge.svg" /></a>
         </div>
@@ -163,5 +163,17 @@ export default {
   color: $grey-1;
   box-shadow: $shadow-1;
   z-index: 1;
+}
+
+.app-footer {
+  img {
+    filter: grayscale(0.75);
+  }
+
+  &:hover {
+    img {
+      filter: grayscale(0);
+    }
+  }
 }
 </style>
