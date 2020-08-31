@@ -33,7 +33,8 @@
         </template>
       </div>
       <q-space />
-      <div class="flex no-wrap">
+      <div class="flex no-wrap q-gutter-x-sm">
+        <q-btn @click="viewer.rowSorting = null" v-if="viewer.rowSorting" padding="0 sm" label="Reset sorting" no-caps color="blue-grey-8" />
         <q-btn @click="app.exportSchemaDialog = true" :disable="!viewer.datFile" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
       </div>
     </div>
@@ -58,7 +59,7 @@
             </template>
             <template v-slot="{ index }">
               <data-row
-                :row-idx="index"
+                :row-idx="rows[index]"
                 :format="rowFormat" />
             </template>
           </q-virtual-scroll>
@@ -139,7 +140,12 @@ export default {
     },
     rows () {
       if (this.viewer.datFile) {
-        return new Array(this.viewer.datFile.rowCount).fill(undefined)
+        if (this.viewer.rowSorting) {
+          return this.viewer.rowSorting
+        } else {
+          return new Array(this.viewer.datFile.rowCount).fill(undefined)
+            .map((_, idx) => idx)
+        }
       }
       return []
     },

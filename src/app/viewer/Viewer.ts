@@ -48,6 +48,7 @@ class Viewer {
   columnStats = [] as ColumnStats[]
   rowNumberLength = -1
   editHeader = null as Header | null
+  rowSorting = null as number[] | null
 
   // eslint-disable-next-line no-useless-constructor
   constructor (
@@ -60,6 +61,7 @@ class Viewer {
     this.rowNumberLength = calcRowNumLength(parsed.rowCount, app.config.rowNumStart, ROW_NUM_MIN_LENGTH)
     this.datFile = parsed
     this.columns = this.stateColumns(this.columnStats)
+    this.rowSorting = null
     this.headers = [{
       name: null,
       offset: 0,

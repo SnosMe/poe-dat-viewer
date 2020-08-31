@@ -66,6 +66,7 @@
 
 <script>
 import { toggleColsBetween } from './viewer/selection'
+import { sortRows } from './viewer/sorting'
 
 export default {
   props: {
@@ -81,8 +82,9 @@ export default {
   inject: ['viewer'],
   data () {
     return {
-      // selectionStart: 0,
-      // colsBeforeSelection: []
+      sortOrder: 0
+      // this.selectionStart: 0,
+      // this.colsBeforeSelection: []
     }
   },
   methods: {
@@ -135,7 +137,24 @@ export default {
       }
     },
     editHeader (header) {
-      this.viewer.editHeader = header
+      if (
+        this.viewer.editHeader === header &&
+        header.cachedView &&
+        !header.type.byteView
+      ) {
+        if (this.sortOrder === 0) {
+          this.sortOrder = 1
+        } else if (this.sortOrder === 1) {
+          this.sortOrder = -1
+        } else if (this.sortOrder === -1) {
+          this.sortOrder = 1
+        }
+        const rows = sortRows(header, this.sortOrder)
+        this.viewer.rowSorting = Object.freeze(rows)
+      } else {
+        this.viewer.editHeader = header
+        this.sortOrder = 0
+      }
     },
     calcHeaderWidth (header) {
       const width = header.type.byteView

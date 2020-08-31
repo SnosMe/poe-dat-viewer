@@ -95,12 +95,14 @@ export function calcRowNumLength (rowCount: number, rowNumStart: number, minLeng
 }
 
 export function cacheHeaderDataView (header: Header, datFile: DatFile) {
+  const entriesRaw = Array(datFile.rowCount).fill(undefined).map((_, rowIdx) => {
+    return readCellValue((rowIdx * datFile.rowLength) + header.offset, header, datFile)
+  })
+
   // NOTE: length of the string is in UTF-16 code units, not code points!
   let length = 0
 
-  const entries = Array(datFile.rowCount).fill(undefined).map<[string, number]>((_, rowIdx) => {
-    const value = readCellValue((rowIdx * datFile.rowLength) + header.offset, header, datFile)
-
+  const entries = entriesRaw.map<[string, number]>((value) => {
     let text = ''
     let color = 0
 
@@ -169,7 +171,8 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
 
   header.cachedView = Object.freeze({
     length,
-    entries
+    entries,
+    entriesRaw
   })
 }
 
