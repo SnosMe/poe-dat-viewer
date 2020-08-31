@@ -126,7 +126,7 @@ export default {
           this.isCdnImportRunning = true
           const datFile = await importFromPoeCdn(this.poePatch, this.ggpkPath)
           this.cacheFiles = await getAllFilesMeta()
-          await this.commonImport(datFile, false)
+          await this.commonImport(datFile, false, true)
         }
         try {
           await this.viewer.tryImportHeaders(IMPORT_HDRS)
@@ -138,7 +138,7 @@ export default {
         this.isCdnImportRunning = false
       }
     },
-    async commonImport (datFile, findHeaders) {
+    async commonImport (datFile, findHeaders, doNotImportHeaders) {
       try {
         this.$q.loading.show({ delay: 0 })
         await this.viewer.loadDat(datFile)
@@ -150,7 +150,9 @@ export default {
               datFile.meta.headers = headers
             }
           }
-          await this.viewer.tryImportHeaders(datFile.meta.headers)
+          if (!doNotImportHeaders) {
+            await this.viewer.tryImportHeaders(datFile.meta.headers)
+          }
         } catch (e) {
           this.$q.notify({ color: 'warning', message: e.message, progress: true })
         }
