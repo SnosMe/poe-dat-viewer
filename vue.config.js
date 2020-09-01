@@ -2,6 +2,9 @@
 const webpack = require('webpack')
 
 module.exports = {
+  publicPath: process.env.NODE_ENV === 'production'
+    ? '/poe-dat-viewer/'
+    : '/',
   pluginOptions: {
     quasar: {
       importStrategy: 'manual',
