@@ -14,6 +14,7 @@
           <span v-else-if="col.name === ''" class="bg-blue-grey-6 text-grey-2 rounded-borders q-px-px">?</span>
           <template v-else>{{ col.name }}</template>
         </button>
+        <div v-if="!headers.length" class="viewer-col">File does not have data</div>
       </div>
       <div class="flex no-wrap">
         <button v-for="col in columns" :key="col.offset"

@@ -62,14 +62,18 @@ class Viewer {
     this.datFile = parsed
     this.columns = this.stateColumns(this.columnStats)
     this.rowSorting = null
-    this.headers = [{
-      name: null,
-      offset: 0,
-      length: parsed.rowLength,
-      type: {
-        byteView: {}
-      }
-    }]
+    if (parsed.rowLength) {
+      this.headers = [{
+        name: null,
+        offset: 0,
+        length: parsed.rowLength,
+        type: {
+          byteView: {}
+        }
+      }]
+    } else {
+      this.headers = []
+    }
   }
 
   stateColumns (columnStats: ColumnStats[]) {

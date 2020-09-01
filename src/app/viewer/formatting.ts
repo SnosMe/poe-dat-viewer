@@ -36,6 +36,8 @@ export function getRowFormating (columns: StateColumn[]) {
     }
   }
 
+  if (!columns.length) return fmt
+
   columns = [...columns]
   fmt.push(colToFmt(columns.shift()!))
 
