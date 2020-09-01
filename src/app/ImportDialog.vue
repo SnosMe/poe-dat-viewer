@@ -73,7 +73,7 @@
 import { fasAngleDown, fasEraser } from '@quasar/extras/fontawesome-v5'
 import { getAllFilesMeta, deleteByHash } from './dat/file-cache'
 import { importFromPoeCdn, importFromFile, getByHash, findLatestHeaders, getNamePart } from './dat/dat-file'
-import { IMPORT_HDRS } from './viewer/_test_data'
+import { DEMO_HDRS } from './viewer/_demo_data'
 
 export default {
   async created () {
@@ -129,11 +129,10 @@ export default {
           await this.commonImport(datFile, false, true)
         }
         try {
-          await this.viewer.tryImportHeaders(IMPORT_HDRS)
+          await this.viewer.tryImportHeaders(DEMO_HDRS)
         } catch (e) { console.error(e) }
       } catch (e) {
-        this.$q.notify({ color: 'negative', message: e.message, progress: true })
-        this.$q.notify({ color: 'primary', message: 'You may need to adjust the patch version.' })
+        this.$q.notify({ color: 'negative', message: e.message, caption: 'You may need to adjust the patch version.', progress: true })
       } finally {
         this.isCdnImportRunning = false
       }
