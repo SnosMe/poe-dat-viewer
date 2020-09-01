@@ -5,7 +5,7 @@
       <q-space />
       <q-btn padding="0 sm" label="Import" no-caps flat @click="app.importDialog = true" class="q-mr-sm" />
       <q-btn padding="0 sm" label="Help" no-caps flat @click="app.helpDialog = true" class="q-mr-sm" />
-      <q-btn padding="0 sm" label="Settings" no-caps flat />
+      <q-btn padding="0 sm" label="Settings" no-caps flat @click="app.settingsDialog = true" />
     </div>
     <q-dialog v-model="app.exportSchemaDialog">
       <export-schema />
@@ -15,6 +15,9 @@
     </q-dialog>
     <q-dialog v-model="app.importDialog">
       <import-dialog />
+    </q-dialog>
+    <q-dialog v-model="app.settingsDialog">
+      <settings-dialog />
     </q-dialog>
     <div class="flex no-wrap bg-blue-grey-9 q-pa-sm">
       <div class="flex no-wrap">
@@ -84,6 +87,7 @@ import HeaderProps from './HeaderProps'
 import ExportSchema from './ExportSchema'
 import HelpContent from './HelpContent'
 import ImportDialog from './ImportDialog'
+import SettingsDialog from './SettingsDialog'
 import { App } from './viewer/Viewer'
 import { getAllFilesMeta } from './dat/file-cache'
 import { getByHash } from './dat/dat-file'
@@ -92,7 +96,7 @@ import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog },
+  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog },
   async created () {
     const files = await getAllFilesMeta()
     if (files.length) {

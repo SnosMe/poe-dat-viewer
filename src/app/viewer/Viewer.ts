@@ -27,6 +27,7 @@ export class App {
   exportSchemaDialog = false
   helpDialog = false
   importDialog = true
+  settingsDialog = false
   config = {
     rowNumStart: 0,
     colNumStart: 0
