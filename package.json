@@ -1,6 +1,6 @@
 {
   "name": "poe-dat-viewer",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-beta",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
