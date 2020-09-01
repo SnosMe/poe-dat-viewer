@@ -43,16 +43,14 @@
     </div>
     <div class="flex min-h-0 flex-1">
       <div class="layout-column min-w-0 flex-1">
-        <q-scroll-area
-          class="flex-1 font-mono"
+        <div
+          class="flex-1 font-mono scroll"
           style="--ppc: 8px; letter-spacing: calc(var(--ppc) - 1ch);"
           id="viewer-fancy-scroll"
         >
-          <!-- class="flex-1 font-mono scroll" -->
-          <!-- TODO: REMOVE IT BEFORE BETA -->
           <q-virtual-scroll
             :items="rows"
-            :virtual-scroll-item-size="24"
+            :virtual-scroll-item-size="21"
             scroll-target="#viewer-fancy-scroll > .scroll"
             style="min-width: min-content;"
             >
@@ -67,7 +65,7 @@
                 :format="rowFormat" />
             </template>
           </q-virtual-scroll>
-        </q-scroll-area>
+        </div>
         <div class="app-footer bg-blue-grey-9 q-pa-sm text-white text-body2 flex q-gutter-x-lg">
           <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
           <a href="https://discord.gg/SJjBdT3" class="flex"><img src="@/assets/discord-badge.svg" /></a>
