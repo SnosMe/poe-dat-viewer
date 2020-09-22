@@ -7,6 +7,30 @@ const INT64_NULL = 0xfefefefefefefefe
 const TEXT_DECODER = new TextDecoder('utf-16le')
 const STRING_TERMINATOR = [0x00, 0x00, 0x00, 0x00]
 
+export const FIELD_SIZE = {
+  BOOL: 1,
+  BYTE: 1,
+  SHORT: 2,
+  LONG: 4,
+  LONGLONG: 8,
+  STRING: {
+    4: 4,
+    8: 8
+  } as Record<number, number>,
+  KEY: {
+    4: 4,
+    8: 8
+  } as Record<number, number>,
+  KEY_FOREIGN: {
+    4: 4 + 4,
+    8: 8 + 8
+  } as Record<number, number>,
+  ARRAY: {
+    4: 4 + 4,
+    8: 8 + 8
+  } as Record<number, number>
+}
+
 function readInteger (data: BinaryReader, offset: number, size: number, unsigned: boolean): number | null {
   if (size === 1 && unsigned) return data.getUint8(offset)
   else if (size === 2 && unsigned) return data.getUint16(offset)

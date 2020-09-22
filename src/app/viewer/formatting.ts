@@ -1,7 +1,8 @@
 import { StateColumn } from './Viewer'
 import { DatFile } from '../dat/dat-file'
 import { Header } from './headers'
-import { readCellValue } from '../dat/reader'
+import { FIELD_SIZE, readCellValue } from '../dat/reader'
+import { ColumnStats } from '../dat/analysis'
 
 interface RowPartFormat {
   offset: number
@@ -32,7 +33,9 @@ export function getRowFormating (columns: StateColumn[]) {
       length: 1,
       selected: col.selected,
       dataStart: col.dataStart,
-      cachedView: (col.header && !col.header.type.byteView) ? col.header.cachedView : null
+      cachedView: (col.header && (!col.header.type.byteView || col.header.type.byteView.array))
+        ? col.header.cachedView
+        : null
     }
   }
 
@@ -88,6 +91,71 @@ export function formatRow (rowIdx: number, fmt: RowPartFormat[], datFile: DatFil
         width: hexDump.length
       }
     }
+  })
+}
+
+function readArrayVarData (offset: number, length: number, datFile: DatFile) {
+  const arrayLength = datFile.readerFixed.getSizeT(offset)
+  const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
+
+  if (arrayLength === 0) {
+    return { value: [], size: 0 }
+  }
+
+  return {
+    value: Array.from(
+      datFile.dataVariable.subarray(varOffset, varOffset + (length * arrayLength))
+    ),
+    size: arrayLength
+  }
+}
+
+export function cacheHeaderArrayVarData (header: Header, stats: ColumnStats, datFile: DatFile) {
+  if (!stats.refArray) throw Error('never')
+
+  const entryMaxLength = Math.max(...([
+    [FIELD_SIZE.KEY_FOREIGN[datFile.memsize], stats.refArray.keyForeign],
+    [FIELD_SIZE.KEY[datFile.memsize], stats.refArray.keySelf],
+    [FIELD_SIZE.STRING[datFile.memsize], stats.refArray.string],
+    [FIELD_SIZE.LONGLONG, stats.refArray.longLong],
+    [FIELD_SIZE.LONG, stats.refArray.long],
+    [FIELD_SIZE.SHORT, stats.refArray.short],
+    [1, true]
+  ] as [number, boolean][]).map(([size, isValid]) => isValid ? size : 0))
+
+  const entriesRaw = Array(datFile.rowCount).fill(undefined).map((_, rowIdx) => {
+    return readArrayVarData((rowIdx * datFile.rowLength) + header.offset, entryMaxLength, datFile)
+  })
+
+  const maxArrayLength = Math.max(...entriesRaw.map(_ => _.size))
+
+  let length = 0
+
+  const entries = entriesRaw.map<[string, number]>(({ value, size }) => {
+    let text = ''
+
+    if (!value.length) {
+      text = '[]'
+    } else {
+      const hexDump = value
+        .map(byte => byte.toString(16).padStart(2, '0'))
+        .join(' ')
+
+      text = `${String(size).padStart(maxArrayLength, ' ')} { ${hexDump} }`
+    }
+
+    length = Math.max(length, text.length)
+
+    return [text, 0]
+  })
+
+  length = medianEntriesLength(entries)
+  length = Math.max(length, (4 * 3 - 1))
+
+  header.cachedView = Object.freeze({
+    length,
+    entries,
+    entriesRaw: entriesRaw.map(_ => _.value)
   })
 }
 
@@ -183,7 +251,8 @@ function medianEntriesLength (entries: Array<[string, number]>) {
     .filter(_ => _[0] !== '[]' && _[0] !== 'null')
     .map(_ => _[0].length)
   if (!arr.length) return 0
-  arr.sort((a, b) => a - b)
+  arr.sort((a, b) => b - a)
   const mid = Math.floor(arr.length / 2)
-  return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2
+  const median = arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2
+  return Math.min(median + (4 * 3 - 1), arr[0], Math.floor(median * 1.20))
 }

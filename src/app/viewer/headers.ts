@@ -7,7 +7,7 @@ export interface Header {
   readonly offset: number
   readonly length: number
   type: {
-    byteView?: {}
+    byteView?: { array: boolean }
     ref?: { array: boolean }
     boolean?: {}
     integer?: { unsigned: boolean, size: number }
@@ -25,6 +25,8 @@ export interface Header {
     ]>
   }>
 }
+
+export const byteView = (): Header['type'] => ({ byteView: { array: false } })
 
 function removeHeadersAtOffsets (offsets: number[], headers: Header[], columns: StateColumn[]) {
   for (let idx = 0; idx < headers.length;) {
@@ -62,17 +64,17 @@ export function createHeaderFromSelected (columns: StateColumn[], headers: Heade
       name: null,
       offset: emptyHeader.offset,
       length: selected[0].offset - emptyHeader.offset,
-      type: { byteView: {} }
+      type: byteView()
     }, {
       name: '',
       offset: selected[0].offset,
       length: selected.length,
-      type: { byteView: {} }
+      type: byteView()
     }, {
       name: null,
       offset: selected[0].offset + selected.length,
       length: emptyHeader.length - (selected[0].offset - emptyHeader.offset + selected.length),
-      type: { byteView: {} }
+      type: byteView()
     }
   ]
   const header = updatedHeaders[1]
@@ -97,9 +99,7 @@ export function removeHeader (header: Header, headers: Header[], columns: StateC
   }
 
   header.name = null
-  header.type = {
-    byteView: {}
-  }
+  header.type = byteView()
 
   for (let idx = 0; idx < (headers.length - 1);) {
     const merged = mergeEmptyHeaders(headers[idx], headers[idx + 1])
@@ -122,9 +122,7 @@ function mergeEmptyHeaders (h1: Header, h2: Header): Header | false {
       name: null,
       offset: h1.offset,
       length: h1.length + h2.length,
-      type: {
-        byteView: {}
-      }
+      type: byteView()
     }
   }
 

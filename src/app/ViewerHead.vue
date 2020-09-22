@@ -141,7 +141,7 @@ export default {
       if (
         this.viewer.editHeader === header &&
         header.cachedView &&
-        !header.type.byteView
+        (!header.type.byteView || header.type.byteView.array)
       ) {
         if (this.sortOrder === 0) {
           this.sortOrder = 1
@@ -158,7 +158,7 @@ export default {
       }
     },
     calcHeaderWidth (header) {
-      const width = header.type.byteView
+      const width = (header.type.byteView && !header.type.byteView.array)
         ? header.length * 3 - 1
         : header.cachedView.length
       return `calc(var(--ppc) * ${width})`

@@ -1,6 +1,6 @@
 import { DatFile } from '../dat/dat-file'
 import { analyze, ColumnStats } from '../dat/analysis'
-import { Header, createHeaderFromSelected } from './headers'
+import { Header, createHeaderFromSelected, byteView } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
 import { calcRowNumLength, cacheHeaderDataView } from './formatting'
 import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
@@ -68,9 +68,7 @@ class Viewer {
         name: null,
         offset: 0,
         length: parsed.rowLength,
-        type: {
-          byteView: {}
-        }
+        type: byteView()
       }]
     } else {
       this.headers = []
@@ -180,7 +178,7 @@ class Viewer {
 
   enableByteView (header: Header) {
     const { columns, columnStats } = this
-    header.type.byteView = {}
+    header.type.byteView = { array: false }
     const colIdx = columns.findIndex(col => col.offset === header.offset)
     const fresh = this.stateColumns(columnStats)
     columns.splice(colIdx + 1, 0, ...fresh.slice(header.offset + 1, header.offset + header.length))

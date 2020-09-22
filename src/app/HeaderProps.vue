@@ -13,12 +13,10 @@
       <div
         class="q-mb-sm q-pl-sm flex no-wrap items-baseline">
         <div class="q-mb-xs q-mr-sm">View mode</div>
-        <q-btn-group unelevated>
-          <q-btn label="Bytes" @click="setByteViewMode(true)"
-            padding="0 sm" no-caps :color="header.type.byteView ? 'primary' : 'blue-grey-1'" :text-color="header.type.byteView ? 'white' : 'black'" class="q-mr-px" />
-          <q-btn label="Data" @click="setByteViewMode(false)" :disable="!dataType"
-            padding="0 sm" no-caps :color="header.type.byteView ? 'blue-grey-1' : 'primary'" :text-color="header.type.byteView ? 'black' : 'white'" />
-        </q-btn-group>
+        <q-btn-toggle unelevated padding="0 sm" no-caps color="blue-grey-1" text-color="black"
+          :options="viewModeOpts"
+          v-model="byteViewMode"
+        ></q-btn-toggle>
       </div>
       <div class="q-mb-sm q-pl-sm">
         <div class="q-mb-xs flex items-baseline justify-between">
@@ -47,7 +45,7 @@
 
 <script>
 import { removeHeader } from './viewer/headers'
-import { cacheHeaderDataView } from './viewer/formatting'
+import { cacheHeaderDataView, cacheHeaderArrayVarData } from './viewer/formatting'
 
 export default {
   inject: ['viewer'],
@@ -123,6 +121,18 @@ export default {
 
       return opts
     },
+    viewModeOpts () {
+      const opts = []
+      const type = this.header.type
+
+      opts.push({ label: 'Bytes', value: 'bytes', class: 'q-mr-px' })
+      if (type.ref && type.ref.array) {
+        opts.push({ label: 'Var. bytes', value: 'array-bytes', class: 'q-mr-px' })
+      }
+      opts.push({ label: 'Data', value: 'data', disable: !this.dataType || (this.dataType === 'reference' && !this.arrayType) })
+
+      return opts
+    },
     stats () {
       return this.viewer.columnStats[this.header.offset]
     },
@@ -156,6 +166,7 @@ export default {
             this.$set(header.type, 'string', {})
           } else {
             this.$set(header.type, 'ref', { array: true })
+            this.setByteViewMode('array-bytes')
             return
           }
         } else if (type === 'key') {
@@ -172,7 +183,6 @@ export default {
         } else if (type === 'boolean') {
           this.$set(header.type, 'boolean', {})
         }
-        cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
         this.viewer.saveHeadersToFileCache()
       }
@@ -222,9 +232,21 @@ export default {
         } else if (type === 'boolean') {
           this.$set(header.type, 'boolean', {})
         }
-        cacheHeaderDataView(header, this.viewer.datFile)
         this.setByteViewMode(false)
         this.viewer.saveHeadersToFileCache()
+      }
+    },
+    byteViewMode: {
+      get () {
+        const type = this.header.type
+        if (type.byteView) {
+          return type.byteView.array ? 'array-bytes' : 'bytes'
+        } else {
+          return 'data'
+        }
+      },
+      set (mode) {
+        this.setByteViewMode(mode === 'data' ? false : mode)
       }
     }
   },
@@ -241,12 +263,24 @@ export default {
       viewer.saveHeadersToFileCache()
     },
     setByteViewMode (byteView) {
+      const { type } = this.header
       if (byteView) {
-        if (!this.header.type.byteView) {
-          this.viewer.enableByteView(this.header)
+        if (byteView === 'array-bytes') {
+          cacheHeaderArrayVarData(this.header, this.stats, this.viewer.datFile)
+          if (type.byteView && !type.byteView.array) {
+            this.viewer.disableByteView(this.header)
+          }
+          this.header.type.byteView = { array: true }
+        } else {
+          if (!type.byteView || type.byteView.array) {
+            this.viewer.enableByteView(this.header)
+          }
         }
       } else {
-        if (this.header.type.byteView) {
+        cacheHeaderDataView(this.header, this.viewer.datFile)
+        if (type.byteView && type.byteView.array) {
+          type.byteView = undefined
+        } else {
           this.viewer.disableByteView(this.header)
         }
       }
