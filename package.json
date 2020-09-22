@@ -17,10 +17,10 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
-    "@vue/cli-plugin-babel": "~4.4.0",
-    "@vue/cli-plugin-eslint": "~4.4.0",
-    "@vue/cli-plugin-typescript": "~4.4.0",
-    "@vue/cli-service": "~4.4.0",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-typescript": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-standard": "^5.1.2",
     "@vue/eslint-config-typescript": "^5.0.2",
     "babel-plugin-transform-imports": "1.5.0",
@@ -32,7 +32,7 @@
     "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^4.13.0",
     "sass-loader": "^8.0.0",
-    "typescript": "~3.9.3",
+    "typescript": "^3.0.0",
     "vue-cli-plugin-quasar": "~2.0.2",
     "vue-template-compiler": "^2.6.11"
   },
