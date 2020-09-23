@@ -130,9 +130,13 @@ function getArrayReader (header: Header, datFile: DatFile) {
       ] as const
     }
     if (type.string) {
+      const readString_ = readString(dataVariable)
       return [
         datFile.memsize,
-        readString(dataVariable)
+        (offset: number) => {
+          const varOffset = readerVariable.getSizeT(offset)
+          return readString_(varOffset)
+        }
       ] as const
     }
     if (type.integer) {
