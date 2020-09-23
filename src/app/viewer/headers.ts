@@ -1,6 +1,6 @@
 import { StateColumn } from './Viewer'
 import { getColumnSelections } from './selection'
-import { readCellValue } from '../dat/reader'
+import { readColumn } from '../dat/reader'
 
 export interface Header {
   name: string | null
@@ -17,7 +17,7 @@ export interface Header {
   }
   cachedView?: Readonly<{
     // stats: [] @TODO
-    entriesRaw: Array<ReturnType<typeof readCellValue>>,
+    entriesRaw: ReturnType<typeof readColumn>,
     length: number
     entries: Array<[
       string, // value

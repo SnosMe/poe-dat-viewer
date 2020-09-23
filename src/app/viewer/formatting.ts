@@ -1,7 +1,7 @@
 import { StateColumn } from './Viewer'
 import { DatFile } from '../dat/dat-file'
 import { Header } from './headers'
-import { FIELD_SIZE, readCellValue } from '../dat/reader'
+import { FIELD_SIZE, readColumn } from '../dat/reader'
 import { ColumnStats } from '../dat/analysis'
 
 interface RowPartFormat {
@@ -165,9 +165,7 @@ export function calcRowNumLength (rowCount: number, rowNumStart: number, minLeng
 }
 
 export function cacheHeaderDataView (header: Header, datFile: DatFile) {
-  const entriesRaw = Array(datFile.rowCount).fill(undefined).map((_, rowIdx) => {
-    return readCellValue((rowIdx * datFile.rowLength) + header.offset, header, datFile)
-  })
+  const entriesRaw = readColumn(header, datFile)
 
   // NOTE: length of the string is in UTF-16 code units, not code points!
   let length = 0

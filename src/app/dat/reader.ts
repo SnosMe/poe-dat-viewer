@@ -31,125 +31,158 @@ export const FIELD_SIZE = {
   } as Record<number, number>
 }
 
-function readInteger (data: BinaryReader, offset: number, size: number, unsigned: boolean): number | null {
-  if (size === 1 && unsigned) return data.getUint8(offset)
-  else if (size === 2 && unsigned) return data.getUint16(offset)
-  else if (size === 4 && unsigned) return data.getUint32(offset)
-  else if (size === 8 && unsigned) return Number(data.getBigUint64(offset))
-  else if (size === 1 && !unsigned) return data.getInt8(offset)
-  else if (size === 2 && !unsigned) return data.getInt16(offset)
-  else if (size === 4 && !unsigned) return data.getInt32(offset)
-  else if (size === 8 && !unsigned) return Number(data.getBigInt64(offset))
+function readInteger (data: BinaryReader, size: number, unsigned: boolean): (offset: number) => number {
+  if (size === 1 && unsigned) return (offset) => data.getUint8(offset)
+  else if (size === 2 && unsigned) return (offset) => data.getUint16(offset)
+  else if (size === 4 && unsigned) return (offset) => data.getUint32(offset)
+  else if (size === 8 && unsigned) return (offset) => Number(data.getBigUint64(offset))
+  else if (size === 1 && !unsigned) return (offset) => data.getInt8(offset)
+  else if (size === 2 && !unsigned) return (offset) => data.getInt16(offset)
+  else if (size === 4 && !unsigned) return (offset) => data.getInt32(offset)
+  else if (size === 8 && !unsigned) return (offset) => Number(data.getBigInt64(offset))
 
-  return undefined as never
+  throw new Error('never')
 }
 
-function readDecimal (data: BinaryReader, offset: number, size: number): number {
-  if (size === 4) {
-    return data.getFloat32(offset)
-  } else if (size === 8) {
-    return data.getFloat64(offset)
+function readDecimal (data: BinaryReader, size: number): (offset: number) => number {
+  if (size === 4) return (offset) => data.getFloat32(offset)
+  else if (size === 8) return (offset) => data.getFloat64(offset)
+
+  throw new Error('never')
+}
+
+function readString (data: Uint8Array): (offset: number) => string {
+  return offset => {
+    let end = findSequence(data, STRING_TERMINATOR, offset)
+    while ((end - offset) % 2 !== 0) {
+      end = findSequence(data, STRING_TERMINATOR, end + 1)
+    }
+    return TEXT_DECODER.decode(data.subarray(offset, end))
   }
-  return undefined as never
-}
-
-function readString (data: Uint8Array, offset: number): string {
-  let end = findSequence(data, STRING_TERMINATOR, offset)
-  while ((end - offset) % 2 !== 0) {
-    end = findSequence(data, STRING_TERMINATOR, end + 1)
-  }
-  return TEXT_DECODER.decode(data.subarray(offset, end))
-}
-
-function readBoolean (data: Uint8Array, offset: number): boolean {
-  return Boolean(data[offset])
 }
 
 export function isNULL (value: number, memsize: number) {
   return value === (memsize === 4 ? INT32_NULL : INT64_NULL)
 }
 
-function readKeySelf (data: BinaryReader, offset: number): number | null {
-  const rowIdx = data.getSizeT(offset)
-  return isNULL(rowIdx, data.memsize) ? null : rowIdx
+function getNULL (memsize: number) {
+  return (memsize === 4) ? INT32_NULL : INT64_NULL
 }
 
-function readKeyForeign (data: BinaryReader, offset: number): [number, number] | null {
-  const rowIdx = [data.getSizeT(offset), data.getSizeT(offset + data.memsize)] as [number, number]
-  return isNULL(rowIdx[0], data.memsize) ? null : rowIdx
+function readKeySelf (data: BinaryReader): (offset: number) => number | null {
+  const NULL = getNULL(data.memsize)
+  return offset => {
+    const rowIdx = data.getSizeT(offset)
+    return (rowIdx === NULL) ? null : rowIdx
+  }
 }
 
-function readScalar (offset: number, header: Header, datFile: DatFile) {
+function readKeyForeign (data: BinaryReader): (offset: number) => [number, number] | null {
+  const NULL = getNULL(data.memsize)
+  return offset => {
+    const rowIdx = data.getSizeT(offset)
+    return (rowIdx === NULL)
+      ? null
+      : [rowIdx, data.getSizeT(offset + data.memsize)]
+  }
+}
+
+function getScalarReader (header: Header, datFile: DatFile) {
   const { type } = header
+  const { dataFixed, dataVariable, readerFixed } = datFile
+
   if (type.boolean) {
-    return readBoolean(datFile.dataFixed, offset)
+    return (offset: number) => Boolean(dataFixed[offset])
   }
   if (type.string) {
-    const varOffset = datFile.readerFixed.getSizeT(offset)
-    return readString(datFile.dataVariable, varOffset)
+    const readString_ = readString(dataVariable)
+    return (offset: number) => {
+      const varOffset = readerFixed.getSizeT(offset)
+      return readString_(varOffset)
+    }
   }
   if (type.integer) {
-    return readInteger(datFile.readerFixed, offset, type.integer.size, type.integer.unsigned)
+    return readInteger(readerFixed, type.integer.size, type.integer.unsigned)
   }
   if (type.decimal) {
-    return readDecimal(datFile.readerFixed, offset, type.decimal.size)
+    return readDecimal(readerFixed, type.decimal.size)
   }
   if (type.key) {
     if (type.key.foreign) {
-      return readKeyForeign(datFile.readerFixed, offset)
+      return readKeyForeign(readerFixed)
     } else {
-      return readKeySelf(datFile.readerFixed, offset)
+      return readKeySelf(readerFixed)
     }
   }
-  return undefined as never
+
+  throw new Error('never')
 }
 
-function readArray (offset: number, header: Header, datFile: DatFile) {
+function getArrayReader (header: Header, datFile: DatFile) {
   const { type } = header
-  const arrayLength = datFile.readerFixed.getSizeT(offset)
-  const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
+  const { dataVariable, readerVariable } = datFile
 
-  if (arrayLength === 0) {
-    return []
-  }
-  const out = Array(arrayLength).fill(undefined)
+  const [elSize, reader] = (() => {
+    if (type.boolean) {
+      return [
+        1,
+        (offset: number) => Boolean(dataVariable[offset])
+      ] as const
+    }
+    if (type.string) {
+      return [
+        datFile.memsize,
+        readString(dataVariable)
+      ] as const
+    }
+    if (type.integer) {
+      return [
+        type.integer.size,
+        readInteger(readerVariable, type.integer.size, type.integer.unsigned)
+      ] as const
+    }
+    if (type.decimal) {
+      return [
+        type.decimal.size,
+        readDecimal(readerVariable, type.decimal.size)
+      ] as const
+    }
+    if (type.key) {
+      if (type.key.foreign) {
+        return [
+          (datFile.memsize * 2),
+          readKeyForeign(readerVariable)
+        ] as const
+      } else {
+        return [
+          datFile.memsize,
+          readKeySelf(readerVariable)
+        ] as const
+      }
+    }
 
-  if (type.boolean) {
-    return out.map((_, idx) =>
-      readBoolean(datFile.dataVariable, varOffset + (1 * idx))
-    )
+    throw new Error('never')
+  })()
+
+  return (offset: number) => {
+    const arrayLength = datFile.readerFixed.getSizeT(offset)
+    if (arrayLength === 0) {
+      return []
+    }
+
+    const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
+    const out = Array(arrayLength).fill(undefined)
+    return out.map((_, elIdx) => reader(varOffset + (elIdx * elSize)))
   }
-  if (type.string) {
-    return out.map((_, idx) =>
-      readString(datFile.dataVariable, varOffset + (datFile.memsize * idx))
-    )
-  }
-  if (type.integer) {
-    return out.map((_, idx) =>
-      readInteger(datFile.readerVariable, varOffset + (type.integer!.size * idx), type.integer!.size, type.integer!.unsigned)
-    )
-  }
-  if (type.decimal) {
-    return out.map((_, idx) =>
-      readDecimal(datFile.readerVariable, varOffset + (type.decimal!.size * idx), type.decimal!.size)
-    )
-  }
-  if (type.key) {
-    return out.map((_, idx) =>
-      (type.key!.foreign)
-        ? readKeyForeign(datFile.readerVariable, varOffset + ((datFile.memsize * 2) * idx))
-        : readKeySelf(datFile.readerVariable, varOffset + (datFile.memsize * idx))
-    )
-  }
-  return out as never
 }
 
-export function readCellValue (offset: number, header: Header, datFile: DatFile) {
-  if (header.type.ref?.array) {
-    return readArray(offset, header, datFile)
-  } else {
-    return readScalar(offset, header, datFile)
-  }
+export function readColumn (header: Header, datFile: DatFile) {
+  const reader = (header.type.ref?.array)
+    ? getArrayReader(header, datFile)
+    : getScalarReader(header, datFile)
+
+  const out = Array(datFile.rowCount).fill(undefined)
+  return out.map((_, rowIdx) => reader((rowIdx * datFile.rowLength) + header.offset))
 }
 
 export function findSequence (data: Uint8Array, sequence: number[], fromIndex = 0): number {
