@@ -170,65 +170,93 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
   // NOTE: length of the string is in UTF-16 code units, not code points!
   let length = 0
 
-  const entries = entriesRaw.map<[string, number]>((value) => {
-    let text = ''
-    let color = 0
+  let text = ''
+  let color = 0
 
-    if (Array.isArray(value) && header.type.ref?.array) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formatter: (value: any) => void = (() => {
+    if (header.type.ref?.array) {
       if (header.type.boolean) {
-        text = `[${value.join(', ')}]`
         color = 3
-      } else if (header.type.string) {
-        text = `[${(value as string[]).map(_ => '"' + _ + '"').join(', ')}]`
-        color = 1
-      } else if (header.type.integer || header.type.decimal) {
-        text = `[${value.join(', ')}]`
-        color = 2
-      } else if (header.type.key) {
-        if (header.type.key.foreign) {
-          text = `[${(value as Array<[number, number]>).map(rowIdx => `<${rowIdx[0]}, ${rowIdx[1]}>`).join(', ')}]`
-        } else {
-          text = `[${(value as number[]).map(rowIdx => `<${rowIdx}, self>`).join(', ')}]`
+        return (value: boolean[]) => {
+          text = `[${value.join(', ')}]`
         }
+      } else if (header.type.string) {
+        color = 1
+        return (value: string[]) => {
+          text = `[${value.map(str => '"' + str + '"').join(', ')}]`
+        }
+      } else if (header.type.integer || header.type.decimal) {
         color = 2
+        return (value: number[]) => {
+          text = `[${value.join(', ')}]`
+        }
+      } else if (header.type.key) {
+        color = 2
+        if (header.type.key.foreign) {
+          return (value: [number, number][]) => {
+            text = `[${value.map(key => `<${key[0]}, ${key[1]}>`).join(', ')}]`
+          }
+        } else {
+          return (value: number[]) => {
+            text = `[${value.map(key => `<${key}, self>`).join(', ')}]`
+          }
+        }
       }
+
+      throw new Error('never')
     } else {
       if (header.type.boolean) {
-        text = String(value)
         color = 3
-      } else if (header.type.string) {
-        if (value === '') {
-          text = 'null'
-          color = 3
-        } else {
+        return (value: boolean) => {
           text = String(value)
-          color = 1
+        }
+      } else if (header.type.string) {
+        return (value: string) => {
+          if (value === '') {
+            text = 'null'
+            color = 3
+          } else {
+            text = String(value)
+            color = 1
+          }
         }
       } else if (header.type.integer || header.type.decimal) {
-        if (value === null) {
-          text = 'null'
-          color = 3
-        } else {
+        color = 2
+        return (value: number) => {
           text = String(value)
-          color = 2
         }
       } else if (header.type.key) {
-        if (value === null) {
-          text = 'null'
-          color = 3
-        } else {
-          if (header.type.key.foreign) {
-            text = `<${(value as unknown as [number, number])[0]}, ${(value as unknown as [number, number])[1]}>`
-          } else {
-            text = `<${value}, self>`
+        if (header.type.key.foreign) {
+          return (value: [number, number] | null) => {
+            if (value === null) {
+              text = 'null'
+              color = 3
+            } else {
+              text = `<${value[0]}, ${value[1]}>`
+              color = 2
+            }
           }
-          color = 2
+        } else {
+          return (value: number | null) => {
+            if (value === null) {
+              text = 'null'
+              color = 3
+            } else {
+              text = `<${value}, self>`
+              color = 2
+            }
+          }
         }
       }
+
+      throw new Error('never')
     }
+  })()
 
+  const entries = entriesRaw.map<[string, number]>((value) => {
+    formatter(value)
     length = Math.max(length, text.length)
-
     return [text, color]
   })
 
@@ -246,8 +274,8 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
 
 function medianEntriesLength (entries: Array<[string, number]>) {
   const arr = entries
-    .filter(_ => _[0] !== '[]' && _[0] !== 'null')
-    .map(_ => _[0].length)
+    .filter(([text]) => text !== '[]' && text !== 'null')
+    .map(([text]) => text.length)
   if (!arr.length) return 0
   arr.sort((a, b) => b - a)
   const mid = Math.floor(arr.length / 2)
