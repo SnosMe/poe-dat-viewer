@@ -127,8 +127,7 @@ export async function analyze (datFile: DatFile) {
 
           for (let idx = 0; idx < arrayLength && stat.refArray.boolean; idx += 1) {
             stat.refArray.boolean = (
-              datFile.dataVariable[varOffset + idx] === 0x00 ||
-              datFile.dataVariable[varOffset + idx] === 0x01
+              datFile.dataVariable[varOffset + idx] <= 0x01
             )
           }
 

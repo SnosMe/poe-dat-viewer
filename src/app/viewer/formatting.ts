@@ -96,11 +96,11 @@ export function formatRow (rowIdx: number, fmt: RowPartFormat[], datFile: DatFil
 
 function readArrayVarData (offset: number, length: number, datFile: DatFile) {
   const arrayLength = datFile.readerFixed.getSizeT(offset)
-  const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
-
   if (arrayLength === 0) {
     return { value: [], size: 0 }
   }
+
+  const varOffset = datFile.readerFixed.getSizeT(offset + datFile.memsize)
 
   return {
     value: Array.from(
