@@ -38,6 +38,7 @@
       <q-space />
       <div class="flex no-wrap q-gutter-x-sm">
         <q-btn @click="viewer.rowSorting = null" v-if="viewer.rowSorting" padding="0 sm" label="Reset sorting" no-caps color="blue-grey-8" />
+        <q-btn @click="exportDataJson" :disable="!viewer.datFile" padding="0 sm" label="Export data" no-caps color="blue-grey-8" />
         <q-btn @click="app.exportSchemaDialog = true" :disable="!viewer.datFile" padding="0 sm" label="Export schema" no-caps color="blue-grey-8" />
       </div>
     </div>
@@ -88,10 +89,11 @@ import ImportDialog from './ImportDialog'
 import SettingsDialog from './SettingsDialog'
 import { App } from './viewer/Viewer'
 import { getAllFilesMeta } from './dat/file-cache'
-import { getByHash } from './dat/dat-file'
+import { getByHash, getNamePart } from './dat/dat-file'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
+import FileSaver from 'file-saver'
 
 export default {
   components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog },
@@ -162,6 +164,15 @@ export default {
       viewer.editHeader = createHeaderFromSelected(viewer.columns, viewer.headers)
       clearColumnSelection(viewer.columns)
       viewer.saveHeadersToFileCache()
+    },
+    exportDataJson () {
+      const data = this.viewer.collectData()
+
+      FileSaver.saveAs(new File(
+        [JSON.stringify(data, null, 2)],
+        `${getNamePart(this.viewer.datFile.meta.ggpkPath)}.json`,
+        { type: 'application/json;charset=utf-8' }
+      ))
     }
   }
 }

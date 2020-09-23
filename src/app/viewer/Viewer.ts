@@ -6,6 +6,7 @@ import { calcRowNumLength, cacheHeaderDataView } from './formatting'
 import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
 import { updateFileHeaders } from '../dat/file-cache'
 import { CPUTask } from '../cpu-task'
+import { readColumn } from '../dat/reader'
 
 export interface StateColumn {
   readonly offset: number
@@ -183,5 +184,19 @@ class Viewer {
     const fresh = this.stateColumns(columnStats)
     columns.splice(colIdx + 1, 0, ...fresh.slice(header.offset + 1, header.offset + header.length))
     columns[colIdx].header = null
+  }
+
+  collectData () {
+    const columns = this.headers
+      .filter(({ type }) => type.boolean || type.decimal || type.integer || type.key || type.string)
+      .map((header, idx) => ({
+        name: header.name || `Unknown${idx + 1}`,
+        data: header.cachedView?.entriesRaw || readColumn(header, this.datFile!)
+      }))
+
+    return Array(this.datFile!.rowCount).fill(undefined)
+      .map((_, idx) => Object.fromEntries(
+        columns.map(col => [col.name, col.data[idx]])
+      ))
   }
 }
