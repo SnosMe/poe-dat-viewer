@@ -131,15 +131,17 @@ class DataViewStream {
   }
 
   getHash64 () {
-    const hash = Array.from(
-      this.data.subarray(this.offset, this.offset + 8)
+    const hash = (
+      this.data[this.offset + 7].toString(16).padStart(2, '0') +
+      this.data[this.offset + 6].toString(16).padStart(2, '0') +
+      this.data[this.offset + 5].toString(16).padStart(2, '0') +
+      this.data[this.offset + 4].toString(16).padStart(2, '0') +
+      this.data[this.offset + 3].toString(16).padStart(2, '0') +
+      this.data[this.offset + 2].toString(16).padStart(2, '0') +
+      this.data[this.offset + 1].toString(16).padStart(2, '0') +
+      this.data[this.offset + 0].toString(16).padStart(2, '0')
     )
-      .reverse()
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-
     this.offset += 8
-
     return hash
   }
 }
