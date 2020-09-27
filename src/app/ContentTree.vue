@@ -1,6 +1,6 @@
 <template>
   <q-scroll-area
-    style="width: 300px;" class="shadow-1 q-pa-xs"
+    style="width: 300px; flex-shrink: 0;" class="shadow-1 q-pa-xs"
     id="content-tree-fancy-scroll"
   >
     <q-virtual-scroll
