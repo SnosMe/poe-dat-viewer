@@ -1,147 +1,79 @@
-import { decompressBundle } from './bundle'
+import { decompressBundle, unpackIndexPaths } from '../worker/interface'
+import fnv from 'fnv-plus'
+import { findSequence } from '../dat/reader'
 
 // https://github.com/poe-tool-dev/ggpk.discussion/wiki/Bundle-scheme#bundle-index-format
 
-export interface IndexBundle {
-  name: string
-  uncompressedSize: number
-}
+export async function readFilesIndex (bundle: Uint8Array) {
+  const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
+  let offset = 0
 
-export interface IndexFile {
-  hash: string
-  bundleIdx: number
-  offset: number
-  size: number
-}
+  const bundlesCount = reader.getInt32(offset, true)
+  offset += 4
+  for (let i = 0; i < bundlesCount; ++i) {
+    const nameLen = reader.getInt32(offset, true)
+    offset += (4 /* nameLen */ + nameLen /* nameStr */ + 4 /* decompressedSize */)
+  }
 
-export interface IndexPath {
-  hash: string
-  offset: number
-  size: number
-  recursiveSize: number
-}
+  const filesCount = reader.getInt32(offset, true)
+  offset += 4
+  const filesOffset = offset
+  offset += filesCount * (8 /* hash */ + 4 /* bundleIdx */ + 4 /* fileOffset */ + 4 /* fileSize */)
 
-export async function bundleIndex (bundle: Uint8Array) {
-  const reader = new DataViewStream(bundle)
+  const pathsCount = reader.getInt32(offset, true)
+  offset += 4
+  const pathsOffset = offset
+  const pathsLen = pathsCount * (8 /* hash */ + 4 /* offset */ + 4 /* size */ + 4 /* recursiveSize */)
+  offset += pathsLen
 
-  const bundlesCount = reader.getInt32()
-  const bundles = new Array(bundlesCount).fill(undefined)
-    .map<IndexBundle>(_ => ({
-      name: reader.getUtf8String(reader.getInt32()),
-      uncompressedSize: reader.getInt32()
-    }))
-
-  const filesCount = reader.getInt32()
-  const files = new Array(filesCount).fill(undefined)
-    .map<IndexFile>(_ => ({
-      hash: reader.getHash64(),
-      bundleIdx: reader.getInt32(),
-      offset: reader.getInt32(),
-      size: reader.getInt32()
-    }))
-
-  const pathsCount = reader.getInt32()
-  const paths = new Array(pathsCount).fill(undefined)
-    .map<IndexPath>(_ => ({
-      hash: reader.getHash64(),
-      offset: reader.getInt32(),
-      size: reader.getInt32(),
-      recursiveSize: reader.getInt32()
-    }))
-
-  const pathBundleBin = bundle.buffer.slice(reader.offset)
+  const pathBundleOffset = offset
+  const pathBundleBin = bundle.subarray(pathBundleOffset)
   const pathBundle = await decompressBundle(pathBundleBin)
 
-  const unpackedPaths = paths.flatMap(p => unpackPaths(pathBundle.subarray(p.offset, p.offset + p.size)))
-  console.assert(unpackedPaths.length === filesCount)
+  return {
+    filesOffset,
+    dirs: await unpackIndexPaths(pathBundle, bundle.subarray(pathsOffset, pathsOffset + pathsLen))
+  }
+}
+
+export function getFileLocation (bundle: Uint8Array, path: string, filesOffset: number) {
+  const hashHex = fnv.fast1a64(path.toLowerCase() + '++')
+  const hash = [
+    parseInt(hashHex.substr(14, 2), 16),
+    parseInt(hashHex.substr(12, 2), 16),
+    parseInt(hashHex.substr(10, 2), 16),
+    parseInt(hashHex.substr(8, 2), 16),
+    parseInt(hashHex.substr(6, 2), 16),
+    parseInt(hashHex.substr(4, 2), 16),
+    parseInt(hashHex.substr(2, 2), 16),
+    parseInt(hashHex.substr(0, 2), 16)
+  ]
+
+  const offset = findSequence(bundle, hash, filesOffset)
+  if (offset === -1) {
+    throw new Error('never')
+  }
+
+  const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
+  const bundleIdx = reader.getInt32(offset + 8, true)
+  const offsetInBundle = reader.getInt32(offset + 8 + 4, true)
+  const fileSize = reader.getInt32(offset + 8 + 4 + 4, true)
+
+  let bundleName: string
+  {
+    let offset = 4 // <- bundlesCount
+    for (let i = 0; i < bundleIdx; ++i) {
+      const nameLen = reader.getInt32(offset, true)
+      offset += (4 /* nameLen */ + nameLen /* nameStr */ + 4 /* decompressedSize */)
+    }
+    const nameLen = reader.getInt32(offset, true)
+    offset += 4
+    bundleName = new TextDecoder('utf-8').decode(bundle.subarray(offset, offset + nameLen))
+  }
 
   return {
-    bundles,
-    files,
-    paths: unpackedPaths
-  }
-}
-
-function unpackPaths (data: Uint8Array) {
-  const reader = new DataViewStream(data)
-
-  let baseMode = false
-  let bases = [] as string[]
-  const paths = [] as string[]
-
-  while (reader.offset <= (data.byteLength - 4)) {
-    let idx = reader.getInt32()
-    const isModeSwitch = (idx === 0)
-    if (isModeSwitch) {
-      baseMode = !baseMode
-      if (baseMode) {
-        bases = []
-      }
-    } else {
-      idx -= 1
-
-      let path = reader.getZutf8String()
-      if (idx < bases.length) {
-        path = `${bases[idx]}${path}`
-      }
-
-      if (baseMode) {
-        bases.push(path)
-      } else {
-        paths.push(path)
-      }
-    }
-  }
-
-  return paths
-}
-
-class DataViewStream {
-  private utf8Decoder = new TextDecoder('utf-8')
-  private view: DataView
-  private data: Uint8Array
-  offset = 0
-
-  constructor (data: Uint8Array) {
-    this.view = new DataView(data.buffer)
-    this.data = data
-  }
-
-  getInt32 () {
-    const value = this.view.getInt32(this.data.byteOffset + this.offset, true)
-    this.offset += 4
-    return value
-  }
-
-  getUtf8String (length: number) {
-    const str = this.utf8Decoder.decode(
-      this.data.subarray(this.offset, this.offset + length)
-    )
-    this.offset += length
-    return str
-  }
-
-  getZutf8String () {
-    const end = this.data.indexOf(0x00, this.offset)
-    const str = this.utf8Decoder.decode(
-      this.data.subarray(this.offset, end)
-    )
-    this.offset = end + 1
-    return str
-  }
-
-  getHash64 () {
-    const hash = (
-      this.data[this.offset + 7].toString(16).padStart(2, '0') +
-      this.data[this.offset + 6].toString(16).padStart(2, '0') +
-      this.data[this.offset + 5].toString(16).padStart(2, '0') +
-      this.data[this.offset + 4].toString(16).padStart(2, '0') +
-      this.data[this.offset + 3].toString(16).padStart(2, '0') +
-      this.data[this.offset + 2].toString(16).padStart(2, '0') +
-      this.data[this.offset + 1].toString(16).padStart(2, '0') +
-      this.data[this.offset + 0].toString(16).padStart(2, '0')
-    )
-    this.offset += 8
-    return hash
+    bundle: `${bundleName}.bundle.bin`,
+    offset: offsetInBundle,
+    size: fileSize
   }
 }

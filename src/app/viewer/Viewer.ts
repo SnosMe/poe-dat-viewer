@@ -4,9 +4,10 @@ import { Header, createHeaderFromSelected, byteView } from './headers'
 import { selectColsByHeader, clearColumnSelection } from './selection'
 import { calcRowNumLength, cacheHeaderDataView } from './formatting'
 import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serializeHeaders } from '../exporters/internal'
-import { updateFileHeaders } from '../dat/file-cache'
+import { updateFileHeaders } from '../dat/db'
 import { CPUTask } from '../cpu-task'
 import { readColumn } from '../dat/reader'
+import { Loading, Notify } from 'quasar'
 
 export interface StateColumn {
   readonly offset: number
@@ -24,7 +25,7 @@ export interface StateColumn {
   }
 }
 
-export class App {
+class App {
   exportSchemaDialog = false
   helpDialog = false
   importDialog = true
@@ -57,7 +58,25 @@ class Viewer {
     private app: App
   ) {}
 
-  async loadDat (parsed: DatFile) {
+  async loadDat (parsed: DatFile, overrideHeaders?: DatSerializedHeader[]) {
+    Loading.show({ delay: 0 })
+    try {
+      await this._loadDat(parsed)
+      try {
+        const headers = overrideHeaders || parsed.meta.headers
+        await this.tryImportHeaders(headers)
+      } catch (e) {
+        Notify.create({ color: 'warning', message: e.message, progress: true })
+      }
+    } catch (e) {
+      Notify.create({ color: 'negative', message: e.message, progress: true })
+      throw e
+    } finally {
+      Loading.hide()
+    }
+  }
+
+  private async _loadDat (parsed: DatFile) {
     const { app } = this
     this.columnStats = await analyze(parsed)
     this.rowNumberLength = calcRowNumLength(parsed.rowCount, app.config.rowNumStart, ROW_NUM_MIN_LENGTH)
@@ -163,8 +182,8 @@ class Viewer {
 
   async saveHeadersToFileCache () {
     await updateFileHeaders(
-      serializeHeaders(this.headers),
-      this.datFile!.meta.sha256
+      this.datFile!.meta.name,
+      serializeHeaders(this.headers)
     )
   }
 
@@ -200,3 +219,5 @@ class Viewer {
       ))
   }
 }
+
+export const app = new App()

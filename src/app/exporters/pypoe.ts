@@ -1,8 +1,7 @@
 import { Header } from '../viewer/headers'
 import { ExporterFieldType, headerToFieldFormat } from './common'
-import { getNamePart } from '../dat/dat-file'
 
-export function exportToPypoe (headers: Header[], path: string) {
+export function exportToPypoe (headers: Header[], name: string) {
   let unknownNum = 0
   let undefinedNum = 0
 
@@ -17,7 +16,7 @@ export function exportToPypoe (headers: Header[], path: string) {
     return `        ('${field[0]}', Field(\n            name='${field[0]}',\n            type='${field[1]}',\n        )),`
   }).join('\n')
 
-  return `'${getNamePart(path)}.dat': File(\n    fields=OrderedDict((\n${fieldsText}\n    )),\n),`
+  return `'${name}.dat': File(\n    fields=OrderedDict((\n${fieldsText}\n    )),\n),`
 }
 
 function getPypoeFieldType (header: Header): ExporterFieldType {

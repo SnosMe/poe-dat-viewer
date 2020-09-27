@@ -1,5 +1,4 @@
 import { Header } from '../viewer/headers'
-import { getNamePart } from '../dat/dat-file'
 import { ColumnStats } from '../dat/analysis'
 
 export interface DatSerializedHeader {
@@ -15,9 +14,9 @@ export interface DatSerializedHeader {
   }
 }
 
-export function exportInternalState (headers: Header[], path: string) {
+export function exportInternalState (headers: Header[], name: string) {
   return JSON.stringify({
-    name: getNamePart(path),
+    name: name,
     headers: serializeHeaders(headers)
   }, null, 2)
 }

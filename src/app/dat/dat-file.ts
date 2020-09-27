@@ -1,8 +1,12 @@
+import { DatSerializedHeader } from '../exporters/internal'
+import { findByName } from './db'
 import { findSequence } from './reader'
-import * as FileCache from './file-cache'
 
 export interface DatFile {
-  meta: FileCache.FileMeta
+  meta: {
+    name: string
+    headers: DatSerializedHeader[]
+  }
   memsize: number
   rowCount: number
   rowLength: number
@@ -45,53 +49,14 @@ function initDatFile (filename: string, content: ArrayBuffer) {
   }
 }
 
-export async function importFromPoeCdn (patch: string, ggpkPath: string): Promise<DatFile> {
-  if (!ggpkPath.startsWith('/')) {
-    ggpkPath = '/' + ggpkPath
-  }
-
-  let file = await FileCache.findByPath(patch, ggpkPath)
-  if (!file) {
-    const FILE_URL = `http://patch.poecdn.com/patch/${patch}${ggpkPath}`
-    const res = await fetch(`https://cors-anywhere.herokuapp.com/${FILE_URL}`)
-    if (res.status !== 200) {
-      throw new Error(`patch.poecdn.com: ${res.status} ${res.statusText}`)
-    }
-    file = await FileCache.putFile(patch, ggpkPath, await res.arrayBuffer())
-  }
+export async function importFromFile (name: string, content: ArrayBuffer): Promise<DatFile> {
   return Object.freeze({
-    meta: file.meta,
-    ...initDatFile(file.meta.ggpkPath, file.content)
+    meta: {
+      name: getNamePart(name),
+      headers: await findByName(getNamePart(name))
+    },
+    ...initDatFile(name, content)
   })
-}
-
-export async function importFromFile (upload: File) {
-  const file = await FileCache.putFile(null, upload.name, await upload.arrayBuffer())
-  return Object.freeze({
-    meta: file.meta,
-    ...initDatFile(file.meta.ggpkPath, file.content)
-  })
-}
-
-export async function getByHash (sha256: string) {
-  const file = await FileCache.findByHash(sha256)
-  if (file) {
-    return Object.freeze({
-      meta: file.meta,
-      ...initDatFile(file.meta.ggpkPath, file.content)
-    })
-  }
-}
-
-export async function findLatestHeaders (typeName: string) {
-  let files = await FileCache.getAllFilesMeta()
-  files = files
-    .filter(file => getNamePart(file.ggpkPath) === typeName)
-    .filter(file => file.headers.length && (
-      file.headers.length > 1 || file.headers[0].name != null
-    ))
-  files.sort((a, b) => b.cachedAt.getTime() - a.cachedAt.getTime())
-  return files.length ? files[0].headers : undefined
 }
 
 export function getNamePart (path: string) {

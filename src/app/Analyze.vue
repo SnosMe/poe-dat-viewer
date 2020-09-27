@@ -1,7 +1,7 @@
 <template>
   <div class="layout-column">
     <div class="app-titlebar">
-      <div v-if="viewer.datFile" class="ellipsis q-mr-xs">{{ viewer.datFile.meta.ggpkPath }}</div>
+      <div v-if="viewer.datFile" class="ellipsis q-mr-xs">{{ viewer.datFile.meta.name }}</div>
       <q-space />
       <q-btn padding="0 sm" label="Import" no-caps flat @click="app.importDialog = true" class="q-mr-sm" />
       <q-btn padding="0 sm" label="Help" no-caps flat @click="app.helpDialog = true" class="q-mr-sm" />
@@ -43,6 +43,7 @@
       </div>
     </div>
     <div class="flex min-h-0 flex-1">
+      <content-tree />
       <div class="layout-column min-w-0 flex-1">
         <div
           class="flex-1 font-mono scroll"
@@ -67,15 +68,16 @@
             </template>
           </q-virtual-scroll>
         </div>
-        <div class="app-footer bg-blue-grey-9 q-pa-sm text-white text-body2 flex q-gutter-x-lg">
+        <div class="app-footer bg-blue-grey-9 q-pa-sm text-white text-body2 flex">
           <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
-          <a href="https://discord.gg/SJjBdT3" class="flex"><img src="@/assets/discord-badge.svg" /></a>
+          <a href="https://discord.gg/SJjBdT3" class="flex q-ml-lg"><img src="@/assets/discord-badge.svg" /></a>
         </div>
       </div>
       <div class="flex-shrink-0">
         <header-props />
       </div>
     </div>
+    <download-progress />
   </div>
 </template>
 
@@ -87,36 +89,16 @@ import ExportSchema from './ExportSchema'
 import HelpContent from './HelpContent'
 import ImportDialog from './ImportDialog'
 import SettingsDialog from './SettingsDialog'
-import { App } from './viewer/Viewer'
-import { getAllFilesMeta } from './dat/file-cache'
-import { getByHash, getNamePart } from './dat/dat-file'
+import { app } from './viewer/Viewer'
 import { getColumnSelections, clearColumnSelection } from './viewer/selection'
 import { getRowFormating } from './viewer/formatting'
 import { createHeaderFromSelected } from './viewer/headers'
 import FileSaver from 'file-saver'
+import DownloadProgress from './DownloadProgress'
+import ContentTree from './ContentTree'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog },
-  async created () {
-    const files = await getAllFilesMeta()
-    if (files.length) {
-      this.$q.loading.show({ delay: 0 })
-      try {
-        const datFile = await getByHash(files[0].sha256)
-        await this.viewer.loadDat(datFile)
-        await this.viewer.tryImportHeaders(datFile.meta.headers)
-        this.$q.notify({
-          color: 'primary',
-          message: 'Previous session successfully restored',
-          caption: 'You can close Import dialog.',
-          timeout: 1250
-        })
-      } catch (e) {
-        console.error(e)
-      }
-      this.$q.loading.hide()
-    }
-  },
+  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog, DownloadProgress, ContentTree },
   provide () {
     return {
       viewer: this.viewer,
@@ -124,8 +106,6 @@ export default {
     }
   },
   data () {
-    const app = new App()
-
     return {
       app: app,
       viewer: app.viewers[0].instance
@@ -170,7 +150,7 @@ export default {
 
       FileSaver.saveAs(new File(
         [JSON.stringify(data, null, 2)],
-        `${getNamePart(this.viewer.datFile.meta.ggpkPath)}.json`,
+        `${this.viewer.datFile.meta.name}.json`,
         { type: 'application/json;charset=utf-8' }
       ))
     }

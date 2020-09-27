@@ -47,19 +47,19 @@ export default {
   computed: {
     pypoe () {
       const { headers, datFile } = this.viewer
-      return exportToPypoe(headers, datFile.meta.ggpkPath)
+      return exportToPypoe(headers, datFile.meta.name)
     },
     pogo () {
       const { headers, datFile } = this.viewer
-      return exportToPogo(headers, datFile.meta.ggpkPath)
+      return exportToPogo(headers, datFile.meta.name)
     },
     clang () {
       const { headers, datFile } = this.viewer
-      return exportToClang(headers, datFile.meta.ggpkPath)
+      return exportToClang(headers, datFile.meta.name)
     },
     json () {
       const { headers, datFile } = this.viewer
-      return exportInternalState(headers, datFile.meta.ggpkPath)
+      return exportInternalState(headers, datFile.meta.name)
     }
   }
 }

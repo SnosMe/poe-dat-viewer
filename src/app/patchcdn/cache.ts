@@ -1,68 +1,79 @@
-import { getNamePart } from '../dat/dat-file'
-import { decompressBundle } from './bundle'
-import { bundleIndex } from './bundle-index'
+import { Notify } from 'quasar'
+import Vue from 'vue'
 
 const BUNDLE_DIR = 'Bundles2'
 
-async function loadIndexBin () {
-  const cache = await caches.open('bundles')
+export const progress = Vue.observable({
+  totalSize: 0,
+  received: 0,
+  active: false,
+  bundleName: ''
+})
 
-  let res = await cache.match('_.index.bin')
+export async function fetchFile (patchVer: string | null, name: string) {
+  if (patchVer == null) {
+    patchVer = localStorage.getItem('POE_PATCH_VER')
+    if (!patchVer) throw new Error('never')
+  }
+
+  try {
+    return await _fetchFile(patchVer, name)
+  } catch (e) {
+    Notify.create({ color: 'negative', message: e.message, caption: 'You may need to adjust the patch version.', progress: true })
+    throw e
+  }
+}
+
+export async function _fetchFile (patchVer: string, name: string): Promise<ArrayBuffer> {
+  const path = `${patchVer}/${BUNDLE_DIR}/${name}`
+  let cache = await caches.open('bundles')
+  let res = await cache.match(path)
   if (!res) {
-    const FILE_URL = `http://patchcdn.pathofexile.com/3.12.2.2/${BUNDLE_DIR}/_.index.bin`
-    res = await fetch(`https://cors-anywhere.herokuapp.com/${FILE_URL}`)
-    const buf = await res.arrayBuffer()
-    await cache.put('_.index.bin', new Response(buf, {
+    progress.totalSize = 0
+    progress.received = 0
+    progress.active = true
+    progress.bundleName = name
+
+    res = await fetch(`http://poe-bundles.snos.workers.dev/${path}`)
+    if (res.status !== 200) {
+      progress.active = false
+      throw new Error(`patchcdn: ${res.status} ${res.statusText}`)
+    }
+    progress.totalSize = Number(res.headers.get('content-length'))
+
+    let buf: Uint8Array
+    try {
+      const reader = res.body!.getReader()
+      const chunks = [] as Uint8Array[]
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        chunks.push(value!)
+        progress.received += value!.length
+      }
+
+      buf = new Uint8Array(progress.received)
+      let bufPos = 0
+      for (const chunk of chunks) {
+        buf.set(chunk, bufPos)
+        bufPos += chunk.length
+      }
+    } finally {
+      progress.active = false
+    }
+
+    if (localStorage.getItem('POE_PATCH_VER') !== patchVer) {
+      await caches.delete('bundles')
+      cache = await caches.open('bundles')
+    }
+
+    await cache.put(path, new Response(buf, {
       headers: {
         'content-length': String(buf.byteLength),
         'content-type': 'application/octet-stream'
       }
     }))
-    return buf
+    return buf.buffer
   }
   return res.arrayBuffer()
-}
-
-export async function playground () {
-  const indexBin = await loadIndexBin()
-
-  console.time('decompressBundle')
-  const index = await decompressBundle(indexBin)
-  console.timeEnd('decompressBundle')
-  const bundle = await bundleIndex(index)
-
-  const paths = bundle.paths.filter(path => path.endsWith('.dat') || path.endsWith('.dat64'))
-
-  console.log(paths)
-
-  const tables = new Map<string, {
-    name: string
-    hasTranslation: boolean
-  }>()
-
-  for (const path of paths) {
-    const name = getNamePart(path)
-    let entry = tables.get(name)
-    if (!entry) {
-      entry = {
-        name,
-        hasTranslation: false
-      }
-      tables.set(name, entry)
-    }
-
-    if (!entry.hasTranslation && path.startsWith('Data/Russian/')) {
-      entry.hasTranslation = true
-    }
-
-    if (!path.startsWith('Data/')) {
-      console.log('not in dat folder', path)
-    }
-  }
-
-  for (const tbl of tables.values()) {
-    if (!tbl.hasTranslation) {
-      // console.log('not tr in all langs', tbl.name)
-    }
-  }
 }

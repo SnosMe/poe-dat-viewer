@@ -1,7 +1,8 @@
 import Vue from 'vue'
 
 import './styles/quasar.scss'
-import iconSet from 'quasar/icon-set/fontawesome-v5.js'
+import '@quasar/extras/line-awesome/line-awesome.css'
+import iconSet from 'quasar/icon-set/line-awesome.js'
 import {
   Quasar,
   QBtn,
@@ -34,12 +35,14 @@ import {
   QItemLabel,
   QList,
   Notify,
-  Loading
+  Loading,
+  QTree
 } from 'quasar'
 
 Vue.use(Quasar, {
   config: {},
   components: {
+    QTree,
     QOptionGroup,
     QBtnToggle,
     QInput,
