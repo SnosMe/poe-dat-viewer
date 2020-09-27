@@ -34,7 +34,7 @@ export async function _fetchFile (patchVer: string, name: string): Promise<Array
     progress.active = true
     progress.bundleName = name
 
-    res = await fetch(`http://poe-bundles.snos.workers.dev/${path}`)
+    res = await fetch(`https://poe-bundles.snos.workers.dev/${path}`)
     if (res.status !== 200) {
       progress.active = false
       throw new Error(`patchcdn: ${res.status} ${res.statusText}`)
