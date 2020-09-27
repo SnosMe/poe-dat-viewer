@@ -81,7 +81,7 @@ export default {
     },
     async importDemo () {
       if (!ContentTree.tree.length) {
-        this.poePatch = '3.12.2.2'
+        this.poePatch = '3.12.2.3.2'
         await this.cdnImport()
       }
 
