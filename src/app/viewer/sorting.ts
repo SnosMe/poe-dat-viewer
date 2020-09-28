@@ -32,9 +32,9 @@ export function sortRows (header: Header, order: 1 | -1): number[] {
     } else if (header.type.key) {
       if (header.type.key.foreign) {
         rows.sort((ai, bi) => {
-          const a = entriesRaw[ai] as [number, number] | null
-          const b = entriesRaw[bi] as [number, number] | null
-          return ((b?.[0] || 0) - (a?.[0] || 0)) * order
+          const a = entriesRaw[ai] as { rid: number, unknown: number } | null
+          const b = entriesRaw[bi] as { rid: number, unknown: number } | null
+          return ((b?.rid || 0) - (a?.rid || 0)) * order
         })
       } else {
         rows.sort((ai, bi) => {

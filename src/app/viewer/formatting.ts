@@ -194,8 +194,8 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
       } else if (header.type.key) {
         color = 2
         if (header.type.key.foreign) {
-          return (value: [number, number][]) => {
-            text = `[${value.map(key => `<${key[0]}, ${key[1]}>`).join(', ')}]`
+          return (value: { rid: number, unknown: number }[]) => {
+            text = `[${value.map(key => `<${key.rid}, ${key.unknown}>`).join(', ')}]`
           }
         } else {
           return (value: number[]) => {
@@ -228,12 +228,12 @@ export function cacheHeaderDataView (header: Header, datFile: DatFile) {
         }
       } else if (header.type.key) {
         if (header.type.key.foreign) {
-          return (value: [number, number] | null) => {
+          return (value: { rid: number, unknown: number } | null) => {
             if (value === null) {
               text = 'null'
               color = 3
             } else {
-              text = `<${value[0]}, ${value[1]}>`
+              text = `<${value.rid}, ${value.unknown}>`
               color = 2
             }
           }

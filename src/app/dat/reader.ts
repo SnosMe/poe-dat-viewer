@@ -77,13 +77,13 @@ function readKeySelf (data: BinaryReader): (offset: number) => number | null {
   }
 }
 
-function readKeyForeign (data: BinaryReader): (offset: number) => [number, number] | null {
+function readKeyForeign (data: BinaryReader): (offset: number) => { rid: number, unknown: number } | null {
   const NULL = getNULL(data.memsize)
   return offset => {
     const rowIdx = data.getSizeT(offset)
     return (rowIdx === NULL)
       ? null
-      : [rowIdx, data.getSizeT(offset + data.memsize)]
+      : { rid: rowIdx, unknown: data.getSizeT(offset + data.memsize) }
   }
 }
 
