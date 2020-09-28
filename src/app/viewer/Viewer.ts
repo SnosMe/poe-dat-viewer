@@ -210,8 +210,34 @@ class Viewer {
       .filter(({ type }) => type.boolean || type.decimal || type.integer || type.key || type.string)
       .map((header, idx) => ({
         name: header.name || `Unknown${idx + 1}`,
-        data: header.cachedView?.entriesRaw || readColumn(header, this.datFile!)
+        data: (() => {
+          const data = header.cachedView?.entriesRaw || readColumn(header, this.datFile!)
+
+          if (header.type.key?.foreign) {
+            if (!header.type.ref?.array) {
+              const data_ = data as ({ rid: number, unknown: number } | null)[]
+              if (!data_.every(row => row == null || row.unknown === 0)) {
+                throw new Error('never')
+              }
+              return data_.map(row => row && row.rid)
+            } else {
+              const data_ = data as (Array<{ rid: number, unknown: number }>)[]
+              if (!data_.every(row => row.every(entry => entry.unknown === 0))) {
+                throw new Error('never')
+              }
+              return data_.map(row => row.map(entry => entry.rid))
+            }
+          }
+
+          return data
+        })()
       }))
+
+    columns.unshift({
+      name: '_rid',
+      data: Array(this.datFile!.rowCount).fill(undefined)
+        .map((_, idx) => idx)
+    })
 
     return Array(this.datFile!.rowCount).fill(undefined)
       .map((_, idx) => Object.fromEntries(
