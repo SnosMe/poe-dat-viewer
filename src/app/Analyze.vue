@@ -46,29 +46,28 @@
       </div>
       <div class="flex min-h-0 flex-1">
         <div class="layout-column min-w-0 flex-1">
-          <div
-            class="flex-1 font-mono scroll"
+          <virtual-scroll
+            class="flex-1 font-mono"
             style="--ppc: 8px; letter-spacing: calc(var(--ppc) - 1ch);"
-            id="viewer-fancy-scroll"
+            :items="rows"
+            :item-height="14 * 1.5"
+            :header-height="72"
           >
-            <q-virtual-scroll
-              :items="rows"
-              :virtual-scroll-item-size="21"
-              scroll-target="#viewer-fancy-scroll > .scroll"
-              style="min-width: min-content;"
-              >
-              <template #before>
-                <viewer-head
-                  :headers="viewer.headers"
-                  :columns="viewer.columns" />
-              </template>
-              <template v-slot="{ index }">
-                <data-row
-                  :row-idx="rows[index]"
+            <template #header>
+              <viewer-head
+                :headers="viewer.headers"
+                :columns="viewer.columns" />
+            </template>
+            <template v-slot="props">
+              <div style="min-width: min-content;" :style="{ height: props.height + 'px' }">
+                <data-row v-for="(rowIdx, idx) in props.items" :key="rowIdx"
+                  style="position: absolute;"
+                  :style="{ top: (props.top + (idx * (14 * 1.5))) + 'px' }"
+                  :row-idx="rowIdx"
                   :format="rowFormat" />
-              </template>
-            </q-virtual-scroll>
-          </div>
+              </div>
+            </template>
+          </virtual-scroll>
           <div class="app-footer bg-blue-grey-9 q-pa-sm text-white text-body2 flex">
             <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
             <a href="https://discord.gg/SJjBdT3" class="flex q-ml-lg"><img src="@/assets/discord-badge.svg" /></a>
@@ -98,9 +97,10 @@ import { createHeaderFromSelected } from './viewer/headers'
 import FileSaver from 'file-saver'
 import DownloadProgress from './DownloadProgress'
 import ContentTree from './ContentTree'
+import VirtualScroll from './VirtualScroll'
 
 export default {
-  components: { ViewerHead, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog, DownloadProgress, ContentTree },
+  components: { ViewerHead, VirtualScroll, HeaderProps, DataRow, ExportSchema, HelpContent, ImportDialog, SettingsDialog, DownloadProgress, ContentTree },
   provide () {
     return {
       viewer: this.viewer,
