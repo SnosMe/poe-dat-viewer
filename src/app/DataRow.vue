@@ -40,7 +40,6 @@ export default {
 .viewer-row {
   white-space: pre;
   padding: 0 calc(var(--ppc) / 2);
-  z-index: -2;
   box-sizing: content-box;
   overflow: hidden;
   white-space: nowrap;
@@ -63,7 +62,6 @@ export default {
   white-space: pre;
   position: sticky;
   left: 0;
-  z-index: -1;
   padding: 0 0.25rem;
   background: $grey-1;
   color: $blue-8;

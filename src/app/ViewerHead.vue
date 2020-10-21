@@ -231,7 +231,6 @@ export default {
   position: absolute;
   width: calc(var(--ppc) * 3);
   height: var(--ppc);
-  z-index: 1;
 
   .viewer-col-stat--border:not(:first-child) > & {
     width: calc(var(--ppc) * 3 + 1px);
@@ -244,7 +243,6 @@ export default {
   text-align: center;
   cursor: default;
   line-height: calc(var(--ppc) * 3);
-  z-index: 1;
   position: relative;
   color: $grey-1;
   text-shadow: 0 0 0.5ch rgba(0,0,0,0.7);
@@ -260,7 +258,7 @@ export default {
   position: sticky;
   top: 0;
   left: 0;
-  z-index: 2;
+  z-index: 1;
   user-select: none;
   white-space: pre;
   padding: 0 0.25rem;
@@ -274,5 +272,6 @@ export default {
   position: sticky;
   top: 0;
   min-width: min-content;
+  z-index: 1;
 }
 </style>
