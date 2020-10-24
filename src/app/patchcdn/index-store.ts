@@ -1,5 +1,6 @@
 import { decompressBundle, decompressFileTransferBundle } from '../worker/interface'
-import { readFilesIndex, getFileLocation } from './bundle-index'
+import { readIndexBundle, getFileInfo } from '../bundles/index-bundle'
+import { getDirContent, getRootDirs } from '../bundles/index-paths'
 import { fetchFile } from './cache'
 import Vue from 'vue'
 import FileSaver from 'file-saver'
@@ -7,9 +8,10 @@ import { importFromFile as importDat } from '../dat/dat-file'
 import { app } from '../viewer/Viewer'
 
 let index_ = null as {
-  bundle: Uint8Array
-  filesOffset: number
-  dirs: Map<string, string[]>
+  bundlesInfo: Uint8Array,
+  filesInfo: Uint8Array,
+  dirsInfo: Uint8Array,
+  pathReps: Uint8Array
 } | null
 
 export const ContentTree = Vue.observable({
@@ -20,14 +22,9 @@ export const ContentTree = Vue.observable({
 })
 
 function initRoots () {
-  const firstLvl = [] as string[]
-  for (const dirName of index_!.dirs.keys()) {
-    if (!dirName.includes('/')) {
-      firstLvl.push(dirName)
-    }
-  }
+  const roots = getRootDirs(index_!.pathReps, index_!.dirsInfo)
 
-  ContentTree.tree = firstLvl.map(dirName => ({
+  ContentTree.tree = roots.map(dirName => ({
     label: dirName,
     isFile: false
   })).sort((a, b) => a.label.localeCompare(b.label))
@@ -40,16 +37,12 @@ export function listDirContent (fullPath: string) {
     return
   }
 
-  const files = index_!.dirs.get(fullPath)!
+  const content = getDirContent(fullPath, index_!.pathReps, index_!.dirsInfo)
+  content.dirs = content.dirs.map(s => s.substr(fullPath.length + 1))
+  content.files = content.files.map(s => s.substr(fullPath.length + 1))
 
-  const childDirs = [] as string[]
-  for (const dirName of index_!.dirs.keys()) {
-    if (
-      dirName.startsWith(fullPath) &&
-      dirName.lastIndexOf('/') === fullPath.length
-    ) {
-      childDirs.push(dirName.substring(dirName.lastIndexOf('/') + 1))
-    }
+  if (fullPath === 'Data') {
+    content.files = content.files.filter(file => file === 'Mods.dat64' || file === 'AbyssObjects.dat64')
   }
 
   ContentTree.tree = Object.freeze([
@@ -57,11 +50,11 @@ export function listDirContent (fullPath: string) {
       label: '../',
       isFile: false
     },
-    ...childDirs.map(dirName => ({
+    ...content.dirs.map(dirName => ({
       label: dirName,
       isFile: false
     })).sort((a, b) => a.label.localeCompare(b.label)),
-    ...files.map(fileName => ({
+    ...content.files.map(fileName => ({
       label: fileName,
       isFile: true
     })).sort((a, b) => a.label.localeCompare(b.label))
@@ -87,7 +80,7 @@ export async function loadFile (fullPath: string) {
 }
 
 export async function loadFileContent (fullPath: string) {
-  const location = getFileLocation(index_!.bundle, fullPath, index_!.filesOffset)
+  const location = getFileInfo(fullPath, index_!.bundlesInfo, index_!.filesInfo)
   const bundleBin = await fetchFile(null, location.bundle)
 
   return await decompressFileTransferBundle(bundleBin, location.offset, location.size)
@@ -95,10 +88,12 @@ export async function loadFileContent (fullPath: string) {
 
 export async function loadIndex (indexBin: ArrayBuffer) {
   const indexBundle = await decompressBundle(new Uint8Array(indexBin))
-  const index = await readFilesIndex(indexBundle)
+  const index = readIndexBundle(indexBundle)
   index_ = {
-    bundle: indexBundle,
-    ...index
+    bundlesInfo: index.bundlesInfo,
+    filesInfo: index.filesInfo,
+    dirsInfo: index.dirsInfo,
+    pathReps: await decompressBundle(index.pathRepsBundle)
   }
   initRoots()
 }

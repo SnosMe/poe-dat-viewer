@@ -1,20 +1,20 @@
 import * as Ooz from 'ooz-wasm'
 
 // https://github.com/poe-tool-dev/ggpk.discussion/wiki/Bundle-scheme#bundle-file-format
-const DECOMPRESSED_DATA_SIZE = 0
-const CHUNK_COUNT = 36
-const COMPRESSION_GRANULARITY = 40
-const CHUNK_SIZES = 60
+const S_DECOMPRESSED_DATA_SIZE$ = 0
+const S_CHUNK_COUNT$ = 36
+const S_COMPRESSION_GRANULARITY$ = 40
+const S_CHUNK_SIZES$ = 60
 
-export async function _decompressSliceInBundle (
+export async function decompressSliceInBundle (
   bundle: Uint8Array,
   sliceOffset = 0,
   sliceSize = 0
 ): Promise<Uint8Array> {
   const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
-  const decompressedBundleSize = reader.getInt32(DECOMPRESSED_DATA_SIZE, true)
-  const chunksCount = reader.getInt32(CHUNK_COUNT, true)
-  const compressionGranularity = reader.getInt32(COMPRESSION_GRANULARITY, true)
+  const decompressedBundleSize = reader.getInt32(S_DECOMPRESSED_DATA_SIZE$, true)
+  const chunksCount = reader.getInt32(S_CHUNK_COUNT$, true)
+  const compressionGranularity = reader.getInt32(S_COMPRESSION_GRANULARITY$, true)
 
   if (!sliceSize) {
     sliceSize = decompressedBundleSize
@@ -22,11 +22,11 @@ export async function _decompressSliceInBundle (
 
   const decompressedSlice = new Uint8Array(sliceSize)
 
-  let chunkBegin = CHUNK_SIZES + (chunksCount * 4)
+  let chunkBegin = S_CHUNK_SIZES$ + (chunksCount * 4)
   let bundleDecomprOffset = 0
   let sliceDecomprOffset = 0
   for (let idx = 0; idx < chunksCount; idx += 1) {
-    const chunkSize = reader.getInt32(CHUNK_SIZES + (idx * 4), true)
+    const chunkSize = reader.getInt32(S_CHUNK_SIZES$ + (idx * 4), true)
     const chunk = bundle.subarray(chunkBegin, chunkBegin + chunkSize)
 
     const decomprChunkSize = (idx === chunksCount - 1)
