@@ -197,7 +197,7 @@ export function findSequence (data: Uint8Array, sequence: number[], fromIndex = 
     let matched = true
     for (let di = idx, si = 0; si < sequence.length; di += 1, si += 1) {
       if (data[di] !== sequence[si]) {
-        fromIndex = di
+        fromIndex = idx + 1
         matched = false
         break
       }
