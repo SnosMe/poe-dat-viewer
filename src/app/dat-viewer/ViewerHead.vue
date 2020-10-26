@@ -67,8 +67,8 @@
 </template>
 
 <script>
-import { toggleColsBetween } from './viewer/selection'
-import { sortRows } from './viewer/sorting'
+import { toggleColsBetween } from '../viewer/selection'
+import { sortRows } from '../viewer/sorting'
 
 export default {
   props: {
@@ -168,12 +168,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-@import '@/styles/quasar.variables';
-
+<style lang="postcss">
 .viewer-col {
-  color: $blue-grey-6;
-  background: $grey-2;
   border: none;
   cursor: pointer;
   padding: 0 calc(var(--ppc) / 2);
@@ -184,22 +180,16 @@ export default {
   overflow: hidden;
 
   &.viewer-col--border {
-    border-left: 1px solid $grey-5;
   }
 
   &:hover {
-    background: $blue-4;
-    color: $blue-1;
   }
 
   &.viewer-col--selected {
-    background: $blue-6;
-    color: $blue-1;
   }
 
   &.viewer-col--selected.viewer-col--border,
   &.viewer-col--selected + &.viewer-col--border {
-    border-left-color: $blue-8;
   }
 
   &:first-child { border: none; }
@@ -207,21 +197,16 @@ export default {
 }
 
 .viewer-col-stat {
-  color: $blue-grey-6;
-  background: $grey-2;
   box-sizing: content-box;
   height: calc(var(--ppc) * 3);
   position: relative;
 
   &.viewer-col-stat--border {
-    border-left: 1px solid $grey-5;
   }
 
   &.viewer-col-stat--selected + &.viewer-col-stat--border {
-    border-left-color: $grey-6;
   }
   &.viewer-col-stat--selected.viewer-col-stat--border {
-    border-left-color: $grey-5;
   }
 
   &:first-child { border: none; }
@@ -244,7 +229,6 @@ export default {
   cursor: default;
   line-height: calc(var(--ppc) * 3);
   position: relative;
-  color: $grey-1;
   text-shadow: 0 0 0.5ch rgba(0,0,0,0.7);
   background: #757575b0;
 
@@ -254,7 +238,6 @@ export default {
 }
 
 .viewer-col-rownum {
-  background: $grey-2;
   position: sticky;
   top: 0;
   left: 0;
@@ -267,8 +250,6 @@ export default {
 
 .viewer-sticky-head {
   display: flex;
-  background: $grey-2;
-  box-shadow: $shadow-1;
   position: sticky;
   top: 0;
   min-width: min-content;

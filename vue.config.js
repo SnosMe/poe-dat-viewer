@@ -5,15 +5,6 @@ module.exports = {
   publicPath: process.env.NODE_ENV === 'production'
     ? '/poe-dat-viewer/'
     : '/',
-  pluginOptions: {
-    quasar: {
-      importStrategy: 'manual',
-      rtlSupport: false
-    }
-  },
-  transpileDependencies: [
-    'quasar'
-  ],
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({

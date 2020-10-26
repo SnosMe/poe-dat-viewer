@@ -7,7 +7,7 @@ import { DatSerializedHeader, getHeaderLength, validateImportedHeader, serialize
 import { updateFileHeaders } from '../dat/db'
 import { CPUTask } from '../cpu-task'
 import { readColumn } from '../dat/reader'
-import { Loading, Notify } from 'quasar'
+import { settings } from '@/app/workbench/workbench-core'
 
 export interface StateColumn {
   readonly offset: number
@@ -25,26 +25,9 @@ export interface StateColumn {
   }
 }
 
-class App {
-  exportSchemaDialog = false
-  helpDialog = false
-  importDialog = true
-  settingsDialog = false
-  config = {
-    rowNumStart: 0,
-    colNumStart: 0
-  }
-
-  viewers: Array<{ instance: Viewer }> = []
-
-  constructor () {
-    this.viewers.push({ instance: new Viewer(this) })
-  }
-}
-
 const ROW_NUM_MIN_LENGTH = 4
 
-class Viewer {
+export class Viewer {
   headers = [] as Header[]
   columns = [] as StateColumn[]
   datFile = null as DatFile | null
@@ -53,33 +36,24 @@ class Viewer {
   editHeader = null as Header | null
   rowSorting = null as number[] | null
 
-  // eslint-disable-next-line no-useless-constructor
-  constructor (
-    private app: App
-  ) {}
-
   async loadDat (parsed: DatFile, overrideHeaders?: DatSerializedHeader[]) {
-    Loading.show({ delay: 0 })
     try {
       await this._loadDat(parsed)
       try {
         const headers = overrideHeaders || parsed.meta.headers
         await this.tryImportHeaders(headers)
       } catch (e) {
-        Notify.create({ color: 'warning', message: e.message, progress: true })
+        window.alert(e.message)
       }
     } catch (e) {
-      Notify.create({ color: 'negative', message: e.message, progress: true })
+      window.alert(e.message)
       throw e
-    } finally {
-      Loading.hide()
     }
   }
 
   private async _loadDat (parsed: DatFile) {
-    const { app } = this
     this.columnStats = await analyze(parsed)
-    this.rowNumberLength = calcRowNumLength(parsed.rowCount, app.config.rowNumStart, ROW_NUM_MIN_LENGTH)
+    this.rowNumberLength = calcRowNumLength(parsed.rowCount, settings.rowNumStart, ROW_NUM_MIN_LENGTH)
     this.datFile = parsed
     this.columns = this.stateColumns(this.columnStats)
     this.rowSorting = null
@@ -96,13 +70,12 @@ class Viewer {
   }
 
   stateColumns (columnStats: ColumnStats[]) {
-    const { app } = this
     const columns = new Array(columnStats.length).fill(undefined)
       .map<StateColumn>((_, idx) => ({
         offset: idx,
-        colNum99: String((idx + app.config.colNumStart) % 100).padStart(2, '0'),
-        // colNum100: String(Math.floor((idx + this.app.config.colNumStart) / 100)),
-        colNum100: String(idx + app.config.colNumStart).padStart(2, '0'),
+        colNum99: String((idx + settings.colNumStart) % 100).padStart(2, '0'),
+        // colNum100: String(Math.floor((idx + settings.colNumStart) / 100)),
+        colNum100: String(idx + settings.colNumStart).padStart(2, '0'),
         selected: false,
         header: null,
         dataStart: false,
@@ -245,5 +218,3 @@ class Viewer {
       ))
   }
 }
-
-export const app = new App()

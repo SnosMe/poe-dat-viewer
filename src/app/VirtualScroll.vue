@@ -45,7 +45,7 @@ export default {
     calculate () {
       const scrollTop = this.$el.scrollTop
 
-      const count = Math.ceil(this.$el.offsetHeight / this.itemHeight)
+      const count = Math.floor(this.$el.offsetHeight / this.itemHeight) + 2
       const startIdx = Math.floor(scrollTop / this.itemHeight)
 
       this.top = (startIdx * this.itemHeight) + this.headerHeight

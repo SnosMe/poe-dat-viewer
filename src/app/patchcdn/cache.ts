@@ -1,9 +1,8 @@
-import { Notify } from 'quasar'
-import Vue from 'vue'
+import { reactive } from 'vue'
 
 const BUNDLE_DIR = 'Bundles2'
 
-export const progress = Vue.observable({
+export const progress = reactive({
   totalSize: 0,
   received: 0,
   active: false,
@@ -19,7 +18,7 @@ export async function fetchFile (patchVer: string | null, name: string) {
   try {
     return await _fetchFile(patchVer, name)
   } catch (e) {
-    Notify.create({ color: 'negative', message: e.message, caption: 'You may need to adjust the patch version.', progress: true })
+    window.alert('You may need to adjust the patch version.')
     throw e
   }
 }

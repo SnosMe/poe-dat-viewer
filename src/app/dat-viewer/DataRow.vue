@@ -17,26 +17,25 @@
 </template>
 
 <script>
-import { formatRow } from './viewer/formatting'
+import { formatRow } from '../viewer/formatting'
+import { settings } from '@/app/workbench/workbench-core'
 
 export default {
   props: ['rowIdx', 'format'],
-  inject: ['viewer', 'app'],
+  inject: ['viewer'],
   computed: {
     formatted () {
       return formatRow(this.rowIdx, this.format, this.viewer.datFile)
     },
     rowNum () {
-      return String(this.rowIdx + this.app.config.rowNumStart)
+      return String(this.rowIdx + settings.rowNumStart)
         .padStart(this.viewer.rowNumberLength, ' ')
     }
   }
 }
 </script>
 
-<style lang="scss">
-@import '@/styles/quasar.variables';
-
+<style lang="postcss">
 .viewer-row {
   white-space: pre;
   padding: 0 calc(var(--ppc) / 2);
@@ -46,11 +45,9 @@ export default {
   text-overflow: ellipsis;
 
   &.viewer-row--border {
-    border-left: 1px solid $grey-5;
   }
 
   &.viewer-row--selected {
-    background: $blue-2;
   }
 
   &:nth-child(2) {
@@ -63,8 +60,5 @@ export default {
   position: sticky;
   left: 0;
   padding: 0 0.25rem;
-  background: $grey-1;
-  color: $blue-8;
-  border-right: 1px solid $blue-grey-1;
 }
 </style>
