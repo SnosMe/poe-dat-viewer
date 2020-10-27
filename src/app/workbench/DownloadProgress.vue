@@ -36,5 +36,6 @@ export default defineComponent({
   @apply m-6;
   @apply shadow;
   @apply border;
+  @apply text-base;
 }
 </style>

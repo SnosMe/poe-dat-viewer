@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 overflow-auto">
+  <div class="p-4 overflow-auto border-l flex-1 text-base">
     <div class="inline-flex items-baseline border-b pb-2">
       <div style="width: 200px;" class="my-1">
         <input value="patchcdn.pathofexile.com/" readonly :class="$style.input" />
