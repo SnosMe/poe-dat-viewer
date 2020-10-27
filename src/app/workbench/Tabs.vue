@@ -1,16 +1,17 @@
 <template>
   <div :class="$style.titlebar">
-    <div class="mx-4 pt-2 flex overflow-hidden">
+    <div class="flex overflow-hidden divide-x divide-gray-700">
       <div v-for="tab in tabs" :key="tab.id"
         :class="[$style.tab, { [$style.active]: tab.isActive }]">
-        <button class="pl-2 pr-1 py-2">{{ tab.title }}</button>
-        <button class="pl-1 pr-2 py-2"><i class="las la-times"></i></button>
+        <button class="pl-3 pr-1.5"
+          @click="setActiveTab(tab.id)">{{ tab.title }}</button>
+        <button class="pl-1.5 pr-3" title="Close"><i class="codicon codicon-close"></i></button>
       </div>
     </div>
-    <div class="p-2 flex-shrink-0">
-      <button class="hover:bg-gray-400 hover:text-black p-1 mr-1">Import</button>
-      <button class="hover:bg-gray-400 hover:text-black p-1 mr-1">Help</button>
-      <button class="hover:bg-gray-400 hover:text-black p-1">Settings</button>
+    <div class="flex p-1.5 flex-shrink-0 space-x-1">
+      <button class="hover:bg-gray-400 hover:text-black p-2">Import</button>
+      <button class="hover:bg-gray-400 hover:text-black px-2" title="Help"><i class="codicon codicon-question"></i></button>
+      <button class="hover:bg-gray-400 hover:text-black px-2" title="Settings"><i class="codicon codicon-settings"></i></button>
     </div>
   </div>
 </template>
@@ -48,8 +49,6 @@ export default defineComponent({
 
 .tab {
   display: flex;
-  align-items: baseline;
-  @apply mx-px;
 
   &:hover {
     @apply bg-gray-400;
@@ -58,8 +57,6 @@ export default defineComponent({
 
   &.active {
     @apply bg-gray-900;
-    @apply border-t border-gray-600;
-    @apply -mt-px;
 
     &:hover {
       @apply bg-gray-700;

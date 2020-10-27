@@ -3,21 +3,20 @@
     <div class="viewer-col-rownum"
       >{{ ''.padStart(viewer.rowNumberLength) }}</div>
     <!-- // -->
-    <div style="display: flex; flex-direction: column;">
-      <div class="flex no-wrap">
-        <!-- eslint-disable-next-line vue/require-v-for-key -->
-        <button v-for="col in headers"
+    <div class="flex flex-col">
+      <div class="flex">
+        <button v-for="col in headers" :key="col.offset"
           class="viewer-col viewer-col--border"
           :style="{ width: calcHeaderWidth(col) }"
           @click="editHeader(col)">
           <span v-if="col.name === null">{{ '\u00a0' }}</span>
-          <span v-else-if="col.name === ''" class="bg-blue-grey-6 text-grey-2 rounded-borders q-px-px">?</span>
+          <span v-else-if="col.name === ''" class="bg-gray-600 text-gray-300 px-1">?</span>
           <template v-else>{{ col.name }}</template>
         </button>
         <div v-if="!headers.length" class="viewer-col" style="padding-top: 1.5rem; padding-bottom: 1.5rem;"
           >File doesn't have data (enum)</div>
       </div>
-      <div class="flex no-wrap">
+      <div class="flex">
         <button v-for="col in columns" :key="col.offset"
           class="viewer-col"
           :class="{
@@ -31,7 +30,7 @@
           @touchmove="selectColumn(col.offset, $event)"
           >{{ col.colNum99 }}</button>
       </div>
-      <div class="flex no-wrap">
+      <div class="flex">
         <div v-for="col in columns" :key="col.offset"
           class="viewer-col-stat"
           :class="{
@@ -42,19 +41,19 @@
         >
           <template v-if="!col.header">
             <div v-if="col.stats.string"
-              class="viewer-col-stat_indicator bg-brown-4"
+              class="viewer-col-stat_indicator bg-yellow-600"
               style="top: 0;" />
             <div v-if="col.stats.array"
-              class="viewer-col-stat_indicator bg-teal-4"
+              class="viewer-col-stat_indicator bg-teal-500"
               style="top: var(--ppc);" />
             <div v-if="col.stats.b00"
-              class="viewer-col-stat_indicator bg-grey-10"
+              class="viewer-col-stat_indicator bg-gray-900"
               style="top: calc(var(--ppc) * 2);" />
             <div v-else-if="col.stats.nullable"
-              class="viewer-col-stat_indicator bg-pink-4"
+              class="viewer-col-stat_indicator bg-pink-500"
               style="top: calc(var(--ppc) * 2);" />
             <div v-if="col.selected"
-              class="viewer-col-stat_indicator bg-grey-10"
+              class="viewer-col-stat_indicator bg-gray-900"
               style="top: 0; height: calc(var(--ppc) * 3); opacity: 0.25;" />
             <div
               class="viewer-col-stat_max"
@@ -170,7 +169,7 @@ export default {
 
 <style lang="postcss">
 .viewer-col {
-  border: none;
+  @apply text-gray-700;
   cursor: pointer;
   padding: 0 calc(var(--ppc) / 2);
   text-align: center;
@@ -180,16 +179,22 @@ export default {
   overflow: hidden;
 
   &.viewer-col--border {
+    @apply border-l border-gray-500;
   }
 
   &:hover {
+    @apply bg-blue-400;
+    @apply text-white;
   }
 
   &.viewer-col--selected {
+    @apply bg-blue-500;
+    @apply text-blue-100;
   }
 
   &.viewer-col--selected.viewer-col--border,
   &.viewer-col--selected + &.viewer-col--border {
+    @apply border-blue-700;
   }
 
   &:first-child { border: none; }
@@ -202,11 +207,14 @@ export default {
   position: relative;
 
   &.viewer-col-stat--border {
+    @apply border-l border-gray-500;
   }
 
   &.viewer-col-stat--selected + &.viewer-col-stat--border {
+    @apply border-gray-600;
   }
   &.viewer-col-stat--selected.viewer-col-stat--border {
+    @apply border-gray-500;
   }
 
   &:first-child { border: none; }
@@ -229,6 +237,7 @@ export default {
   cursor: default;
   line-height: calc(var(--ppc) * 3);
   position: relative;
+  @apply text-gray-100;
   text-shadow: 0 0 0.5ch rgba(0,0,0,0.7);
   background: #757575b0;
 
@@ -238,6 +247,7 @@ export default {
 }
 
 .viewer-col-rownum {
+  @apply bg-gray-200;
   position: sticky;
   top: 0;
   left: 0;
@@ -250,6 +260,8 @@ export default {
 
 .viewer-sticky-head {
   display: flex;
+  @apply bg-gray-200;
+  @apply shadow;
   position: sticky;
   top: 0;
   min-width: min-content;

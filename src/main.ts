@@ -1,4 +1,4 @@
 import { createApp } from 'vue'
-import App from './App.vue'
+import Workbench from './app/workbench/Workbench.vue'
 
-createApp(App).mount('#app')
+createApp(Workbench).mount('#app')

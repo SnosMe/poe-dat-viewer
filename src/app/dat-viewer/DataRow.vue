@@ -45,9 +45,11 @@ export default {
   text-overflow: ellipsis;
 
   &.viewer-row--border {
+    @apply border-l border-gray-500;
   }
 
   &.viewer-row--selected {
+    @apply bg-blue-200;
   }
 
   &:nth-child(2) {
@@ -60,5 +62,8 @@ export default {
   position: sticky;
   left: 0;
   padding: 0 0.25rem;
+  @apply bg-gray-100;
+  @apply text-blue-700;
+  @apply border-r border-gray-300;
 }
 </style>

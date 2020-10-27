@@ -1,11 +1,11 @@
 <template>
   <div class="layout-column flex-shrink-0" :style="{ 'width': showTree ? '300px' : undefined }">
-    <div class="flex p-1 items-center">
+    <div class="flex p-1 items-center mb-px">
       <button
         title="Toggle tree visibility"
         :class="$style.treeToggle"
         @click="toggleTree"
-        ><i class="las la-bars"></i></button>
+        ><i class="codicon codicon-list-flat"></i></button>
       <input v-if="showTree"
         v-model.trim="searchText"
         placeholder="Search in current folder"
@@ -20,15 +20,16 @@
       <virtual-scroll
         class="flex-1"
         :items="tree"
-        :item-height="24"
+        :item-height="22"
       >
         <template v-slot="props">
           <div :style="{ height: props.height + 'px' }">
             <div v-for="(item, idx) in props.items" :key="item.fullPath"
               :class="$style.itemBtn"
-              :style="{ top: (props.top + (idx * (24))) + 'px' }">
+              :style="{ top: (props.top + (idx * (22))) + 'px' }">
               <button @click="handleTreeNav(item)">
-                <i v-if="!item.isFile" class="las la-folder-open mr-3"></i>{{ item.label }}</button>
+                <i v-if="!item.isFile" class="codicon codicon-folder pr-3"></i
+                >{{ item.label }}</button>
             </div>
           </div>
         </template>
@@ -105,7 +106,8 @@ function useTreeNavigation () {
         openTab({
           id: `bundles@${item.fullPath}`,
           title: item.label,
-          type: DatViewer,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          type: DatViewer as any,
           args: {
             fileContent,
             fullPath: item.fullPath
@@ -175,12 +177,12 @@ export default defineComponent({
 }
 
 .searchInput {
-  @apply h-6;
+  @apply h-7;
   @apply border;
   box-sizing: content-box;
   @apply flex-1;
   @apply mx-1;
-  @apply px-1;
+  @apply px-1 py-px;
 
   &:focus {
     @apply border-blue-500;
@@ -190,13 +192,13 @@ export default defineComponent({
 .itemBtn {
   position: absolute;
   width: 100%;
-  line-height: 1;
-  @apply px-2 py-px;
+  line-height: 22px;
+  @apply px-2;
 
   & > button {
     width: 100%;
     text-align: left;
-    @apply p-1;
+    @apply px-1;
     @apply truncate;
 
     &:hover {
