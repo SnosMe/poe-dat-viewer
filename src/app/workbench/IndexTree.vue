@@ -19,19 +19,18 @@
         class="italic text-center text-gray-600 p-2">No results found</div>
       <virtual-scroll
         class="flex-1"
+        :scrollable-props="{ style: 'background: #fff;', widthY: 10 }"
         :items="tree"
         :item-height="22"
       >
         <template v-slot="props">
-          <div :style="{ height: props.height + 'px' }">
-            <div v-for="(item, idx) in props.items" :key="item.fullPath"
+          <button v-for="entry in props.entries" :key="entry.item.fullPath"
               :class="$style.itemBtn"
-              :style="{ top: (props.top + (idx * (22))) + 'px' }">
-              <button @click="handleTreeNav(item)">
-                <i v-if="!item.isFile" class="codicon codicon-folder pr-3"></i
-                >{{ item.label }}</button>
-            </div>
-          </div>
+            :style="{ transform: `translate(0, ${entry.top}px` }"
+            @click="handleTreeNav(entry.item)"
+          >
+            <i v-if="!entry.item.isFile" class="codicon codicon-folder pr-3"></i
+            >{{ entry.item.label }}</button>
         </template>
       </virtual-scroll>
     </template>
@@ -191,19 +190,14 @@ export default defineComponent({
 
 .itemBtn {
   position: absolute;
-  width: 100%;
   line-height: 22px;
-  @apply px-2;
-
-  & > button {
-    width: 100%;
+  @apply px-3;
     text-align: left;
-    @apply px-1;
     @apply truncate;
+  width: 100%;
 
     &:hover {
       @apply bg-gray-200;
     }
   }
-}
 </style>
