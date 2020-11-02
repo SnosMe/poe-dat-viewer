@@ -2,6 +2,7 @@
 import Worker from 'worker-loader!./script'
 import * as Comlink from 'comlink'
 import type { WorkerRPC } from './script'
+import type { DatFile } from '../dat/dat-file'
 
 const thread = Comlink.wrap<WorkerRPC>(new Worker())
 
@@ -22,4 +23,8 @@ export function decompressFileTransferBundle (bundle: ArrayBuffer, offset: numbe
     offset,
     size
   )
+}
+
+export function analyzeDatFile (datFile: DatFile) {
+  return thread.analyzeDatFile(datFile)
 }
