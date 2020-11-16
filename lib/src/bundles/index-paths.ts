@@ -1,5 +1,5 @@
-import { fnv1a64 } from './utils/fnv1a64'
-import { findSequence } from '../dat/reader'
+import { findSequence } from '../utils/findSequence'
+import { fnv1a64 } from '../utils/fnv1a64'
 
 /* eslint-disable */
 const S_HASH        = 8; const S_HASH$        = 0
@@ -162,6 +162,7 @@ function _pathsSanityCheck (pathReps: Uint8Array, dirsInfo: Uint8Array) {
         if (
           dirsReader.getInt32(structOffset + S_DIRECT_SIZE$, true) !==
           dirsReader.getInt32(structOffset + S_ALL_SIZE$, true)) {
+          // has empty dirs inside
           console.log('[warn] Doesn\'t have child dirs but `payload_recursive_size` isn\'t same as `payload_size`:', dir)
         }
       }

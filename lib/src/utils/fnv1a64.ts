@@ -1,4 +1,4 @@
-import fnv from 'fnv-plus'
+import * as fnv from 'fnv-plus'
 
 export function fnv1a64 (data: string) {
   const hashHex = fnv.fast1a64(data)

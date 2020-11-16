@@ -1,0 +1,5 @@
+export { readDatFile } from './dat/dat-file'
+export { readColumn } from './dat/reader'
+export { getHeaderLength } from './dat/header'
+export type { DatFile } from './dat/dat-file'
+export type { Header } from './dat/header'

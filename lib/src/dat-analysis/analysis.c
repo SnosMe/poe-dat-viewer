@@ -50,6 +50,7 @@ void app_analyze_dat(
     stats[bi].arr_keySelf = true;
   }
 
+  if (row_len == 0) return;
   size_t row_count = dataFixed_len / row_len;
 
   for (size_t ri = 0; ri < row_count; ++ri) {

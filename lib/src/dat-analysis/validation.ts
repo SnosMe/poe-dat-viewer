@@ -1,66 +1,15 @@
-import { Header } from '../viewer/headers'
-import { ColumnStats } from '../dat/analysis'
+import type { ColumnStats } from './stats'
+import type { Header } from '../dat/header'
+import type { DatFile } from '../dat/dat-file'
 
-export interface DatSerializedHeader {
-  name: string | null
-  length?: number
-  type: {
-    ref?: { array: boolean }
-    boolean?: {}
-    integer?: { unsigned: boolean, size: number }
-    decimal?: { size: number }
-    string?: {}
-    key?: { foreign: boolean }
-  }
-}
-
-export function exportInternalState (headers: Header[], name: string) {
-  return JSON.stringify({
-    name: name,
-    headers: serializeHeaders(headers)
-  }, null, 2)
-}
-
-export function serializeHeaders (headers: Header[]) {
-  return headers.map<DatSerializedHeader>(header => ({
-    name: header.name,
-    length: (header.type.ref || header.type.key) ? undefined : header.length,
-    type: {
-      ...header.type,
-      byteView: undefined
-    }
-  }))
-}
-
-export function getHeaderLength (header: DatSerializedHeader, memsize: number) {
-  if (header.length) return header.length
-
-  if (header.type.ref?.array) {
-    return memsize * 2
-  } else if (header.type.string) {
-    return memsize
-  } else if (header.type.key) {
-    return header.type.key.foreign
-      ? memsize * 2
-      : memsize
-  }
-
-  throw new Error('Corrupted header')
-}
-
-export function validateImportedHeader (
-  header: Pick<Header, 'type' | 'offset' | 'length'>,
-  columns: ColumnStats[]
-): boolean {
+export function validateHeader (header: Header, columns: ColumnStats[], datFile: DatFile): boolean {
   const boolean = header.type.boolean
   const integer = header.type.integer
   const decimal = header.type.decimal
   const string = header.type.string
-  const array = header.type.ref?.array
+  const array = header.type.array
   const key = header.type.key
   const size = integer?.size || decimal?.size
-
-  // NOTE: keep in sync with `HeaderProps.vue`
 
   const space = columns.length - header.offset
   const stats = columns[header.offset]
@@ -100,7 +49,7 @@ export function validateImportedHeader (
   if (key && key.foreign) {
     return array
       ? stats.refArray && stats.refArray.keyForeign
-      : space >= header.length
+      : space >= datFile.fieldSize.KEY_FOREIGN
   }
 
   if (key && !key.foreign) {
@@ -109,5 +58,5 @@ export function validateImportedHeader (
       : stats.keySelf
   }
 
-  return space >= header.length
+  throw new Error('Unexpected type')
 }
