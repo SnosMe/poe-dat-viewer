@@ -3,13 +3,16 @@
 import type { DatFile } from '../dat/dat-file'
 import type { ColumnStats } from './stats'
 
+type AnalyzeFn = (
+  dataFixedPtr: number, dataFixed_len: number,
+  dataVariablePtr: number, dataVariable_len: number,
+  row_len: number,
+  statsPtr: number
+) => void
+
 interface Native extends EmscriptenModule {
-  _app_analyze_dat(
-    dataFixedPtr: number, dataFixed_len: number,
-    dataVariablePtr: number, dataVariable_len: number,
-    row_len: number,
-    statsPtr: number
-  ): void
+  _app_analyze_dat32: AnalyzeFn
+  _app_analyze_dat64: AnalyzeFn
 }
 
 const Module = require('./app.js') as EmscriptenModuleFactory<Native>
@@ -33,7 +36,10 @@ export async function analyzeDatFile (file: DatFile) {
 
   const statsPtr = module._malloc(STATS_SIZE * file.rowLength)
 
-  module._app_analyze_dat(
+  const analyzeDat = (file.memsize === 4)
+    ? module._app_analyze_dat32
+    : module._app_analyze_dat64
+  analyzeDat(
     dataFixedPtr, file.dataFixed.byteLength,
     dataVariablePtr, file.dataVariable.byteLength,
     file.rowLength,
