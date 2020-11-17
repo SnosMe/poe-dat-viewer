@@ -17,7 +17,8 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '12'
-    - run: yarn --frozen-lockfile
+    - run: rm package.json
+    - run: yarn
       working-directory: viewer
     - run: yarn build
       working-directory: viewer
