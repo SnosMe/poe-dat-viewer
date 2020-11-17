@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #define DAT_MAGIC_BBBB_SIZE 8
+#define DAT_STR_TERMINATOR 4
 
 #pragma pack(push, 1)
 typedef struct {
