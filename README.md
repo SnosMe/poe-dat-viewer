@@ -6,15 +6,9 @@ https://snosme.github.io/poe-dat-viewer
 
 - Supports .dat and .dat64
 - Can upload file from PC or import from PoE patch server
-- Performs file analysis to find possible headers
-- Schema export to PyPoE/pogo/C struct
+- Performs file analysis to find possible columns
 
-![](./src/assets/showcase.png?raw=true) 
-
-## Development
-
-1. Install dependencies `yarn install`
-2. Build and hot-reload `yarn serve`
+![](./viewer/src/assets/showcase.png?raw=true) 
 
 ## Related projects
 
