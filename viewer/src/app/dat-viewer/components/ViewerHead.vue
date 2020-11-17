@@ -5,7 +5,8 @@
         class="datv-header" :class="{ 'datv-col--border': col.border }"
         :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
         :title="col.name"
-        @click="editHeader(col.offset)">
+        @click="editHeader(col.offset)"
+        @wheel="handleHeaderWheel(col.offset, $event)">
         <template v-if="col.name === null">&nbsp;</template>
         <span v-else-if="col.name === ''" class="bg-gray-600 text-gray-300 px-1">?</span>
         <template v-else>{{ col.name }}</template>
@@ -140,6 +141,16 @@ export default defineComponent({
       }
     }
 
+    function handleHeaderWheel (offset: number, e: WheelEvent) {
+      e.preventDefault()
+      const header = viewer.headers.value.find(h => h.offset === offset)!
+      if (header.textLength != null) {
+        header.textLength = Math.max(1, header.textLength -
+          Math.sign(e.deltaY) * (e.ctrlKey ? 4 * 3 - 2 : 1))
+        triggerRef(viewer.headers)
+      }
+    }
+
     const headers = computed(() =>
       renderHeaderCols(viewer.headers.value, props.left, props.left + props.width))
 
@@ -148,6 +159,7 @@ export default defineComponent({
       selectStart,
       selectContinue,
       editHeader,
+      handleHeaderWheel,
       headersRowStyle: computed(() =>
         ({ transform: `translate(${-props.left}px, 0)`, lineHeight: rendering.COLUMN_BYTE_HEIGHT + 'px', fontFamily: rendering.FONT_FAMILY, fontSize: rendering.FONT_SIZE + 'px' })),
       colsRowStyle: computed(() =>
