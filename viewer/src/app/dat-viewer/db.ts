@@ -98,7 +98,7 @@ function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
           : undefined,
         key:
           column.type === 'rowidx' ? {
-            foreign: (column.references as { table: string }).table !== name
+            foreign: column.references ? (column.references as { table: string }).table !== name : false
           }
           : undefined
       },
