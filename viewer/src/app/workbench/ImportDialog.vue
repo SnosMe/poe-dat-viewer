@@ -49,14 +49,14 @@ export default defineComponent({
       cdnImport()
     }
 
-    async function handleFile (e) {
-      const fileContent = new Uint8Array(await e.arrayBuffer())
-      const fileName = e.name
+    async function handleFile (e: Event) {
+      const elFile = (e.target as HTMLInputElement).files![0]
+      const fileContent = new Uint8Array(await elFile.arrayBuffer())
+      const fileName = elFile.name
       openTab({
         id: `file@${fileName}`,
         title: fileName,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        type: DatViewer as any,
+        type: DatViewer,
         args: {
           fileContent,
           fullPath: fileName

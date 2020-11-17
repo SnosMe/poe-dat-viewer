@@ -4,10 +4,14 @@
     <viewer-tabs />
     <div class="layout-column flex-1 min-h-0">
       <component
+        v-if="activeTab"
         :is="activeTab.type"
         :args="activeTab.args"
         :key="activeTab.id"
         v-model:ka-state="activeTab.kaState" />
+      <div v-else
+        class="bg-gray-100 flex-1 text-lg text-gray-600 flex items-center justify-center"
+        >The viewer is ready to fulfill your wishes 👾</div>
     </div>
     <div class="app-footer">
       <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>

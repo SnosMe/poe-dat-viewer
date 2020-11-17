@@ -155,11 +155,14 @@ export default defineComponent({
       watch(headerRef, (value) => {
         if (watchStop) {
           watchStop()
+          watchStop = null
         }
-        watchStop = watch(value, () => {
-          triggerRef(viewer.headers)
-          saveHeaders(viewer)
-        }, { deep: true })
+        if (value) {
+          watchStop = watch(value, () => {
+            triggerRef(viewer.headers)
+            saveHeaders(viewer)
+          }, { deep: true })
+        }
       })
     }
 

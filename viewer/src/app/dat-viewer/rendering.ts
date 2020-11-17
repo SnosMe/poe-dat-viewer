@@ -31,7 +31,7 @@ export function rowsNumWidth (rowCount: number) {
 }
 
 export function rowsOverlayWidth (rowCount: number) {
-  return Math.ceil(rowNumLength(rowCount) * CHAR_WIDTH) + (8 * 2)
+  return rowsNumWidth(rowCount) + (8 * 2)
 }
 
 function getMonoFontWidth (fontSize: number, fontFamily: string): number {

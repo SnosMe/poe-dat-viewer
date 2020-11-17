@@ -1,9 +1,9 @@
 <template>
-  <div class="absolute overflow-hidden">
+  <div class="datv-header-layer">
     <div :style="headersRowStyle" class="absolute">
       <button v-for="col in headers" :key="col.offset"
         class="datv-header" :class="{ 'datv-col--border': col.border }"
-        :style="{ width: col.widthPx + 'px', left: col.leftPx + 'px' }"
+        :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
         :title="col.name"
         @click="editHeader(col.offset)">
         <template v-if="col.name === null">&nbsp;</template>
@@ -18,7 +18,7 @@
           'datv-col--border': col.border,
           'datv-byte--selected': col.selected
         }"
-        :style="{ width: col.widthPx + 'px', left: col.leftPx + 'px' }"
+        :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
         @mousedown="selectStart(col.offset)"
         @mouseenter="selectContinue(col.offset, $event)"
         :title="col.offset"
@@ -32,7 +32,7 @@
           'datv-col--border': col.border,
           'datv-byte--selected': col.selected
         }"
-        :style="{ width: col.widthPx + 'px', left: col.leftPx + 'px' }"
+        :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
       >
         <template v-if="col.stat">
           <div v-if="col.stat.string"
@@ -86,6 +86,14 @@ export default defineComponent({
       colsBeforeSelection = [...viewer.columnSelection.value]
       toggleColsBetween(viewer.columnSelection.value, selectionStart, selectionStart, viewer.headers.value)
       triggerRef(viewer.columnSelection)
+
+      document.addEventListener('mouseup', cancelSelection)
+      document.addEventListener('mouseleave', cancelSelection)
+      function cancelSelection () {
+        selectionStart = -1
+        document.removeEventListener('mouseup', cancelSelection)
+        document.removeEventListener('mouseleave', cancelSelection)
+      }
     }
 
     function selectContinue (offset: number, e: MouseEvent) {
@@ -248,5 +256,13 @@ export default defineComponent({
   .datv-stats_row:hover & {
     visibility: visible;
   }
+}
+
+.datv-header-layer {
+  position: absolute;
+  overflow: hidden;
+  transform: translate3d(0, 0, 0);
+  contain: strict;
+  @apply bg-gray-200;
 }
 </style>

@@ -13,6 +13,13 @@
         type="search" spellcheck="false">
     </div>
     <template v-if="showTree">
+      <div v-if="extensionOpts"
+        class="flex gap-x-1 border-b pb-1.5 px-2 justify-end">
+        <button v-for="opt in extensionOpts" :key="opt.value"
+          @click="opt.handleClick"
+          :class="['px-2', (opt.active ? 'bg-gray-300' : 'hover:bg-gray-200') ]"
+          v-text="opt.value" />
+      </div>
       <div v-if="!isIndexLoaded"
         class="italic text-center text-gray-600 p-2">Waiting for Index bundle...</div>
       <div v-if="isIndexLoaded && !tree.length"
@@ -108,8 +115,7 @@ function useTreeNavigation () {
         openTab({
           id: `bundles@${item.fullPath}`,
           title: item.label,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          type: DatViewer as any,
+          type: DatViewer,
           args: {
             fileContent,
             fullPath: item.fullPath
@@ -126,6 +132,7 @@ function useTreeNavigation () {
   }
 
   return {
+    currentDir,
     tree,
     handleTreeNav
   }
@@ -143,15 +150,26 @@ export default defineComponent({
       return Boolean(index.value)
     })
 
-    const { tree, handleTreeNav } = useTreeNavigation()
+    const { tree, handleTreeNav, currentDir } = useTreeNavigation()
+
+    const searchExtension = shallowRef('.dat64')
+    const extensionOpts = computed(() => {
+      if (!currentDir.value.startsWith('Data')) return null
+
+      return ['.dat', '.dat64', '.datl', '.datl64'].map(ext => ({
+        value: ext,
+        active: searchExtension.value === ext,
+        handleClick: () => { searchExtension.value = ext }
+      }))
+    })
 
     const searchText = shallowRef('')
     const filteredTree = computed(() => {
-      if (!searchText.value) return tree.value
-
       const term = searchText.value.toLowerCase()
+      const ext = extensionOpts.value ? searchExtension.value : ''
       return tree.value.filter(item => {
-        return item.label.toLowerCase().includes(term)
+        return item.label.toLowerCase().includes(term) &&
+          (item.isFile ? item.label.endsWith(ext) : true)
       })
     })
 
@@ -161,7 +179,8 @@ export default defineComponent({
       tree: filteredTree,
       handleTreeNav,
       searchText,
-      isIndexLoaded
+      isIndexLoaded,
+      extensionOpts
     }
   }
 })

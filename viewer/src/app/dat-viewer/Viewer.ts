@@ -5,7 +5,7 @@ import { getHeaderLength } from 'pathofexile-dat/dat/header'
 import { Header, createHeaderFromSelected, byteView } from './headers'
 import * as db from './db'
 import { clearColumnSelection, selectColsByHeader } from './selection'
-import { shallowRef, Ref, triggerRef } from 'vue'
+import { shallowRef, Ref, triggerRef, shallowReactive } from 'vue'
 import { analyzeDatFile } from '../worker/interface'
 
 export interface Viewer {
@@ -16,6 +16,7 @@ export interface Viewer {
   columnSelection: Ref<boolean[]>
   editHeader: Ref<Header | null>
   rowSorting: Ref<number[] | null>
+  scrollPos: { x: number, y: number }
 }
 
 export function createViewer (path: string, fileContent: Uint8Array): Viewer {
@@ -36,7 +37,8 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     columnStats: shallowRef([]),
     columnSelection: shallowRef(new Array(parsed.rowLength).fill(false)),
     editHeader: shallowRef(null),
-    rowSorting: shallowRef(null)
+    rowSorting: shallowRef(null),
+    scrollPos: shallowReactive({ x: 0, y: 0 })
   }
 
   analyzeDatFile(viewer.datFile).then(async stats => {

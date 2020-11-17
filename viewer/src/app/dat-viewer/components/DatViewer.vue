@@ -10,6 +10,7 @@
         />
       </div>
       <canvas-scroll
+        ref="canvasScroll"
         class="absolute bg-white"
         @scroll="handleScroll"
         :style="scrollableStyle"
@@ -21,7 +22,7 @@
       <div :class="$style.rowsOverlay" :style="rowsOverlayStyle">
         <div class="absolute" :style="{ transform: `translate(0, ${renderItems.top}px)` }">
           <div v-for="(rowIdx, i) in renderItems.ids" :key="rowIdx"
-            :style="{ transform: `translate(0, ${i * LINE_HEIGHT}px)`, position: 'absolute' }"
+            :style="{ transform: `translate(0, ${i * LINE_HEIGHT}px)`, width: rowsNumberWidth, position: 'absolute' }"
             v-text="rowIdx" />
         </div>
       </div>
@@ -31,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, computed, provide, watch, shallowRef, shallowReactive, ref, render } from 'vue'
+import { defineComponent, PropType, reactive, computed, provide, watch, shallowRef, shallowReactive, ref, render, onMounted } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
 import { Viewer, createViewer } from '../Viewer'
@@ -69,6 +70,11 @@ export default defineComponent({
 
     const canvasRef = ref<HTMLCanvasElement | null>(null)
 
+    const canvasScroll = ref<{ scrollTo(x: number, y: number): void } | null>(null)
+    onMounted(() => {
+      canvasScroll.value!.scrollTo(viewer.scrollPos.x, viewer.scrollPos.y)
+    })
+
     const rowIndices = computed(() => {
       if (viewer.rowSorting.value) {
         return viewer.rowSorting.value
@@ -85,7 +91,7 @@ export default defineComponent({
       paintWidth.value = sz.width
       paintHeight.value = sz.height
     }
-    const scrollPos = shallowReactive({ x: 0, y: 0 })
+    const { scrollPos } = viewer
     function handleScroll (pos: { y: number, x: number }) {
       scrollPos.x = pos.x
       scrollPos.y = pos.y
@@ -179,7 +185,9 @@ export default defineComponent({
       renderColumns,
       scrollLeft: computed(() => scrollPos.x),
       rowsWidth: computed(() => Math.min(rowsFullWidth.value, rowsWidth.value)),
-      LINE_HEIGHT: rendering.LINE_HEIGHT
+      LINE_HEIGHT: rendering.LINE_HEIGHT,
+      canvasScroll,
+      rowsNumberWidth: (rendering.rowsNumWidth(viewer.datFile.rowCount) + 'px')
     }
   }
 })
@@ -197,6 +205,7 @@ export default defineComponent({
   padding-right: 8px;
   text-align: right;
   box-shadow: #cacaca 0 6px 6px -6px inset;
+  user-select: none;
 }
 
 .canvasShadow {

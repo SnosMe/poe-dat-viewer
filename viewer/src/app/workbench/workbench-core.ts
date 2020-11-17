@@ -1,10 +1,5 @@
-import { shallowRef, shallowReactive, DefineComponent } from 'vue'
+import { shallowRef, shallowReactive, DefineComponent, triggerRef } from 'vue'
 import ImportDialog from './ImportDialog.vue'
-
-export const settings = shallowReactive({
-  rowNumStart: 0,
-  colNumStart: 0
-})
 
 interface Tab {
   id: string
@@ -14,9 +9,9 @@ interface Tab {
   kaState: unknown
 }
 
-export const activeTabId = shallowRef('poe-dat-viewer@import')
+export const activeTabId = shallowRef<string | null>('poe-dat-viewer@import')
 
-export function setActiveTab (id: string) {
+export function setActiveTab (id: string | null) {
   activeTabId.value = id
 }
 
@@ -24,7 +19,7 @@ export const tabs = shallowRef<Tab[]>([
   {
     id: 'poe-dat-viewer@import',
     title: 'Import',
-    type: ImportDialog,
+    type: ImportDialog as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     args: undefined,
     kaState: undefined
   }
@@ -33,7 +28,8 @@ export const tabs = shallowRef<Tab[]>([
 interface OpenTabParams {
   id: string
   title: string
-  type: DefineComponent
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type: any // vue.DefineComponent
   args: unknown
 }
 
@@ -48,5 +44,20 @@ export function openTab (params: OpenTabParams) {
       kaState: undefined
     })
   }
-  activeTabId.value = params.id
+  setActiveTab(params.id)
+  triggerRef(tabs)
+}
+
+export function closeTab (id: string) {
+  const idx = tabs.value.findIndex(tab => tab.id === id)
+  if (id === activeTabId.value) {
+    if ((idx + 1) < tabs.value.length) {
+      setActiveTab(tabs.value[idx + 1].id)
+    } else if (idx !== 0) {
+      setActiveTab(tabs.value[idx - 1].id)
+    } else {
+      setActiveTab(null)
+    }
+  }
+  tabs.value = tabs.value.filter(tab => tab.id !== id)
 }
