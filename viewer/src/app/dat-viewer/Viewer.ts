@@ -47,9 +47,10 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     const headers = await db.findByName(viewer.name)
     try {
       tryImportHeaders(headers, viewer)
-      triggerRef(viewer.headers)
     } catch (e) {
       window.alert(`WARN: ${e.message}`)
+    } finally {
+      triggerRef(viewer.headers)
     }
   })
 

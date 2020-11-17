@@ -1,5 +1,6 @@
 import { openDB, DBSchema } from 'idb'
 import type { Header } from './headers'
+import { schema, SchemaEnum, SchemaTable } from '@/assets/schema'
 
 interface DatSchema {
   name: string
@@ -36,7 +37,7 @@ const db = openDB<PoeDatViewerSchema>('poe-dat-viewer', 3, {
 
 export async function findByName (name: string) {
   const record = await (await db).get('dat-schemas', name)
-  return record?.headers || []
+  return record?.headers || fromJsonSchema(name) || []
 }
 
 export async function saveHeaders (
@@ -62,4 +63,46 @@ function serializeHeaders (headers: Header[]) {
     ) ? undefined
       : header.length
   }))
+}
+
+function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
+  const sch = schema.find(s => s.name === name)
+  if (!sch || (sch as SchemaEnum).enum) return null
+
+  return (sch as SchemaTable).columns.map(column => {
+    return { /* eslint-disable indent */
+      name: column.name,
+      type: {
+        array: column.array,
+        integer:
+          column.type === 'uint8' ? { unsigned: true, size: 1 }
+          : column.type === 'uint16' ? { unsigned: true, size: 2 }
+          : column.type === 'uint32' ? { unsigned: true, size: 4 }
+          : column.type === 'uint64' ? { unsigned: true, size: 8 }
+          : column.type === 'int8' ? { unsigned: false, size: 1 }
+          : column.type === 'int16' ? { unsigned: false, size: 2 }
+          : column.type === 'int32' ? { unsigned: false, size: 4 }
+          : column.type === 'int64' ? { unsigned: false, size: 8 }
+          // TODO: dedicated type
+          : column.type === 'enum' ? { unsigned: true, size: 4 }
+          : undefined,
+        decimal:
+          column.type === 'float32' ? { size: 4 }
+          : column.type === 'float64' ? { size: 8 }
+          : undefined,
+        string:
+          column.type === 'string' ? {}
+          : undefined,
+        boolean:
+          column.type === 'bool' ? {}
+          : undefined,
+        key:
+          column.type === 'rowidx' ? {
+            foreign: (column.references as { table: string }).table !== name
+          }
+          : undefined
+      },
+      textLength: 4 * 3 - 1
+    }
+  })
 }
