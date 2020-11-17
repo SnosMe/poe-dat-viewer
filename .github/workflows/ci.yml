@@ -18,4 +18,6 @@ jobs:
       with:
         node-version: '12'
     - run: yarn --frozen-lockfile
+      working-directory: viewer
     - run: yarn build
+      working-directory: viewer

@@ -12,9 +12,11 @@ jobs:
       with:
         node-version: '12'
     - run: yarn --frozen-lockfile
+      working-directory: viewer
     - run: yarn build
+      working-directory: viewer
     - name: Publish
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+        publish_dir: ./viewer/dist
