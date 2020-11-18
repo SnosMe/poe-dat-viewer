@@ -55,7 +55,7 @@
 import { toggleColsBetween } from '../selection'
 import { sortRows } from '../sorting'
 import { defineComponent, inject, shallowRef, shallowReactive, watch, computed, triggerRef } from 'vue'
-import { Viewer } from '../Viewer'
+import { saveHeaders, Viewer } from '../Viewer'
 import * as rendering from '../rendering'
 import { Header } from '../headers'
 import { renderHeaderCols } from '../rendering/header-columns'
@@ -148,6 +148,7 @@ export default defineComponent({
         header.textLength = Math.max(1, header.textLength -
           Math.sign(e.deltaY) * (e.ctrlKey ? 4 * 3 - 2 : 1))
         triggerRef(viewer.headers)
+        saveHeaders(viewer)
       }
     }
 
