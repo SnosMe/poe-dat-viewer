@@ -1,8 +1,12 @@
 {
   "name": "pathofexile-dat",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "main": "index.js",
   "types": "index.d.ts",
+  "license": "MIT",
+  "repository": {
+    "url": "https://github.com/SnosMe/poe-dat-viewer"
+  },
   "dependencies": {
     "fnv-plus": "^1.0.0",
     "ooz-wasm": "^1.0.0"

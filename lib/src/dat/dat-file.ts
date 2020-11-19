@@ -31,7 +31,9 @@ export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFi
   if (boundary === -1) {
     throw new Error('Invalid file: section with variable data not found')
   }
-  const rowLength = (boundary - INT_ROWCOUNT) / rowCount
+  const rowLength = rowCount > 0
+    ? (boundary - INT_ROWCOUNT) / rowCount
+    : 0
 
   const dataFixed = file.subarray(INT_ROWCOUNT, boundary)
   const dataVariable = file.subarray(boundary)
