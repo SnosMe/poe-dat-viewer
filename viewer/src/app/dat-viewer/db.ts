@@ -84,7 +84,7 @@ function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
           : column.type === 'int32' ? { unsigned: false, size: 4 }
           : column.type === 'int64' ? { unsigned: false, size: 8 }
           // TODO: dedicated type
-          : column.type === 'enum' ? { unsigned: true, size: 4 }
+          : column.type === 'enum0' || column.type === 'enum1' ? { unsigned: true, size: 4 }
           : undefined,
         decimal:
           column.type === 'float32' ? { size: 4 }

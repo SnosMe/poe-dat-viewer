@@ -8,7 +8,7 @@ export type ColumnType =
   'string' |
   'rowidx' |
   'bool' |
-  'enum'
+  'enum0' | 'enum1'
 
 export interface TableColumn {
   name: string

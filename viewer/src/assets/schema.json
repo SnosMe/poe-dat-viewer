@@ -7,11 +7,11 @@
         "type": "string"
       },
       {
-        "name": "",
+        "name": "MinLevel",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "MaxLevel",
         "type": "int32"
       },
       {
@@ -31,23 +31,23 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "SpawnsMonsters",
         "array": true,
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "MonsterVarieties" }
       },
       {
-        "name": "",
+        "name": "Min_?",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Max_?",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "SubArea",
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "WorldAreas" }
       },
       {
         "name": "",
@@ -58,42 +58,52 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Min_1",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Max_1",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Min_2",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Max_2",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Min_3",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Max_3",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Variant",
         "type": "int32"
       }
     ]
   },
   {
     "name": "AbyssRegions",
-    "columns": []
+    "enum": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
   },
   {
     "name": "AbyssTheme",
-    "columns": []
+    "enum": [
+      "1",
+      "2",
+      "3"
+    ]
   },
   {
     "name": "AccountQuestFlags",
@@ -170,7 +180,7 @@
         "references": { "table": "AchievementSetsDisplay", "column": "Id" }
       },
       {
-        "name": "",
+        "name": "AchievementsRequired",
         "type": "int32"
       },
       {
@@ -180,7 +190,7 @@
         "references": { "table": "BaseItemTypes" }
       },
       {
-        "name": "",
+        "name": "AchievementsForTotemPiece",
         "type": "int32"
       },
       {
@@ -242,7 +252,7 @@
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "HideAchievementItems",
         "type": "bool"
       },
       {
@@ -250,15 +260,15 @@
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "MinCompletedItems",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "TwoColumnLayout",
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "ShowItemCompletionsAsOne",
         "type": "bool"
       },
       {
@@ -266,11 +276,11 @@
         "type": "string"
       },
       {
-        "name": "",
+        "name": "SoftcoreOnly",
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "HardcoreOnly",
         "type": "bool"
       },
       {
@@ -477,13 +487,14 @@
     "name": "AdditionalMonsterPacksFromStats",
     "columns": [
       {
-        "name": "Stats",
+        "name": "FromStat",
         "type": "rowidx",
         "references": { "table": "Stats" }
       },
       {
-        "name": "",
-        "type": "int32"
+        "name": "StatMode",
+        "type": "enum0",
+        "references": { "enum": "AdditionalMonsterPacksStatMode" }
       },
       {
         "name": "MonsterPacks",
@@ -492,7 +503,7 @@
         "references": { "table": "MonsterPacks" }
       },
       {
-        "name": "AdditionalMonsterPacksStatMode",
+        "name": "",
         "type": "int32"
       },
       {
@@ -655,9 +666,13 @@
     "name": "AfflictionFixedMods",
     "columns": [
       {
+        "name": "Rarity",
+        "type": "enum1",
+        "references": { "enum": "Rarity" }
+      },
+      {
         "name": "",
-        "type": "rowidx",
-        "references": { "table": "" }
+        "type": "int32"
       },
       {
         "name": "Mods",
@@ -1534,16 +1549,19 @@
       {
         "name": "",
         "array": true,
-        "type": "uint64"
+        "type": "rowidx",
+        "references": { "table": "" }
       },
       {
         "name": "",
-        "type": "uint64"
+        "type": "rowidx",
+        "references": { "table": "" }
       },
       {
         "name": "",
         "array": true,
-        "type": "uint64"
+        "type": "rowidx",
+        "references": { "table": "" }
       },
       {
         "name": "",
@@ -1736,11 +1754,11 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "MinTier",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "MaxTier",
         "type": "int32"
       },
       {
@@ -2366,7 +2384,7 @@
         "type": "rowidx"
       },
       {
-        "name": "",
+        "name": "IsDisabled",
         "type": "bool"
       },
       {
@@ -3345,9 +3363,9 @@
         "type": "string"
       },
       {
-        "name": "",
+        "name": "EncounterType",
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "BlightEncounterTypes" }
       },
       {
         "name": "",
@@ -3362,7 +3380,7 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Wave",
         "type": "int32"
       }
     ]
@@ -3573,9 +3591,10 @@
         "type": "string"
       },
       {
-        "name": "",
+        "name": "NextUpgradeOptions",
         "array": true,
-        "type": "int32"
+        "type": "rowidx",
+        "references": { "table": "BlightTowers" }
       },
       {
         "name": "",
@@ -6015,11 +6034,11 @@
     "name": "DelveCatchupDepths",
     "columns": [
       {
-        "name": "",
+        "name": "Level",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "Depth",
         "type": "int32"
       }
     ]
@@ -20437,8 +20456,9 @@
         "type": "bool"
       },
       {
-        "name": "",
-        "type": "int32"
+        "name": "Semantics",
+        "type": "enum0",
+        "references": { "enum": "StatSemantics" }
       },
       {
         "name": "",
@@ -20453,7 +20473,7 @@
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "IsVirtual",
         "type": "bool"
       },
       {
@@ -20492,7 +20512,7 @@
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "IsValueUsed",
         "type": "bool"
       }
     ]
