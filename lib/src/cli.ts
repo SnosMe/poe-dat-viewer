@@ -15,6 +15,7 @@ v8.setFlagsFromString('--experimental-wasm-simd')
 
 interface ExportConfig {
   patch: string
+  files: string[]
   tables: Array<{
     name: string
     columns: string[]
@@ -54,10 +55,20 @@ const TRANSLATIONS = [
   }
 
   await loadIndex()
+  
+  fs.rmSync(path.join(process.cwd(), 'files'), { recursive: true, force: true })
+  fs.mkdirSync(path.join(process.cwd(), 'files'))
+  for (const filePath of config.files) {
+    const name = path.basename(filePath)
+    fs.writeFileSync(
+      path.join(process.cwd(), 'files', name),
+      await getFileContent(filePath)
+    )
+  }
 
   for (const tr of TRANSLATIONS) {
-    fs.rmSync(path.join(process.cwd(), tr.name), { recursive: true, force: true })
-    fs.mkdirSync(path.join(process.cwd(), tr.name))
+    fs.rmSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true, force: true })
+    fs.mkdirSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true })
   }
   for (const target of config.tables) {
     for (const tr of TRANSLATIONS) {
@@ -65,7 +76,7 @@ const TRANSLATIONS = [
       const headers = importHeaders(target.name, datFile)
         .filter(hdr => target.columns.includes(hdr.name))
       fs.writeFileSync(
-        path.join(process.cwd(), tr.name, `${target.name}.json`),
+        path.join(process.cwd(), 'tables', tr.name, `${target.name}.json`),
         JSON.stringify(exportAllRows(headers, datFile), null, 2)
       )
     }
@@ -134,6 +145,14 @@ async function getDatFile (fullPath: string) {
     fullPath,
     await decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
   )
+}
+
+async function getFileContent (fullPath: string) {
+  console.log(`Saving '${fullPath}' ...`)
+
+  const location = getFileInfo(fullPath, INDEX.bundlesInfo, INDEX.filesInfo)
+  const bundleBin = await fetchFile(location.bundle)
+  return decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
 }
 
 async function fetchFile (name: string): Promise<ArrayBuffer> {
