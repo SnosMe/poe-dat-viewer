@@ -1,6 +1,6 @@
 import { openDB, DBSchema } from 'idb'
 import type { Header } from './headers'
-import { schema, SchemaEnum, SchemaTable } from '@/assets/schema'
+import { schema, SchemaEnum, SchemaTable } from 'pathofexile-dat/dat/schema'
 
 interface DatSchema {
   name: string

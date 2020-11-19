@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-export const schema = require('./schema.json') as Array<SchemaTable | SchemaEnum>
+export const schema = require('../data/schema.json') as Array<SchemaTable | SchemaEnum>
 
 export type ColumnType =
   'uint8' | 'uint16' | 'uint32' | 'uint64' |
