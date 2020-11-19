@@ -3,6 +3,7 @@
   "version": "1.1.0",
   "main": "index.js",
   "types": "index.d.ts",
+  "bin": "cli.js",
   "license": "MIT",
   "repository": {
     "url": "https://github.com/SnosMe/poe-dat-viewer"
