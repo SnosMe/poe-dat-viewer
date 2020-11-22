@@ -11576,13 +11576,13 @@
     "name": "IndexableSupportGems",
     "columns": [
       {
-        "name": "",
+        "name": "Index",
         "type": "int32"
       },
       {
-        "name": "BaseItemTypes",
+        "name": "SupportGem",
         "type": "rowidx",
-        "references": { "table": "BaseItemTypes" }
+        "references": { "table": "SkillGems" }
       },
       {
         "name": "Name",
@@ -19966,8 +19966,9 @@
         "references": { "table": "GemTags" }
       },
       {
-        "name": "VaalVariant_BaseItemTypes",
-        "type": "int64"
+        "name": "VaalVariant",
+        "type": "rowidx",
+        "references": { "table": "BaseItemTypes" }
       },
       {
         "name": "IsVaalVariant",
@@ -20005,9 +20006,14 @@
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "AwakenedVariant",
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "SkillGems" }
+      },
+      {
+        "name": "RegularVariant",
+        "type": "rowidx",
+        "references": { "table": "SkillGems" }
       }
     ]
   },
