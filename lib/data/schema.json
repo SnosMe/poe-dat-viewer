@@ -2316,13 +2316,13 @@
         "type": "rowidx"
       },
       {
-        "name": "IsBlessing",
+        "name": "",
         "type": "bool"
       },
       {
-        "name": "",
+        "name": "ItemShopType",
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "ItemShopType" }
       },
       {
         "name": "",
@@ -3329,7 +3329,8 @@
     "columns": [
       {
         "name": "",
-        "type": "uint64"
+        "type": "rowidx",
+        "references": { "table": "" }
       }
     ]
   },
@@ -11770,7 +11771,7 @@
         "references": { "table": "Tags" }
       },
       {
-        "name": "",
+        "name": "RemovedIfLeavesArea",
         "type": "bool"
       },
       {
@@ -11826,7 +11827,7 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "CannotStoreInStash",
         "type": "bool"
       }
     ]
@@ -16396,11 +16397,11 @@
       },
       {
         "name": "",
-        "type": "int32"
+        "type": "string"
       },
       {
         "name": "",
-        "type": "int32"
+        "type": "string"
       },
       {
         "name": "ModelSizeMultiplier",
@@ -16595,11 +16596,11 @@
       },
       {
         "name": "",
-        "type": "int8"
+        "type": "bool"
       },
       {
         "name": "",
-        "type": "int32"
+        "type": "string"
       },
       {
         "name": "KillWhileOnslaughtIsActive_AchievementItems",
@@ -16674,7 +16675,7 @@
       },
       {
         "name": "",
-        "type": "int8"
+        "type": "bool"
       },
       {
         "name": "",
@@ -16684,19 +16685,15 @@
       },
       {
         "name": "",
-        "type": "int8"
+        "type": "bool"
       },
       {
         "name": "",
-        "type": "int8"
+        "type": "bool"
       },
       {
         "name": "",
-        "type": "int8"
-      },
-      {
-        "name": "",
-        "type": "int32"
+        "type": "bool"
       },
       {
         "name": "",
@@ -16708,20 +16705,24 @@
       },
       {
         "name": "",
-        "type": "int32"
+        "type": "float32"
       },
       {
         "name": "",
         "type": "int32"
       },
       {
+        "name": "EPKFile",
+        "type": "string"
+      },
+      {
         "name": "",
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "ConditionalEffectPack",
         "type": "rowidx",
-        "references": { "table": "" }
+        "references": { "table": "MonsterConditionalEffectPacks" }
       }
     ]
   },
@@ -22401,7 +22402,7 @@
         "type": "int32"
       },
       {
-        "name": "Text2",
+        "name": "TextTranslated",
         "type": "string"
       },
       {
