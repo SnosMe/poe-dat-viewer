@@ -74,11 +74,25 @@ export function drawRows (params: {
   ctx.fillStyle = '#fff'
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
+  // draw selected row
+  if (params.viewer.selectedRow.value !== null) {
+    const selectedIdx = params.rows.indexOf(params.viewer.selectedRow.value)
+    if (selectedIdx !== -1) {
+      ctx.fillStyle = '#bee3f8'
+      ctx.fillRect(
+        0, params.top + (selectedIdx * LINE_HEIGHT),
+        ctx.canvas.width, LINE_HEIGHT
+      )
+    }
+  }
+
+  // drawColumns
   ctx.save()
   ctx.translate(-params.left, 0)
   drawColumns(ctx, params.columns)
   ctx.restore()
 
+  // draw content
   ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`
   ctx.fillStyle = '#000'
 
@@ -93,6 +107,21 @@ export function drawRows (params: {
     ctx.translate(CHAR_WIDTH / 2, params.top + getBaseLine(LINE_HEIGHT))
     render.exec(ctx, params.rows)
     ctx.restore()
+  }
+
+  // draw inset shadow
+  {
+    const grdH = ctx.createLinearGradient(0, -16, 0, 4)
+    grdH.addColorStop(0, 'rgba(254,254,254,0.6)')
+    grdH.addColorStop(1, 'transparent')
+    ctx.fillStyle = grdH
+    ctx.fillRect(0, 0, ctx.canvas.width, 6)
+
+    const grdV = ctx.createLinearGradient(-16, 0, 4, 0)
+    grdV.addColorStop(0, 'rgba(254,254,254,0.5)')
+    grdV.addColorStop(1, 'transparent')
+    ctx.fillStyle = grdV
+    ctx.fillRect(0, 0, 6, ctx.canvas.height)
   }
 }
 

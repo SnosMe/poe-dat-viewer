@@ -16,8 +16,7 @@
         :style="scrollableStyle"
         :paint-size="scrollablePaintSize"
         :full-size="scrollableFullSize">
-        <canvas ref="canvasRef" />
-        <div :class="$style.canvasShadow" />
+        <canvas ref="canvasRef" @click="handleCanvasClick" />
       </canvas-scroll>
       <div :class="$style.rowsOverlay" :style="rowsOverlayStyle">
         <div class="absolute" :style="{ transform: `translate(0, ${renderItems.top}px)` }">
@@ -137,7 +136,7 @@ export default defineComponent({
         scrollPos.x + Math.min(rowsFullWidth.value, rowsWidth.value))
     )
 
-    watch([scrollPos, renderColumns, rowIndices], () => { draw() })
+    watch([scrollPos, renderColumns, rowIndices, viewer.selectedRow], () => { draw() })
 
     function draw () {
       const ctx = canvasRef.value!.getContext('2d', { alpha: false })!
@@ -174,6 +173,14 @@ export default defineComponent({
       canvasScroll.value!.scrollTo(target.leftPx - rowsWidth.value * 0.33, undefined)
     }
 
+    function handleCanvasClick (e: MouseEvent) {
+      const { selectedRow } = viewer
+      const rowIdx = Math.floor((e.offsetY + scrollPos.y) / rendering.LINE_HEIGHT)
+      selectedRow.value = (selectedRow.value !== rowIdx)
+        ? rowIdx
+        : null
+    }
+
     return {
       headerBlockStyle: computed(() =>
         ({ height: rendering.HEADERS_HEIGHT + 'px', width: paintWidth.value + 'px' })),
@@ -197,7 +204,8 @@ export default defineComponent({
       LINE_HEIGHT: rendering.LINE_HEIGHT,
       canvasScroll,
       rowsNumberWidth: (rendering.rowsNumWidth(viewer.datFile.rowCount) + 'px'),
-      focusEditingHeader
+      focusEditingHeader,
+      handleCanvasClick
     }
   }
 })
@@ -216,16 +224,5 @@ export default defineComponent({
   text-align: right;
   box-shadow: #cacaca 0 6px 6px -6px inset;
   user-select: none;
-}
-
-.canvasShadow {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  box-shadow:
-    #dddddd  6px  0    6px  -6px inset,
-    #cacaca  0    6px  6px  -6px inset;
-    /* #cacaca -6px  0    6px  -6px inset; */
 }
 </style>

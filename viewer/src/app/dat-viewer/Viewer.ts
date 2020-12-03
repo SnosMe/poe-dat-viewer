@@ -15,6 +15,7 @@ export interface Viewer {
   columnStats: Ref<ColumnStats[]>
   columnSelection: Ref<boolean[]>
   editHeader: Ref<Header | null>
+  selectedRow: Ref<number | null>
   rowSorting: Ref<number[] | null>
   scrollPos: { x: number, y: number }
 }
@@ -37,6 +38,7 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     columnStats: shallowRef([]),
     columnSelection: shallowRef(new Array(parsed.rowLength).fill(false)),
     editHeader: shallowRef(null),
+    selectedRow: shallowRef(null),
     rowSorting: shallowRef(null),
     scrollPos: shallowReactive({ x: 0, y: 0 })
   }
