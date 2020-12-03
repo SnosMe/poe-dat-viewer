@@ -2,7 +2,7 @@
   <div class="datv-header-layer">
     <div :style="headersRowStyle" class="absolute">
       <button v-for="col in headers" :key="col.offset"
-        class="datv-header" :class="{ 'datv-col--border': col.border }"
+        class="datv-header" :class="{ 'datv-col--border': col.border, 'datv-header--active': col.active }"
         :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
         :title="col.name"
         @click="editHeader(col.offset)"
@@ -153,7 +153,10 @@ export default defineComponent({
     }
 
     const headers = computed(() =>
-      renderHeaderCols(viewer.headers.value, props.left, props.left + props.width))
+      renderHeaderCols(
+        viewer.headers.value,
+        viewer.editHeader.value,
+        props.left, props.left + props.width))
 
     return {
       headers,
@@ -189,6 +192,11 @@ export default defineComponent({
   &:hover {
     @apply bg-gray-400;
     @apply text-gray-800;
+  }
+
+  &.datv-header--active {
+    @apply bg-gray-600;
+    @apply text-gray-300;
   }
 }
 

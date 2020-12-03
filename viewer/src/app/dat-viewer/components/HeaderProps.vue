@@ -2,9 +2,11 @@
   <div v-if="isVisible" style="width: 300px;" class="relative overflow-hidden">
     <div :style="{ height: HEADERS_HEIGHT + 'px' }" class="bg-gray-200" />
     <div class="m-2 shadow border border-gray-400 bg-white absolute inset-0 flex flex-col">
-      <div class="p-2 bg-gray-200 text-gray-700 shadow flex justify-between items-baseline">
+      <div class="p-2 bg-gray-200 text-gray-700 shadow flex items-baseline">
         <span class="px-2">Column properties</span>
-        <button @click="close" class="px-2 py-1"
+        <button class="border border-gray-500 rounded-full px-3"
+          @click="$emit('focus-editing-header')">Focus</button>
+        <button @click="close" class="px-2 py-1 ml-auto"
           title="Close"><i class="codicon codicon-close"></i></button>
       </div>
       <div v-if="header.name === null" class="p-4">

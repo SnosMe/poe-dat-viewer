@@ -4,6 +4,7 @@ import { columnSizes } from '../rendering'
 interface RenderHeader {
   offset: number
   border: boolean
+  active: boolean
   widthPx: number
   leftPx: number
   name: string | null
@@ -11,6 +12,7 @@ interface RenderHeader {
 
 export function renderHeaderCols (
   headers: readonly Header[],
+  activeHeader: Header | null,
   paintBegin: number,
   paintEnd: number
 ) {
@@ -24,6 +26,7 @@ export function renderHeaderCols (
       res.push({
         offset: header.offset,
         border: sizes.hasBorder,
+        active: (header === activeHeader),
         widthPx: sizes.borderWidth,
         leftPx: left,
         name: header.name

@@ -32,7 +32,7 @@
       >
         <template v-slot="props">
           <button v-for="entry in props.entries" :key="entry.item.fullPath"
-            :class="$style.itemBtn"
+            :class="{ [$style.itemBtn]: true, [$style.active]: entry.item.isActive }"
             :style="{ transform: `translate(0, ${entry.top}px` }"
             @click="handleTreeNav(entry.item)"
           >
@@ -50,7 +50,7 @@ import FileSaver from 'file-saver'
 import VirtualScroll from '@/VirtualScroll.vue'
 import { getRootDirs, getDirContent } from 'pathofexile-dat/bundles/index-paths'
 import { index, loadFileContent } from '../patchcdn/index-store'
-import { openTab } from './workbench-core'
+import { openTab, activeTabId } from './workbench-core'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 import * as perf from '../../perf'
 
@@ -58,6 +58,7 @@ interface TreeItem {
   label: string
   fullPath: string
   isFile: boolean
+  isActive?: boolean
 }
 
 function useTreeNavigation () {
@@ -100,7 +101,8 @@ function useTreeNavigation () {
       ...content.files.map(fileName => ({
         label: fileName.substr(currentDir.value.length + 1),
         fullPath: fileName,
-        isFile: true
+        isFile: true,
+        isActive: (`bundles@${fileName}` === activeTabId.value)
       })).sort((a, b) => a.label.localeCompare(b.label))
     ]
   })
@@ -220,6 +222,11 @@ export default defineComponent({
 
   &:hover {
     @apply bg-gray-200;
+  }
+
+  &.active {
+    @apply bg-blue-500;
+    @apply text-blue-100;
   }
 }
 </style>

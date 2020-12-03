@@ -4,7 +4,8 @@
       <div v-for="tab in tabs" :key="tab.id"
         :class="[$style.tab, { [$style.active]: tab.isActive }]">
         <button class="pl-3 pr-1.5"
-          @click="setActiveTab(tab.id)">{{ tab.title }}</button>
+          @click="setActiveTab(tab.id)"
+          @contextmenu.prevent="closeTab(tab.id)">{{ tab.title }}</button>
         <button class="pl-1.5 pr-3" title="Close"
           @click="closeTab(tab.id)"><i class="codicon codicon-close"></i></button>
       </div>

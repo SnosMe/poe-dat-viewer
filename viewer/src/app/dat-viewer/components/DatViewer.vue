@@ -27,7 +27,8 @@
         </div>
       </div>
     </resize-observer>
-    <header-props />
+    <header-props
+      @focus-editing-header="focusEditingHeader" />
   </div>
 </template>
 
@@ -41,6 +42,7 @@ import ViewerHead from './ViewerHead.vue'
 import HeaderProps from './HeaderProps.vue'
 import * as rendering from '../rendering'
 import { renderByteCols, renderColStats } from '../rendering/byte-columns'
+import { renderHeaderCols } from '../rendering/header-columns'
 
 export default defineComponent({
   components: { ResizeObserver, CanvasScroll, ViewerActions, ViewerHead, HeaderProps },
@@ -70,7 +72,7 @@ export default defineComponent({
 
     const canvasRef = ref<HTMLCanvasElement | null>(null)
 
-    const canvasScroll = ref<{ scrollTo(x: number, y: number): void } | null>(null)
+    const canvasScroll = ref<{ scrollTo(x: number | undefined, y: number | undefined): void } | null>(null)
     onMounted(() => {
       canvasScroll.value!.scrollTo(viewer.scrollPos.x, viewer.scrollPos.y)
     })
@@ -165,6 +167,13 @@ export default defineComponent({
       }
     })
 
+    function focusEditingHeader () {
+      const header = viewer.editHeader.value!
+      const cols = renderHeaderCols(viewer.headers.value, null, 0, 0 + Infinity)
+      const target = cols.find(col => col.offset === header.offset)!
+      canvasScroll.value!.scrollTo(target.leftPx - rowsWidth.value * 0.33, undefined)
+    }
+
     return {
       headerBlockStyle: computed(() =>
         ({ height: rendering.HEADERS_HEIGHT + 'px', width: paintWidth.value + 'px' })),
@@ -187,7 +196,8 @@ export default defineComponent({
       rowsWidth: computed(() => Math.min(rowsFullWidth.value, rowsWidth.value)),
       LINE_HEIGHT: rendering.LINE_HEIGHT,
       canvasScroll,
-      rowsNumberWidth: (rendering.rowsNumWidth(viewer.datFile.rowCount) + 'px')
+      rowsNumberWidth: (rendering.rowsNumWidth(viewer.datFile.rowCount) + 'px'),
+      focusEditingHeader
     }
   }
 })
