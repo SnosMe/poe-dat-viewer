@@ -64,6 +64,12 @@ export function getDirContent (dirPath: string, pathReps: Uint8Array, dirsInfo: 
     childrenEnd = offset + dirsReader.getInt32(structOffset + S_ALL_SIZE$, true)
   }
 
+  // Art dir is special
+  if (dirPath === 'Art') {
+    const dirs = getChildDirectories('Art', pathReps, dirsInfo)
+    return { files, dirs }
+  }
+
   const dirs = new Set<string>()
   for (let idx = 0; idx < dirsCount; ++idx) {
     let offset = dirsReader.getInt32((STRUCT_SIZE * idx) + S_OFFSET$, true)
@@ -128,6 +134,36 @@ export function unpackPaths (data: Uint8Array) {
   }
 
   return paths
+}
+
+function getChildDirectories (dirPath: string, pathReps: Uint8Array, dirsInfo: Uint8Array) {
+  const pathsReader = new DataView(pathReps.buffer, pathReps.byteOffset, pathReps.byteLength)
+  const dirsReader = new DataView(dirsInfo.buffer, dirsInfo.byteOffset, dirsInfo.byteLength)
+  const dirsCount = dirsInfo.byteLength / STRUCT_SIZE
+
+  const dirs = new Set<string>()
+  for (let idx = 0; idx < dirsCount; ++idx) {
+    let pathsOffset = dirsReader.getInt32((STRUCT_SIZE * idx) + S_OFFSET$, true)
+
+    // consume `BASE_MODE ON`
+    pathsOffset += REP_INDEX
+
+    // check if `BASE_MODE OFF` follows immediately
+    const hasNoFiles = (pathsReader.getInt32(pathsOffset, true) === 0)
+    if (!hasNoFiles) {
+      pathsOffset += REP_INDEX
+
+      const nullChar = pathReps.indexOf(0x00, pathsOffset)
+      const basepath = UTF8_DECODER.decode(pathReps.subarray(pathsOffset, nullChar))
+
+      if (basepath.startsWith(dirPath + '/') && basepath !== (dirPath + '/')) {
+        const slashIdx = basepath.indexOf('/', dirPath.length + 1)
+        dirs.add(basepath.slice(0, slashIdx))
+      }
+    }
+  }
+
+  return Array.from(dirs)
 }
 
 function _pathsSanityCheck (pathReps: Uint8Array, dirsInfo: Uint8Array) {
