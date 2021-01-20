@@ -2242,7 +2242,7 @@
         "type": "int32"
       },
       {
-        "name": "",
+        "name": "IsDropDisabled",
         "type": "bool"
       },
       {
