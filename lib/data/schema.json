@@ -11607,6 +11607,21 @@
     ]
   },
   {
+    "name": "InfluenceModUpgrades",
+    "columns": [
+      {
+        "name": "InfluenceMod",
+        "type": "rowidx",
+        "references": { "table": "Mods" }
+      },
+      {
+        "name": "UpgradedMod",
+        "type": "rowidx",
+        "references": { "table": "Mods" }
+      }
+    ]
+  },
+  {
     "name": "InfluenceTypes",
     "columns": []
   },
@@ -15333,6 +15348,11 @@
       {
         "name": "Heist_AddStatValue2",
         "type": "int32"
+      },
+      {
+        "name": "InfluenceType",
+        "type": "enum0",
+        "references": { "enum": "InfluenceTypes" }
       }
     ]
   },
@@ -17566,7 +17586,7 @@
         "type": "bool"
       },
       {
-        "name": "Inflection",
+        "name": "",
         "type": "string"
       },
       {
