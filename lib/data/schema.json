@@ -2328,6 +2328,11 @@
         "name": "",
         "type": "rowidx",
         "references": { "table": "" }
+      },
+      {
+        "name": "",
+        "type": "rowidx",
+        "references": { "table": "" }
       }
     ]
   },
@@ -11776,50 +11781,18 @@
         "type": "int32"
       },
       {
-        "name": "Elder_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
-      },
-      {
-        "name": "Shaper_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
-      },
-      {
         "name": "RemovedIfLeavesArea",
         "type": "bool"
       },
       {
-        "name": "AchievementItems",
+        "name": "",
         "array": true,
-        "type": "rowidx",
-        "references": { "table": "AchievementItems" }
+        "type": "rowidx"
       },
       {
-        "name": "Identify_AchievementItems",
+        "name": "",
         "array": true,
-        "type": "rowidx",
-        "references": { "table": "AchievementItems" }
-      },
-      {
-        "name": "Crusader_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
-      },
-      {
-        "name": "Eyrie_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
-      },
-      {
-        "name": "Basilisk_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
-      },
-      {
-        "name": "Adjudicator_Tags",
-        "type": "rowidx",
-        "references": { "table": "Tags" }
+        "type": "rowidx"
       },
       {
         "name": "",
@@ -11842,8 +11815,37 @@
         "type": "int32"
       },
       {
-        "name": "CannotStoreInStash",
+        "name": "",
         "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "rowidx",
+        "references": { "table": "" }
       }
     ]
   },
@@ -15294,11 +15296,6 @@
         "type": "int8"
       },
       {
-        "name": "Unveil_AchievementItems",
-        "type": "rowidx",
-        "references": { "table": "AchievementItems" }
-      },
-      {
         "name": "",
         "array": true,
         "type": "rowidx",
@@ -15353,6 +15350,12 @@
         "name": "InfluenceType",
         "type": "enum0",
         "references": { "enum": "InfluenceTypes" }
+      },
+      {
+        "name": "",
+        "array": true,
+        "type": "rowidx",
+        "references": { "table": "" }
       }
     ]
   },
@@ -16743,6 +16746,22 @@
         "name": "ConditionalEffectPack",
         "type": "rowidx",
         "references": { "table": "MonsterConditionalEffectPacks" }
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "int8"
+      },
+      {
+        "name": "",
+        "type": "int32"
       }
     ]
   },
@@ -18288,7 +18307,11 @@
       },
       {
         "name": "IsProxyPassive",
-        "type": "int8"
+        "type": "bool"
+      },
+      {
+        "name": "",
+        "type": "int32"
       }
     ]
   },
@@ -20541,6 +20564,12 @@
       {
         "name": "IsValueUsed",
         "type": "bool"
+      },
+      {
+        "name": "",
+        "array": true,
+        "type": "rowidx",
+        "references": { "table": "" }
       }
     ]
   },
