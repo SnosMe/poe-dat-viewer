@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "1.2.6",
+  "version": "2.0.0",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "cli.js",
@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "fnv-plus": "^1.0.0",
-    "ooz-wasm": "^1.0.0"
+    "ooz-wasm": "^1.0.0",
+    "pathofexile-dat-schema": "^1.1.1"
   },
   "devDependencies": {
     "@types/emscripten": "^1.0.0",

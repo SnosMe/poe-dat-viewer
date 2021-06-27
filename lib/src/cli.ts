@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-import { schema, SchemaTable } from './dat/schema'
 import { decompressSliceInBundle } from './bundles/bundle'
 import { getFileInfo, readIndexBundle } from './bundles/index-bundle'
 import { Header, getHeaderLength } from './dat/header'
 import { DatFile, readDatFile } from './dat/dat-file'
 import { readColumn } from './dat/reader'
+import { SCHEMA_URL, SCHEMA_VERSION, SchemaFile } from 'pathofexile-dat-schema'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as https from 'https'
@@ -42,6 +42,8 @@ const TRANSLATIONS = [
   { name: 'Thai', path: 'Data/Thai' }
 ]
 
+let schema: SchemaFile
+
 ;(async function main () {
   const config = require(path.join(process.cwd(), '/config.json')) as ExportConfig
   PATCH_VER = config.patch
@@ -55,7 +57,14 @@ const TRANSLATIONS = [
   }
 
   await loadIndex()
-  
+
+  console.log('Loading schema for dat files')
+  schema = await fetchSchema()
+  if (schema.version !== SCHEMA_VERSION) {
+    console.error('Schema has format not compatible with this package. Check for "pathofexile-dat" updates.')
+    process.exit(1)
+  }
+
   fs.rmSync(path.join(process.cwd(), 'files'), { recursive: true, force: true })
   fs.mkdirSync(path.join(process.cwd(), 'files'))
   for (const filePath of config.files) {
@@ -83,7 +92,7 @@ const TRANSLATIONS = [
   }
 })()
 
-export function exportAllRows (headers: ExtendedHeader[], datFile: DatFile) {
+export function exportAllRows (headers: NamedHeader[], datFile: DatFile) {
   const columns = headers
     .map(header => ({
       name: header.name,
@@ -187,35 +196,50 @@ async function fetchFile (name: string): Promise<ArrayBuffer> {
   })
 }
 
-interface ExtendedHeader extends Header { 
+async function fetchSchema (): Promise<SchemaFile> {
+  return new Promise((resolve, reject) => {
+    (function followUrl (url: string) {
+      const request = https.get(url, (response) => {
+        if (response.statusCode === 301 || response.statusCode === 302) {
+          return followUrl(response.headers.location!)
+        }
+        let data = ''
+        response.on('data', chunk => { data += chunk })
+        response.on('end', () => { resolve(JSON.parse(data)) })
+      })
+      request.on('error', (err) => { reject(err) })
+    })(SCHEMA_URL)
+  })
+}
+
+interface NamedHeader extends Header { 
   name: string
 }
 
-function importHeaders (name: string, datFile: DatFile) {
-  const headers = [] as ExtendedHeader[]
-  
-  const sch = schema.find(s => s.name === name) as SchemaTable
+function importHeaders (name: string, datFile: DatFile): NamedHeader[] {
+  const headers = [] as NamedHeader[]
+
+  const sch = schema.tables.find(s => s.name === name)!
   let offset = 0
   for (const column of sch.columns) {
     headers.push({
-      name: column.name,
+      name: column.name || '',
       offset,
       type: {
         array: column.array,
         integer:
-          column.type === 'uint8' ? { unsigned: true, size: 1 }
-          : column.type === 'uint16' ? { unsigned: true, size: 2 }
-          : column.type === 'uint32' ? { unsigned: true, size: 4 }
-          : column.type === 'uint64' ? { unsigned: true, size: 8 }
-          : column.type === 'int8' ? { unsigned: false, size: 1 }
-          : column.type === 'int16' ? { unsigned: false, size: 2 }
-          : column.type === 'int32' ? { unsigned: false, size: 4 }
-          : column.type === 'int64' ? { unsigned: false, size: 8 }
-          : column.type === 'enum0' || column.type === 'enum1' ? { unsigned: true, size: 4 }
+          column.type === 'u8' ? { unsigned: true, size: 1 }
+          : column.type === 'u16' ? { unsigned: true, size: 2 }
+          : column.type === 'u32' ? { unsigned: true, size: 4 }
+          : column.type === 'u64' ? { unsigned: true, size: 8 }
+          : column.type === 'i8' ? { unsigned: false, size: 1 }
+          : column.type === 'i16' ? { unsigned: false, size: 2 }
+          : column.type === 'i32' ? { unsigned: false, size: 4 }
+          : column.type === 'i64' ? { unsigned: false, size: 8 }
           : undefined,
         decimal:
-          column.type === 'float32' ? { size: 4 }
-          : column.type === 'float64' ? { size: 8 }
+          column.type === 'f32' ? { size: 4 }
+          : column.type === 'f64' ? { size: 8 }
           : undefined,
         string:
           column.type === 'string' ? {}
@@ -224,8 +248,8 @@ function importHeaders (name: string, datFile: DatFile) {
           column.type === 'bool' ? {}
           : undefined,
         key:
-          column.type === 'rowidx' ? {
-            foreign: column.references ? (column.references as { table: string }).table !== name : false
+          (column.type === 'row' || column.type === 'foreignrow') ? {
+            foreign: (column.type === 'foreignrow')
           }
           : undefined
       }
