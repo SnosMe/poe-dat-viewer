@@ -1,7 +1,6 @@
 name: Library
 
 on:
-  workflow_dispatch:
   push:
     paths:
       - 'lib/**'
@@ -21,6 +20,7 @@ jobs:
         name: dat-analysis
         path: lib/src/dat-analysis/build/app.js
         retention-days: 1
+        if-no-files-found: error
 
   build-lib:
     needs: dat-analysis-wasm
@@ -30,7 +30,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: dat-analysis
-        path: lib/dat-analysis/app.js
+        path: lib/dat-analysis
     - uses: actions/setup-node@v2
       with:
         node-version: 14
@@ -43,5 +43,6 @@ jobs:
       working-directory: lib
     - uses: actions/upload-artifact@v2
       with:
+        name: package
         path: lib/pathofexile-dat-*.tgz
         retention-days: 1

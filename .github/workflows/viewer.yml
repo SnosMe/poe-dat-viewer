@@ -1,22 +1,18 @@
-name: Build
+name: Viewer
 
 on:
   push:
-    branches:
-      - '**'
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - README.md
+    paths:
+      - 'viewer/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v2
       with:
-        node-version: '12'
+        node-version: 14
     - run: rm package.json
     - run: yarn
       working-directory: viewer
