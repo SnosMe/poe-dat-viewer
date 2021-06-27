@@ -1,0 +1,46 @@
+name: Library
+
+on:
+  push:
+    paths:
+      - 'lib/**'
+
+jobs:
+  dat-analysis-wasm:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: mymindstorm/setup-emsdk@v10
+    - run: emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
+      working-directory: lib/src/dat-analysis
+    - run: cmake --build build
+      working-directory: lib/src/dat-analysis
+    - uses: actions/upload-artifact@v2
+      with:
+        name: dat-analysis
+        path: lib/src/dat-analysis/build/app.js
+        retention-days: 1
+
+  build-lib:
+    needs: dat-analysis-wasm
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/download-artifact@v2
+      with:
+        name: dat-analysis
+        path: lib/dat-analysis/app.js
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 14
+    - run: rm package.json
+    - run: yarn
+      working-directory: lib
+    - run: yarn tsc
+      working-directory: lib
+    - run: npm pack
+      working-directory: lib
+    - uses: actions/upload-artifact@v2
+      with:
+        path: lib/pathofexile-dat-*.tgz
+        retention-days: 1
