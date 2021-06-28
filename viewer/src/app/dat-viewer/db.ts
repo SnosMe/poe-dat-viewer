@@ -1,6 +1,9 @@
 import { openDB, DBSchema } from 'idb'
+import { shallowRef } from 'vue'
+import { SchemaFile } from 'pathofexile-dat-schema'
 import type { Header } from './headers'
-import { schema, SchemaEnum, SchemaTable } from 'pathofexile-dat/dat/schema'
+
+export const publicSchema = shallowRef<SchemaFile['tables']>([])
 
 export interface ViewerSerializedHeader {
   name: string | null
@@ -66,29 +69,27 @@ function serializeHeaders (headers: Header[]) {
 }
 
 function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
-  const sch = schema.find(s => s.name === name)
-  if (!sch || (sch as SchemaEnum).enum) return null
+  const sch = publicSchema.value.find(s => s.name === name)
+  if (!sch) return null
 
-  return (sch as SchemaTable).columns.map(column => {
+  return sch.columns.map(column => {
     return { /* eslint-disable indent */
-      name: column.name,
+      name: column.name || '',
       type: {
         array: column.array,
         integer:
-          column.type === 'uint8' ? { unsigned: true, size: 1 }
-          : column.type === 'uint16' ? { unsigned: true, size: 2 }
-          : column.type === 'uint32' ? { unsigned: true, size: 4 }
-          : column.type === 'uint64' ? { unsigned: true, size: 8 }
-          : column.type === 'int8' ? { unsigned: false, size: 1 }
-          : column.type === 'int16' ? { unsigned: false, size: 2 }
-          : column.type === 'int32' ? { unsigned: false, size: 4 }
-          : column.type === 'int64' ? { unsigned: false, size: 8 }
-          // TODO: dedicated type
-          : column.type === 'enum0' || column.type === 'enum1' ? { unsigned: true, size: 4 }
+          column.type === 'u8' ? { unsigned: true, size: 1 }
+          : column.type === 'u16' ? { unsigned: true, size: 2 }
+          : column.type === 'u32' ? { unsigned: true, size: 4 }
+          : column.type === 'u64' ? { unsigned: true, size: 8 }
+          : column.type === 'i8' ? { unsigned: false, size: 1 }
+          : column.type === 'i16' ? { unsigned: false, size: 2 }
+          : column.type === 'i32' ? { unsigned: false, size: 4 }
+          : column.type === 'i64' ? { unsigned: false, size: 8 }
           : undefined,
         decimal:
-          column.type === 'float32' ? { size: 4 }
-          : column.type === 'float64' ? { size: 8 }
+          column.type === 'f32' ? { size: 4 }
+          : column.type === 'f64' ? { size: 8 }
           : undefined,
         string:
           column.type === 'string' ? {}
@@ -97,8 +98,8 @@ function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
           column.type === 'bool' ? {}
           : undefined,
         key:
-          column.type === 'rowidx' ? {
-            foreign: column.references ? (column.references as { table: string }).table !== name : false
+          (column.type === 'row' || column.type === 'foreignrow') ? {
+            foreign: (column.type === 'foreignrow')
           }
           : undefined
       },
