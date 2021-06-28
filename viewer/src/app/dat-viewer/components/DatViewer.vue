@@ -110,7 +110,7 @@ export default defineComponent({
       Math.max(0, paintHeight.value - rendering.HEADERS_HEIGHT))
 
     watch([rowsWidth, rowsHeight], () => {
-      const dpr = devicePixelRatio
+      const dpr = window.devicePixelRatio
 
       canvasRef.value!.style.width = rowsWidth.value + 'px'
       canvasRef.value!.style.height = rowsHeight.value + 'px'
@@ -175,9 +175,10 @@ export default defineComponent({
 
     function handleCanvasClick (e: MouseEvent) {
       const { selectedRow } = viewer
-      const rowIdx = Math.floor((e.offsetY + scrollPos.y) / rendering.LINE_HEIGHT)
-      selectedRow.value = (selectedRow.value !== rowIdx)
-        ? rowIdx
+      const sortedIdx = Math.floor((e.offsetY + scrollPos.y) / rendering.LINE_HEIGHT)
+      const realIdx = rowIndices.value[sortedIdx]
+      selectedRow.value = (selectedRow.value !== realIdx)
+        ? realIdx
         : null
     }
 
