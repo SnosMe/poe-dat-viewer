@@ -8,9 +8,7 @@ module.exports = {
   configureWebpack: {
     plugins: [
       new webpack.DefinePlugin({
-        'process.env': {
-          APP_VERSION: JSON.stringify(require('./package.json').version)
-        }
+        'process.env.APP_VERSION': JSON.stringify(require('./package.json').version)
       })
     ],
     resolve: {
