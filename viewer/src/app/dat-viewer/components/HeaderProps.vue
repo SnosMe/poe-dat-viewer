@@ -202,7 +202,7 @@ export default defineComponent({
         } else if (type === 'key_self') {
           header.type.key = { foreign: false }
         } else if (type === 'integer') {
-          header.type.integer = { unsigned: true, size: header.length }
+          header.type.integer = { unsigned: false, size: header.length }
         } else if (type === 'decimal') {
           header.type.decimal = { size: header.length }
         } else if (type === 'boolean') {
@@ -238,13 +238,13 @@ export default defineComponent({
         } else if (type === 'key_self') {
           header.type.key = { foreign: false }
         } else if (type === 'integer_1') {
-          header.type.integer = { unsigned: true, size: 1 }
+          header.type.integer = { unsigned: false, size: 1 }
         } else if (type === 'integer_2') {
-          header.type.integer = { unsigned: true, size: 2 }
+          header.type.integer = { unsigned: false, size: 2 }
         } else if (type === 'integer_4') {
-          header.type.integer = { unsigned: true, size: 4 }
+          header.type.integer = { unsigned: false, size: 4 }
         } else if (type === 'integer_8') {
-          header.type.integer = { unsigned: true, size: 8 }
+          header.type.integer = { unsigned: false, size: 8 }
         } else if (type === 'decimal_4') {
           header.type.decimal = { size: 4 }
         } else if (type === 'decimal_8') {
