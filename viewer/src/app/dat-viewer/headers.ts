@@ -7,10 +7,10 @@ export interface Header {
   type: {
     byteView?: { array: boolean }
     array?: boolean
-    boolean?: {}
+    boolean?: { [key: string]: never }
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
-    string?: {}
+    string?: { [key: string]: never }
     key?: { foreign: boolean }
   }
   textLength?: number

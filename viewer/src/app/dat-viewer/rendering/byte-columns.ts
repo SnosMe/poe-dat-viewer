@@ -5,6 +5,14 @@ import type { DatFile } from 'pathofexile-dat'
 
 const BYTE_WIDTH = Math.ceil(CHAR_WIDTH * 3)
 
+interface RenderStat {
+  max: string
+  array: boolean
+  string: boolean
+  nullable: boolean
+  zero: boolean
+}
+
 export interface RenderByte {
   offset: number
   selected: boolean
@@ -68,14 +76,6 @@ export function renderByteCols (
   }
 
   return res
-}
-
-interface RenderStat {
-  max: string
-  array: boolean
-  string: boolean
-  nullable: boolean
-  zero: boolean
 }
 
 export function renderColStats (stats: ColumnStats[], datFile: DatFile): RenderStat[] {

@@ -12,7 +12,13 @@ module.exports = {
           APP_VERSION: JSON.stringify(require('./package.json').version)
         }
       })
-    ]
+    ],
+    resolve: {
+      fallback: {
+        path: false,
+        fs: false
+      }
+    }
   },
   chainWebpack: config => config.resolve.symlinks(false)
 }

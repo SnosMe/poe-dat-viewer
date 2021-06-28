@@ -11,3 +11,8 @@ declare module 'worker-loader!*' {
 
   export default WebpackWorker
 }
+
+interface TextMetrics {
+  // experimental
+  alphabeticBaseline?: number
+}

@@ -2,24 +2,24 @@ import { openDB, DBSchema } from 'idb'
 import type { Header } from './headers'
 import { schema, SchemaEnum, SchemaTable } from 'pathofexile-dat/dat/schema'
 
-interface DatSchema {
-  name: string
-  headers: ViewerSerializedHeader[]
-}
-
 export interface ViewerSerializedHeader {
   name: string | null
   length?: number
   type: {
     byteView?: { array: boolean }
     array?: boolean
-    boolean?: {}
+    boolean?: { [key: string]: never }
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
-    string?: {}
+    string?: { [key: string]: never }
     key?: { foreign: boolean }
   }
   textLength?: number
+}
+
+interface DatSchema {
+  name: string
+  headers: ViewerSerializedHeader[]
 }
 
 interface PoeDatViewerSchema extends DBSchema {

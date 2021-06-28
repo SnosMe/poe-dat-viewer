@@ -27,11 +27,12 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     headers: shallowRef(
       parsed.rowLength
         ? [{
-          name: null,
-          offset: 0,
-          length: parsed.rowLength,
-          type: byteView()
-        }] : []
+            name: null,
+            offset: 0,
+            length: parsed.rowLength,
+            type: byteView()
+          }]
+        : []
     ),
     datFile: parsed,
     name: getNamePart(path),
