@@ -15,7 +15,7 @@
     "ooz-wasm": "^1.0.0",
     "pathofexile-dat": "^2.0.0",
     "pathofexile-dat-schema": "^1.1.1",
-    "tailwindcss": "^1.9.6",
+    "tailwindcss": "^2.0.0",
     "vscode-codicons": "^0.0.17",
     "vue": "^3.0.0"
   },
@@ -39,6 +39,13 @@
     "postcss-nested": "^5.0.0",
     "typescript": "~4.3.0",
     "worker-loader": "^3.0.3"
+  },
+  "postcss": {
+    "plugins": {
+      "tailwindcss": {},
+      "postcss-nested": {},
+      "autoprefixer": {}
+    }
   },
   "browserslist": [
     "> 1%",

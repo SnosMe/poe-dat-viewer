@@ -10,7 +10,7 @@
         :key="activeTab.id"
         v-model:ka-state="activeTab.kaState" />
       <div v-else
-        class="bg-gray-100 flex-1 text-lg text-gray-600 flex items-center justify-center"
+        class="bg-gray-50 flex-1 text-lg text-gray-500 flex items-center justify-center"
         >The viewer is ready to fulfill your wishes 👾</div>
     </div>
     <div class="app-footer">
@@ -75,7 +75,7 @@ export default defineComponent({
   line-height: 1;
   align-items: center;
   display: flex;
-  @apply bg-gray-800;
+  @apply bg-gray-700;
   @apply text-white;
   @apply p-2;
 

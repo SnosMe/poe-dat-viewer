@@ -1,10 +1,10 @@
 <template>
   <div v-if="isVisible" style="width: 300px;" class="relative overflow-hidden">
-    <div :style="{ height: HEADERS_HEIGHT + 'px' }" class="bg-gray-200" />
-    <div class="m-2 shadow border border-gray-400 bg-white absolute inset-0 flex flex-col">
-      <div class="p-2 bg-gray-200 text-gray-700 shadow flex items-baseline">
+    <div :style="{ height: HEADERS_HEIGHT + 'px' }" class="bg-gray-100" />
+    <div class="m-2 shadow border border-gray-300 bg-white absolute inset-0 flex flex-col">
+      <div class="p-2 bg-gray-100 text-gray-600 shadow flex items-baseline">
         <span class="px-2">Column properties</span>
-        <button class="border border-gray-500 rounded-full px-3"
+        <button class="border border-gray-400 rounded-full px-3"
           @click="$emit('focus-editing-header')">Focus</button>
         <button @click="close" class="px-2 py-1 ml-auto"
           title="Close"><i class="codicon codicon-close"></i></button>
@@ -23,7 +23,7 @@
           <div class="space-x-px flex">
             <button v-for="opt in viewModeOpts" :key="opt.value"
               class="px-2"
-              :class="(byteViewMode === opt.value) ? 'bg-blue-500 text-white' : 'bg-gray-200 hover:bg-gray-400'"
+              :class="(byteViewMode === opt.value) ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-300'"
               @click="byteViewMode = opt.value"
               :disabled="opt.disabled"
               v-text="opt.label" />

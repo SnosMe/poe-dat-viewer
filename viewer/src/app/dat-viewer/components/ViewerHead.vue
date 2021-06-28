@@ -8,7 +8,7 @@
         @click="editHeader(col.offset)"
         @wheel="handleHeaderWheel(col.offset, $event)">
         <template v-if="col.name === null">&nbsp;</template>
-        <span v-else-if="col.name === ''" class="bg-gray-600 text-gray-300 px-1">?</span>
+        <span v-else-if="col.name === ''" class="bg-gray-500 text-gray-200 px-1">?</span>
         <template v-else>{{ col.name }}</template>
       </button>
     </div>
@@ -37,13 +37,13 @@
       >
         <template v-if="col.stat">
           <div v-if="col.stat.string"
-            class="datv-stat__line bg-yellow-600" style="top: 0;" />
+            class="datv-stat__line bg-yellow-500" style="top: 0;" />
           <div v-if="col.stat.array"
-            class="datv-stat__line bg-teal-500" style="top: 7px;" />
+            class="datv-stat__line bg-green-500" style="top: 7px;" />
           <div v-if="col.stat.zero"
-            class="datv-stat__line bg-gray-900" style="top: 14px;" />
+            class="datv-stat__line bg-gray-800" style="top: 14px;" />
           <div v-else-if="col.stat.nullable"
-            class="datv-stat__line bg-pink-500" style="top: 14px;" />
+            class="datv-stat__line bg-pink-400" style="top: 14px;" />
           <div class="datv-stat__max" v-text="col.stat.max" />
         </template>
       </div>
@@ -177,11 +177,11 @@ export default defineComponent({
 
 <style lang="postcss">
 .datv-col--border {
-  @apply border-l border-gray-500;
+  @apply border-l border-gray-400;
 }
 
 .datv-header {
-  @apply text-gray-700;
+  @apply text-gray-600;
   position: absolute;
   box-sizing: border-box;
   text-align: center;
@@ -190,18 +190,18 @@ export default defineComponent({
   @apply px-1.5;
 
   &:hover {
-    @apply bg-gray-400;
-    @apply text-gray-800;
+    @apply bg-gray-300;
+    @apply text-gray-700;
   }
 
   &.datv-header--active {
-    @apply bg-gray-600;
-    @apply text-gray-300;
+    @apply bg-gray-500;
+    @apply text-gray-200;
   }
 }
 
 .datv-byte {
-  @apply text-gray-700;
+  @apply text-gray-600;
   position: absolute;
   box-sizing: content-box;
   text-align: center;
@@ -220,7 +220,7 @@ export default defineComponent({
 
   &.datv-byte--selected.datv-col--border,
   &.datv-byte--selected + &.datv-col--border {
-    @apply border-blue-700;
+    @apply border-blue-600;
   }
 }
 
@@ -234,15 +234,15 @@ export default defineComponent({
 
   &.datv-byte--selected.datv-col--border,
   &.datv-byte--selected + &.datv-col--border {
-    @apply border-gray-500;
+    @apply border-gray-400;
   }
 
   &.datv-byte--selected {
-    @apply bg-gray-400;
+    @apply bg-gray-300;
   }
 
   .datv-stats_row:hover > & {
-    @apply bg-gray-500;
+    @apply bg-gray-400;
   }
 }
 
@@ -257,7 +257,7 @@ export default defineComponent({
   }
 
   .datv-stats_row:hover & {
-    --bg-opacity: 0.35;
+    --tw-bg-opacity: 0.35;
   }
 }
 
@@ -271,7 +271,7 @@ export default defineComponent({
   position: absolute;
   top: 0;
   left: 0;
-  @apply text-gray-100;
+  @apply text-gray-50;
   text-shadow: 0 0 0.5ch rgb(0 0 0 / 70%);
 
   .datv-stats_row:hover & {
@@ -284,6 +284,6 @@ export default defineComponent({
   overflow: hidden;
   transform: translate3d(0, 0, 0);
   contain: strict;
-  @apply bg-gray-200;
+  @apply bg-gray-100;
 }
 </style>

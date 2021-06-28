@@ -1,7 +1,7 @@
 <template>
   <div v-if="active" :class="$style.notification">
     <template v-if="totalSize">
-      <div class="bg-gray-300 h-1"></div>
+      <div class="bg-gray-200 h-1"></div>
       <div class="bg-blue-500 h-1 absolute top-0"
         :style="{ width: `${received/totalSize * 100}%` }"></div>
     </template>
@@ -32,7 +32,7 @@ export default defineComponent({
   bottom: 0;
   right: 0;
   width: 20rem;
-  @apply bg-gray-100;
+  @apply bg-gray-50;
   @apply m-6;
   @apply shadow;
   @apply border;

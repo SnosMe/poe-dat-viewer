@@ -1,15 +1,10 @@
 /* eslint-disable */
+const colors = require('tailwindcss/colors')
 
 module.exports = {
   purge: [
     './src/**/*.vue'
   ],
-  future: {
-    removeDeprecatedGapUtilities: true,
-    purgeLayersByDefault: true,
-    defaultLineHeights: true,
-    standardFontWeights: true
-  },
   theme: {
     screens: false,
     spacing: {
@@ -46,6 +41,13 @@ module.exports = {
       base: ['14px', { lineHeight: '1.5' }],
       lg: ['16px', { lineHeight: '1.75' }],
       xl: ['18px', { lineHeight: '1.75' }]
+    },
+    extend: {
+      colors: {
+        gray: colors.blueGray,
+        blue: colors.sky,
+        green: colors.teal
+      }
     }
   }
 }

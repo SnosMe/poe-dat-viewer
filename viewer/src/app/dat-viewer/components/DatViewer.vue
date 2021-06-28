@@ -2,7 +2,7 @@
   <viewer-actions />
   <div class="flex flex-1">
     <resize-observer @resize="handleResize" class="flex-1 min-h-0 relative">
-      <div class="bg-gray-200 absolute" :style="headerBlockStyle">
+      <div class="bg-gray-100 absolute" :style="headerBlockStyle">
         <viewer-head :style="headerOverlayContentStyle"
           :left="scrollLeft"
           :width="rowsWidth"
@@ -219,7 +219,7 @@ export default defineComponent({
   contain: strict;
   @apply bg-white;
   padding-left: 7px;
-  @apply border-l border-gray-200;
+  @apply border-l border-gray-100;
   padding-right: 8px;
   text-align: right;
   box-shadow: #cacaca 0 6px 6px -6px inset;

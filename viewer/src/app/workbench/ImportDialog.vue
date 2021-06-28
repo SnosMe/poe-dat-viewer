@@ -21,7 +21,7 @@
     <div class="flex items-baseline mt-3 border-b pb-3">
       <span class="pr-2">or</span>
       <label
-        class="bg-gray-200 py-1 px-2 cursor-pointer hover:bg-gray-400"
+        class="bg-gray-100 py-1 px-2 cursor-pointer hover:bg-gray-300"
         style="width: 200px"
         for="import-local-file">Pick local dat file</label>
       <input
@@ -138,13 +138,13 @@ export default defineComponent({
 
   &[readonly] {
     @apply border-b;
-    @apply bg-gray-200;
+    @apply bg-gray-100;
   }
 }
 
 .label {
   @apply text-xs;
   @apply px-2;
-  @apply text-gray-600;
+  @apply text-gray-500;
 }
 </style>

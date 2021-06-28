@@ -17,13 +17,13 @@
         class="flex gap-x-1 border-b pb-1.5 px-2 justify-end">
         <button v-for="opt in extensionOpts" :key="opt.value"
           @click="opt.handleClick"
-          :class="['px-2', (opt.active ? 'bg-gray-300' : 'hover:bg-gray-200') ]"
+          :class="['px-2', (opt.active ? 'bg-gray-200' : 'hover:bg-gray-100') ]"
           v-text="opt.value" />
       </div>
       <div v-if="!isIndexLoaded"
-        class="italic text-center text-gray-600 p-2">Waiting for Index bundle...</div>
+        class="italic text-center text-gray-500 p-2">Waiting for Index bundle...</div>
       <div v-if="isIndexLoaded && !tree.length"
-        class="italic text-center text-gray-600 p-2">No results found</div>
+        class="italic text-center text-gray-500 p-2">No results found</div>
       <virtual-scroll
         class="flex-1"
         :scrollable-props="{ style: 'background: #fff;', widthY: 10 }"
@@ -195,7 +195,7 @@ export default defineComponent({
   line-height: 1;
 
   &:hover {
-    @apply bg-gray-200;
+    @apply bg-gray-100;
   }
 }
 
@@ -221,12 +221,12 @@ export default defineComponent({
   width: 100%;
 
   &:hover {
-    @apply bg-gray-200;
+    @apply bg-gray-100;
   }
 
   &.active {
-    @apply bg-blue-500;
-    @apply text-blue-100;
+    @apply bg-blue-600;
+    @apply text-white;
   }
 }
 </style>

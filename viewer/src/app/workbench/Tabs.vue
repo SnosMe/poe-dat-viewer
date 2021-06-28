@@ -1,6 +1,6 @@
 <template>
   <div :class="$style.titlebar">
-    <div class="flex overflow-hidden divide-x divide-gray-700">
+    <div class="flex overflow-hidden divide-x divide-gray-600">
       <div v-for="tab in tabs" :key="tab.id"
         :class="[$style.tab, { [$style.active]: tab.isActive }]">
         <button class="pl-3 pr-1.5"
@@ -11,10 +11,10 @@
       </div>
     </div>
     <div class="flex p-1.5 flex-shrink-0 space-x-1">
-      <button class="hover:bg-gray-400 hover:text-black p-2"
+      <button class="hover:bg-gray-300 hover:text-black p-2"
         @click="openImport">Import</button>
-      <button class="hover:bg-gray-400 hover:text-black px-2" title="Help"><i class="codicon codicon-question"></i></button>
-      <button class="hover:bg-gray-400 hover:text-black px-2" title="Settings"><i class="codicon codicon-settings"></i></button>
+      <button class="hover:bg-gray-300 hover:text-black px-2" title="Help"><i class="codicon codicon-question"></i></button>
+      <button class="hover:bg-gray-300 hover:text-black px-2" title="Settings"><i class="codicon codicon-settings"></i></button>
     </div>
   </div>
 </template>
@@ -57,8 +57,8 @@ export default defineComponent({
 .titlebar {
   display: flex;
   justify-content: space-between;
-  @apply bg-gray-800;
-  @apply text-gray-100;
+  @apply bg-gray-700;
+  @apply text-gray-50;
   z-index: 1;
   line-height: 1;
 }
@@ -67,15 +67,15 @@ export default defineComponent({
   display: flex;
 
   &:hover {
-    @apply bg-gray-400;
+    @apply bg-gray-300;
     @apply text-black;
   }
 
   &.active {
-    @apply bg-gray-900;
+    @apply bg-gray-800;
 
     &:hover {
-      @apply bg-gray-700;
+      @apply bg-gray-600;
       @apply text-white;
     }
   }
