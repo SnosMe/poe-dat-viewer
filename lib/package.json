@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "index.js",
   "types": "index.d.ts",
   "bin": "cli.js",

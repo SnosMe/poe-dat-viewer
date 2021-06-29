@@ -58,7 +58,7 @@ export function validateHeader (header: Header, columns: ColumnStats[], datFile:
       : stats.keySelf
   }
 
-  if (array && Object.keys(header.type).length == 1) {
+  if (array) {
     return space >= datFile.fieldSize.ARRAY
   }
 
