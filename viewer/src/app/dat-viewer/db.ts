@@ -81,6 +81,9 @@ function fromPublicSchema (name: string): ViewerSerializedHeader[] | null {
       name: column.name || '',
       type: {
         array: column.array,
+        byteView:
+          column.type === 'array' ? { array: true }
+          : undefined,
         integer:
           column.type === 'u8' ? { unsigned: true, size: 1 }
           : column.type === 'u16' ? { unsigned: true, size: 2 }

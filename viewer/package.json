@@ -13,8 +13,8 @@
     "fnv-plus": "^1.3.1",
     "idb": "^6.0.0",
     "ooz-wasm": "^1.0.0",
-    "pathofexile-dat": "^2.0.0",
-    "pathofexile-dat-schema": "^1.1.1",
+    "pathofexile-dat": "^2.1.3",
+    "pathofexile-dat-schema": "^2.0.0",
     "tailwindcss": "^2.0.0",
     "vscode-codicons": "^0.0.17",
     "vue": "^3.0.0"
