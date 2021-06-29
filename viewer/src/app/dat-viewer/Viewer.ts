@@ -44,23 +44,38 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     scrollPos: shallowReactive({ x: 0, y: 0 })
   }
 
-  analyzeDatFile(viewer.datFile).then(async stats => {
-    viewer.columnStats.value = stats
-
-    const headers = await db.findByName(viewer.name)
-    try {
-      tryImportHeaders(headers, viewer)
-    } catch (e) {
-      window.alert(`WARN: ${e.message}`)
-    } finally {
-      triggerRef(viewer.headers)
-    }
-  })
+  analyzeDatFile(viewer.datFile)
+    .then(async (stats) => {
+      viewer.columnStats.value = stats
+      await importHeaders(viewer)
+    })
 
   return viewer
 }
 
-function tryImportHeaders (serialized: db.ViewerSerializedHeader[], viewer: Viewer) {
+export async function importHeaders (viewer: Viewer) {
+  viewer.editHeader.value = null
+
+  viewer.headers.value = viewer.datFile.rowLength
+    ? [{
+        name: null,
+        offset: 0,
+        length: viewer.datFile.rowLength,
+        type: byteView()
+      }]
+    : []
+
+  const headers = await db.findByName(viewer.name)
+  try {
+    tryImportHeaders(headers, viewer)
+  } catch (e) {
+    window.alert(`WARN: ${e.message}`)
+  } finally {
+    triggerRef(viewer.headers)
+  }
+}
+
+function tryImportHeaders (serialized: db.ViewerSerializedHeader[], viewer: Viewer): void {
   let offset = 0
   for (const hdrSerialized of serialized) {
     const headerLength = hdrSerialized.length || getHeaderLength(hdrSerialized, viewer.datFile)
@@ -135,6 +150,10 @@ function getNamePart (path: string) {
   return path.match(/[^/]+(?=\..+$)/)![0]
 }
 
-export function saveHeaders (viewer: Viewer) {
-  db.saveHeaders(viewer.name, viewer.headers.value)
+export async function saveHeaders (viewer: Viewer) {
+  await db.saveHeaders(viewer.name, viewer.headers.value)
+}
+
+export async function removeHeaders (viewer: Viewer) {
+  await db.removeHeaders(viewer.name)
 }

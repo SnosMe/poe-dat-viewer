@@ -20,15 +20,19 @@
       <button v-if="rowSorting"
         class="bg-gray-600 hover:bg-gray-300 hover:text-black px-1.5 border border-gray-500"
         @click="rowSorting = null"
-        >Reset sorting</button>
+        >Clear sorting</button>
+      <button
+        class="hover:bg-gray-300 hover:text-black px-1.5"
+        @click="restoreSchema"
+        ><i class="codicon codicon-discard" /> Restore schema</button>
       <button
         class="hover:bg-gray-300 hover:text-black px-1.5"
         @click="showSchema"
-        >Show schema</button>
+        ><i class="codicon codicon-json" /> Show schema</button>
       <button
         class="hover:bg-gray-300 hover:text-black px-1.5"
         @click="exportDataJson"
-        >Export data</button>
+        ><i class="codicon codicon-database" /> Export data</button>
       <!-- <button TODO
         class="hover:bg-gray-300 hover:text-black px-1.5"
         >Export schema</button> -->
@@ -44,7 +48,7 @@ import { defineComponent, computed, inject, triggerRef } from 'vue'
 import { clearColumnSelection, getColumnSelections } from '../selection'
 import { createHeaderFromSelected } from '../headers'
 import FileSaver from 'file-saver'
-import { Viewer, exportAllRows, saveHeaders } from '../Viewer'
+import { Viewer, exportAllRows, saveHeaders, removeHeaders, importHeaders } from '../Viewer'
 import { openTab } from '../../workbench/workbench-core'
 import ShowSchema from './ShowSchema.vue'
 
@@ -87,13 +91,18 @@ export default defineComponent({
       })
     }
 
+    async function restoreSchema () {
+      await removeHeaders(viewer)
+      await importHeaders(viewer)
+    }
+
     return {
-      viewer,
       rowSorting: viewer.rowSorting,
       selections,
       defineColumn,
       exportDataJson,
-      showSchema
+      showSchema,
+      restoreSchema
     }
   }
 })

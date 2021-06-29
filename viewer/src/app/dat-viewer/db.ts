@@ -40,7 +40,7 @@ const db = openDB<PoeDatViewerSchema>('poe-dat-viewer', 3, {
 
 export async function findByName (name: string) {
   const record = await (await db).get('dat-schemas', name)
-  return record?.headers || fromJsonSchema(name) || []
+  return record?.headers || fromPublicSchema(name) || []
 }
 
 export async function saveHeaders (
@@ -51,6 +51,10 @@ export async function saveHeaders (
     name,
     headers: serializeHeaders(headers)
   })
+}
+
+export async function removeHeaders (name: string) {
+  await (await db).delete('dat-schemas', name)
 }
 
 function serializeHeaders (headers: Header[]) {
@@ -68,7 +72,7 @@ function serializeHeaders (headers: Header[]) {
   }))
 }
 
-function fromJsonSchema (name: string): ViewerSerializedHeader[] | null {
+function fromPublicSchema (name: string): ViewerSerializedHeader[] | null {
   const sch = publicSchema.value.find(s => s.name === name)
   if (!sch) return null
 
