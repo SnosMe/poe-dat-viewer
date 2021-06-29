@@ -59,7 +59,7 @@ export function validateHeader (header: Header, columns: ColumnStats[], datFile:
   }
 
   if (array) {
-    return space >= datFile.fieldSize.ARRAY
+    return Boolean(stats.refArray)
   }
 
   throw new Error('Unexpected type')
