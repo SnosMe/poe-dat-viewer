@@ -58,5 +58,9 @@ export function validateHeader (header: Header, columns: ColumnStats[], datFile:
       : stats.keySelf
   }
 
+  if (array && Object.keys(header.type).length == 1) {
+    return space >= datFile.fieldSize.ARRAY
+  }
+
   throw new Error('Unexpected type')
 }
