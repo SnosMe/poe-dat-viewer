@@ -23,6 +23,10 @@
         >Reset sorting</button>
       <button
         class="hover:bg-gray-300 hover:text-black px-1.5"
+        @click="showSchema"
+        >Show schema</button>
+      <button
+        class="hover:bg-gray-300 hover:text-black px-1.5"
         @click="exportDataJson"
         >Export data</button>
       <!-- <button TODO
@@ -41,6 +45,8 @@ import { clearColumnSelection, getColumnSelections } from '../selection'
 import { createHeaderFromSelected } from '../headers'
 import FileSaver from 'file-saver'
 import { Viewer, exportAllRows, saveHeaders } from '../Viewer'
+import { openTab } from '../../workbench/workbench-core'
+import ShowSchema from './ShowSchema.vue'
 
 export default defineComponent({
   setup () {
@@ -69,12 +75,25 @@ export default defineComponent({
       ))
     }
 
+    function showSchema () {
+      openTab({
+        id: 'poe-dat-viewer@show-schema',
+        title: 'Schema',
+        type: ShowSchema,
+        args: {
+          name: viewer.name,
+          headers: JSON.parse(JSON.stringify(viewer.headers.value))
+        }
+      })
+    }
+
     return {
       viewer,
       rowSorting: viewer.rowSorting,
       selections,
       defineColumn,
-      exportDataJson
+      exportDataJson,
+      showSchema
     }
   }
 })
