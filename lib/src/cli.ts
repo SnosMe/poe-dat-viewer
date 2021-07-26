@@ -84,6 +84,14 @@ let schema: SchemaFile
       const datFile = await getDatFile(`${tr.path}/${target.name}.dat64`)
       const headers = importHeaders(target.name, datFile)
         .filter(hdr => target.columns.includes(hdr.name))
+
+      for (const column of target.columns) {
+        if (!headers.some(hdr => hdr.name === column)) {
+          console.error(`Table "${target.name}" doesn't have a column named "${column}".`)
+          process.exit(1)
+        }
+      }
+
       fs.writeFileSync(
         path.join(process.cwd(), 'tables', tr.name, `${target.name}.json`),
         JSON.stringify(exportAllRows(headers, datFile), null, 2)
