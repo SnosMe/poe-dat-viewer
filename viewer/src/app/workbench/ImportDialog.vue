@@ -18,6 +18,9 @@
         :disabled="isCdnImportRunning"
         :loading="isCdnImportRunning">{{ isCdnImportRunning ? 'Wait...' : 'Import' }}</button>
     </div>
+    <div v-if="latestPoEPatch && poePatch !== latestPoEPatch">
+      Latest PoE patch is <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch }}</code>
+    </div>
     <div class="flex items-baseline mt-3 border-b pb-3">
       <span class="pr-2">or</span>
       <label
@@ -57,6 +60,7 @@ import DatViewer from '../dat-viewer/components/DatViewer.vue'
 export default defineComponent({
   setup () {
     const poePatch = shallowRef(localStorage.getItem('POE_PATCH_VER') || '')
+    const latestPoEPatch = shallowRef('')
     const isCdnImportRunning = shallowRef(false)
     const isFetchingSchema = shallowRef(false)
 
@@ -66,6 +70,7 @@ export default defineComponent({
     if (!publicSchema.value.length) {
       fetchSchema()
     }
+    getLatestPoEPatch()
 
     async function handleFile (e: Event) {
       const elFile = (e.target as HTMLInputElement).files![0]
@@ -112,8 +117,15 @@ export default defineComponent({
       isFetchingSchema.value = false
     }
 
+    async function getLatestPoEPatch () {
+      const res = await fetch('https://raw.githubusercontent.com/poe-tool-dev/latest-patch-version/main/latest.txt')
+      const version = await res.text()
+      latestPoEPatch.value = version
+    }
+
     return {
       poePatch,
+      latestPoEPatch,
       isCdnImportRunning,
       isFetchingSchema,
       handleFile,
