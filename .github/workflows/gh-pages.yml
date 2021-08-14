@@ -1,7 +1,9 @@
 name: Publish viewer
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - 'viewer/**'
 
 jobs:
   build:
