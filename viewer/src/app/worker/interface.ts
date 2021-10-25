@@ -1,5 +1,4 @@
-/* eslint-disable import/no-webpack-loader-syntax */
-import Worker from 'worker-loader!./script'
+import Worker from './script?worker'
 import * as Comlink from 'comlink'
 import type { WorkerRPC } from './script'
 import type { DatFile } from 'pathofexile-dat'

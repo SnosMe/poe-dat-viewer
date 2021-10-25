@@ -37,16 +37,16 @@ export default defineComponent({
 
     return {
       activeTab,
-      appVersion: process.env.APP_VERSION
+      appVersion: import.meta.env.APP_VERSION
     }
   }
 })
 </script>
 
 <style lang="postcss">
+@import "vscode-codicons/dist/codicon.css";
 @tailwind base;
 @tailwind utilities;
-@import "~vscode-codicons/dist/codicon.css";
 
 * {
   outline: none !important;
