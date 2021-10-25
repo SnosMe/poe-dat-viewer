@@ -43,16 +43,14 @@
           @input="handleFile" />
       </div>
     </div>
-    <div class="mt-3">
-      <template v-if="isFetchingSchema">
-        <i class="codicon codicon-loading animate-spin"></i>
-        <span> Downloading schema from </span>
-      </template>
-      <template v-else>
-        <i class="codicon codicon-check"></i>
-        <span> Downloaded schema from </span>
-      </template>
-      <a href="https://github.com/poe-tool-dev/dat-schema" class="underline" target="_blank">github.com/poe-tool-dev/dat-schema</a>
+    <div class="mt-3 flex gap-x-2 items-center">
+      <i v-if="isFetchingSchema" class="codicon codicon-loading animate-spin"></i>
+      <i v-else class="codicon codicon-check"></i>
+      <div>
+        <span v-if="isFetchingSchema"> Downloading schema from </span>
+        <span v-else> Downloaded schema from </span>
+        <a href="https://github.com/poe-tool-dev/dat-schema" class="underline" target="_blank">github.com/poe-tool-dev/dat-schema</a>
+      </div>
     </div>
   </div>
 </template>

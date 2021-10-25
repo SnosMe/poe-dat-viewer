@@ -219,6 +219,8 @@ export default defineComponent({
   text-align: left;
   @apply truncate;
   width: 100%;
+  display: flex;
+  align-items: center;
 
   &:hover {
     @apply bg-gray-100;

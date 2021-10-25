@@ -44,16 +44,12 @@ export default defineComponent({
 </script>
 
 <style lang="postcss">
-@import "vscode-codicons/dist/codicon.css";
+@import "@vscode/codicons/dist/codicon.css";
 @tailwind base;
 @tailwind utilities;
 
 * {
   outline: none !important;
-}
-
-.codicon {
-  vertical-align: text-bottom;
 }
 
 #app {

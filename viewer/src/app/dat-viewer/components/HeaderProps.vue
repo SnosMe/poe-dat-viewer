@@ -2,7 +2,7 @@
   <div v-if="isVisible" style="width: 300px;" class="relative overflow-hidden">
     <div :style="{ height: HEADERS_HEIGHT + 'px' }" class="bg-gray-100" />
     <div class="m-2 shadow border border-gray-300 bg-white absolute inset-0 flex flex-col">
-      <div class="p-2 bg-gray-100 text-gray-600 shadow flex items-baseline">
+      <div class="p-2 bg-gray-100 text-gray-600 shadow flex items-center">
         <span class="px-2">Column properties</span>
         <button class="border border-gray-400 rounded-full px-3"
           @click="$emit('focus-editing-header')">Focus</button>

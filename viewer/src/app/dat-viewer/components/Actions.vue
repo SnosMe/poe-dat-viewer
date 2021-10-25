@@ -5,7 +5,7 @@
         <div class="text-gray-400 italic px-1.5 self-center">No bytes selected</div>
       </template>
       <template v-else-if="selections.length === 1">
-        <button class="hover:bg-gray-300 hover:text-black px-1.5"
+        <button class="hover:bg-gray-300 hover:text-black px-1.5 flex gap-x-1 items-center"
           @click="defineColumn"><i class="codicon codicon-add"></i> Define column</button>
       </template>
       <template v-else-if="selections.length > 1">
@@ -22,23 +22,17 @@
         @click="rowSorting = null"
         >Clear sorting</button>
       <button
-        class="hover:bg-gray-300 hover:text-black px-1.5"
+        class="hover:bg-gray-300 hover:text-black px-1.5 flex gap-x-1 items-center"
         @click="restoreSchema"
         ><i class="codicon codicon-discard" /> Restore schema</button>
       <button
-        class="hover:bg-gray-300 hover:text-black px-1.5"
+        class="hover:bg-gray-300 hover:text-black px-1.5 flex gap-x-1 items-center"
         @click="showSchema"
         ><i class="codicon codicon-json" /> Show schema</button>
       <button
-        class="hover:bg-gray-300 hover:text-black px-1.5"
+        class="hover:bg-gray-300 hover:text-black px-1.5 flex gap-x-1 items-center"
         @click="exportDataJson"
         ><i class="codicon codicon-database" /> Export data</button>
-      <!-- <button TODO
-        class="hover:bg-gray-300 hover:text-black px-1.5"
-        >Export schema</button> -->
-      <!-- <button
-        class="hover:bg-gray-300 hover:text-black px-1.5"
-        ><i class="codicon codicon-ellipsis" /></button> -->
     </div>
   </div>
 </template>
