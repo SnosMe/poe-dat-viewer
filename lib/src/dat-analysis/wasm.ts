@@ -57,7 +57,7 @@ export async function analyzeDatFile (file: DatFile) {
   return stats
 }
 
-const STATS_SIZE = 12
+const STATS_SIZE = 11
 
 function unpackStats (data: Uint8Array, rowLength: number) {
   return new Array(rowLength).fill(undefined)
