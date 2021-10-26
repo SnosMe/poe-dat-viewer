@@ -1,21 +1,6 @@
-/// <reference types="emscripten" />
-
 import type { DatFile } from '../dat/dat-file'
 import type { ColumnStats } from './stats'
-
-type AnalyzeFn = (
-  dataFixedPtr: number, dataFixed_len: number,
-  dataVariablePtr: number, dataVariable_len: number,
-  row_len: number,
-  statsPtr: number
-) => void
-
-interface Native extends EmscriptenModule {
-  _app_analyze_dat32: AnalyzeFn
-  _app_analyze_dat64: AnalyzeFn
-}
-
-const Module = require('./app.js') as EmscriptenModuleFactory<Native>
+import Module from './app'
 
 let module_: ReturnType<typeof Module>
 
