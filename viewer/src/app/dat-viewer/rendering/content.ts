@@ -126,9 +126,9 @@ export function drawArrayVarData (ctx: CanvasRenderingContext2D, header: Header,
     (stat.keyForeign ? datFile.fieldSize.KEY_FOREIGN : 0),
     (stat.keySelf ? datFile.fieldSize.KEY : 0),
     (stat.string ? datFile.fieldSize.STRING : 0),
-    (stat.longLong ? datFile.fieldSize.LONGLONG : 0),
-    (stat.long ? datFile.fieldSize.LONG : 0),
-    (stat.short ? datFile.fieldSize.SHORT : 0),
+    // (stat.numeric64 ? datFile.fieldSize.LONGLONG : 0),
+    (stat.numeric32 ? datFile.fieldSize.LONG : 0),
+    // (stat.numeric16 ? datFile.fieldSize.SHORT : 0),
     (datFile.fieldSize.BYTE)
   ]))
   const maxReadBytes = Math.ceil(header.textLength! / 3)

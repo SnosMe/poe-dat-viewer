@@ -91,16 +91,16 @@ function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   if (len === fieldSize.KEY && stats.keySelf) {
     opts.push({ label: 'Key (self)', value: 'key_self' })
   }
-  if (len === fieldSize.KEY_FOREIGN) {
+  if (len === fieldSize.KEY_FOREIGN && stats.keyForeign) {
     opts.push({ label: 'Key (foreign)', value: 'key_foreign' })
   }
-  if (len === 8 || len === 4 || len === 2 || len === 1) {
+  if (/* len === 8 || */ len === 4 /* || len === 2 || len === 1 */) {
     opts.push({ label: 'Integer', value: 'integer' })
   }
-  if (len === 8 || len === 4) {
+  if (/* len === 8 || */ len === 4) {
     opts.push({ label: 'Decimal', value: 'decimal' })
   }
-  if (len === 1 && stats.bMax <= 0x01) {
+  if (len === 1 && stats.maxValue <= 0x01) {
     opts.push({ label: 'Boolean', value: 'boolean' })
   }
 
@@ -124,25 +124,25 @@ function arrayTypeOpts (header: Header, stats: ColumnStats) {
   if (array.keyForeign) {
     opts.push({ label: 'Key (foreign)', value: 'key_foreign' })
   }
-  if (array.longLong) {
-    opts.push({ label: 'Integer - 8 bytes', value: 'integer_8' })
-  }
-  if (array.long) {
+  // if (array.numeric64) {
+  //   opts.push({ label: 'Integer - 8 bytes', value: 'integer_8' })
+  // }
+  if (array.numeric32) {
     opts.push({ label: 'Integer - 4 bytes', value: 'integer_4' })
   }
-  if (array.short) {
-    opts.push({ label: 'Integer - 2 bytes', value: 'integer_2' })
-  }
-  if (array.longLong) {
-    opts.push({ label: 'Decimal - 8 bytes', value: 'decimal_8' })
-  }
-  if (array.long) {
+  // if (array.numeric16) {
+  //   opts.push({ label: 'Integer - 2 bytes', value: 'integer_2' })
+  // }
+  // if (array.numeric64) {
+  //   opts.push({ label: 'Decimal - 8 bytes', value: 'decimal_8' })
+  // }
+  if (array.numeric32) {
     opts.push({ label: 'Decimal - 4 bytes', value: 'decimal_4' })
   }
   if (array.boolean) {
     opts.push({ label: 'Boolean', value: 'boolean' })
   }
-  opts.push({ label: 'Integer - byte', value: 'integer_1' })
+  // opts.push({ label: 'Integer - byte', value: 'integer_1' })
 
   return opts
 }

@@ -80,11 +80,11 @@ export function renderByteCols (
 
 export function renderColStats (stats: ColumnStats[], datFile: DatFile): RenderStat[] {
   const render = stats.map(stat => ({
-    max: stat.bMax.toString(16).padStart(2, '0'),
+    max: stat.maxValue.toString(16).padStart(2, '0'),
     array: false,
     string: false,
     nullable: false,
-    zero: (stat.bMax === 0x00)
+    zero: (stat.maxValue === 0x00)
   }))
 
   const { fieldSize } = datFile
