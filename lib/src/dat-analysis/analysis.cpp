@@ -22,33 +22,32 @@ struct DatAnalyzedColumn {
 
 template<class SizeT>
 static void analyzeDat(
-  uint8_t* dataFixed, size_t dataFixed_len,
-  uint8_t* dataVariable, size_t dataVariable_len,
-  size_t rowLength,
+  uint8_t* dataFixed, SizeT dataFixed_len,
+  uint8_t* dataVariable, SizeT dataVariable_len,
+  SizeT rowLength,
   DatAnalyzedColumn* stats
 );
 
 extern "C" {
 
 void app_analyze_dat32(
-  uint8_t* a1, size_t a2,
-  uint8_t* a3, size_t a4,
-  size_t a5, DatAnalyzedColumn* a6
+  uint8_t* a1, uint32_t a2,
+  uint8_t* a3, uint32_t a4,
+  uint32_t a5, DatAnalyzedColumn* a6
 ) {
   analyzeDat<uint32_t>(a1, a2, a3, a4, a5, a6);
 }
 void app_analyze_dat64(
-  uint8_t* a1, size_t a2,
-  uint8_t* a3, size_t a4,
-  size_t a5, DatAnalyzedColumn* a6
+  uint8_t* a1, uint64_t a2,
+  uint8_t* a3, uint64_t a4,
+  uint64_t a5, DatAnalyzedColumn* a6
 ) {
   analyzeDat<uint64_t>(a1, a2, a3, a4, a5, a6);
 }
 
 }
 
-static size_t kMagicBbbbSize = 8;
-static size_t kStrTerminatorSize = 4;
+#define can_wrap(expr) (expr)
 
 template<class SizeT>
 static inline SizeT read_unaligned(const uint8_t* data) {
@@ -57,26 +56,38 @@ static inline SizeT read_unaligned(const uint8_t* data) {
   return out;
 }
 
-static inline bool isValidVaroffset(size_t offset, size_t len, size_t dataVariable_len) {
-  return offset >= kMagicBbbbSize && (offset + len) <= dataVariable_len;
+template<class SizeT>
+static inline bool isValidVaroffset(SizeT offset, SizeT len, SizeT dataVariable_len, SizeT arrN = 1) {
+  SizeT kMagicBbbbSize = 8;
+
+  SizeT totalLen = len * arrN;
+  if (arrN != 0) {
+    if (totalLen / arrN != len) return false;
+  }
+
+  SizeT totalEnd = offset + totalLen;
+  if (totalEnd < offset) return false;
+
+  return offset >= kMagicBbbbSize && totalEnd <= dataVariable_len;
 }
 
-static bool isUtf8StringAt(uint8_t* start, uint8_t* end);
+static bool isUtf16StringAt(uint8_t* start, uint8_t* end);
 
 template<class SizeT>
 static void analyzeDat(
-  uint8_t* dataFixed, size_t dataFixed_len,
-  uint8_t* dataVariable, size_t dataVariable_len,
-  size_t rowLength,
+  uint8_t* dataFixed, SizeT dataFixed_len,
+  uint8_t* dataVariable, SizeT dataVariable_len,
+  SizeT rowLength,
   DatAnalyzedColumn* stats
 ) {
-  size_t kPtrSize = sizeof(SizeT);
-  size_t kPtrSize_2 = sizeof(SizeT) * 2;
+  SizeT kPtrSize = sizeof(SizeT);
+  SizeT kPtrSize_2 = sizeof(SizeT) * 2;
   SizeT kNull = (sizeof(SizeT) == 4) ? 0xFEFEFEFE : 0xFEFEFEFEFEFEFEFE;
   SizeT kZero = (sizeof(SizeT) == 4) ? 0x00000000 : 0x0000000000000000;
   uint8_t kNullStart = 0xFE;
+  SizeT kStrTerminatorSize = 4;
 
-  for (size_t bi = 0; bi < rowLength; ++bi) {
+  for (SizeT bi = 0; bi < rowLength; ++bi) {
     stats[bi].maxValue = 0x00;
     stats[bi].nullableMemsize = false;
     stats[bi].value_keySelf = ((rowLength - bi) >= kPtrSize);
@@ -93,12 +104,12 @@ static void analyzeDat(
   }
 
   if (rowLength == 0) return;
-  size_t rowCount = dataFixed_len / rowLength;
+  SizeT rowCount = dataFixed_len / rowLength;
 
-  for (size_t ri = 0; ri < rowCount; ++ri) {
-    size_t row = ri * rowLength;
+  for (SizeT ri = 0; ri < rowCount; ++ri) {
+    SizeT row = ri * rowLength;
 
-    for (size_t bi = 0; bi < rowLength; ++bi) {
+    for (SizeT bi = 0; bi < rowLength; ++bi) {
       DatAnalyzedColumn* stat = stats + bi;
 
       uint8_t byte = dataFixed[row + bi];
@@ -113,7 +124,7 @@ static void analyzeDat(
       if (stat->value_refString) {
         SizeT varOffset = read_unaligned<SizeT>(dataFixed + (row + bi));
         stat->value_refString = isValidVaroffset(varOffset, kStrTerminatorSize, dataVariable_len) &&
-          isUtf8StringAt(dataVariable + varOffset, dataVariable + dataVariable_len);
+          isUtf16StringAt(dataVariable + varOffset, dataVariable + dataVariable_len);
       }
 
       if (stat->value_keySelf) {
@@ -137,42 +148,42 @@ static void analyzeDat(
         SizeT arrayLength = read_unaligned<SizeT>(dataFixed + (row + bi));
         SizeT varOffset = read_unaligned<SizeT>(dataFixed + (row + bi) + kPtrSize);
         if (
-          !isValidVaroffset(varOffset, 0, dataVariable_len) ||
-          !isValidVaroffset(varOffset, (1 * arrayLength), dataVariable_len)
+          !isValidVaroffset(varOffset, (SizeT)0, dataVariable_len) ||
+          !isValidVaroffset(varOffset, (SizeT)1, dataVariable_len, arrayLength)
         ) {
           if (!(arrayLength == 0 && varOffset == dataVariable_len)) {
             stat->array_element8 = false;
           }
         } else {
           // if (stat->array_element16) stat->array_element16 =
-          //   isValidVaroffset(varOffset, (2 * arrayLength), dataVariable_len);
+          //   isValidVaroffset(varOffset, (SizeT)2, dataVariable_len, arrayLength);
           if (stat->array_element32) stat->array_element32 =
-            isValidVaroffset(varOffset, (4 * arrayLength), dataVariable_len);
+            isValidVaroffset(varOffset, (SizeT)4, dataVariable_len, arrayLength);
           // if (stat->array_element64) stat->array_element64 =
-          //   isValidVaroffset(varOffset, (8 * arrayLength), dataVariable_len);
+          //   isValidVaroffset(varOffset, (SizeT)8, dataVariable_len, arrayLength);
           if (stat->array_refString) stat->array_refString =
-            isValidVaroffset(varOffset, (kPtrSize * arrayLength), dataVariable_len);
+            isValidVaroffset(varOffset, kPtrSize, dataVariable_len, arrayLength);
           if (stat->array_keySelf) stat->array_keySelf =
-            isValidVaroffset(varOffset, (kPtrSize * arrayLength), dataVariable_len);
+            isValidVaroffset(varOffset, kPtrSize, dataVariable_len, arrayLength);
           if (stat->array_keyForeign) stat->array_keyForeign =
-            isValidVaroffset(varOffset, (kPtrSize_2 * arrayLength), dataVariable_len);
+            isValidVaroffset(varOffset, kPtrSize_2, dataVariable_len, arrayLength);
 
-          for (size_t idx = 0; idx < arrayLength && stat->array_refString; ++idx) {
+          for (SizeT idx = 0; idx < arrayLength && stat->array_refString; ++idx) {
             SizeT strOffset = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize * idx));
             stat->array_refString = isValidVaroffset(strOffset, kStrTerminatorSize, dataVariable_len) &&
-              isUtf8StringAt(dataVariable + strOffset, dataVariable + dataVariable_len);
+              isUtf16StringAt(dataVariable + strOffset, dataVariable + dataVariable_len);
           }
 
-          for (size_t idx = 0; idx < arrayLength && stat->array_keySelf; ++idx) {
+          for (SizeT idx = 0; idx < arrayLength && stat->array_keySelf; ++idx) {
             SizeT rowIdx = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize * idx));
             if (rowIdx != kNull) {
               stat->array_keySelf = (rowIdx < rowCount);
             }
           }
 
-          for (size_t idx = 0; idx < arrayLength && stat->array_keyForeign; ++idx) {
-            SizeT rowIdx = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize * idx));
-            SizeT tablePtr = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize * idx) + kPtrSize);
+          for (SizeT idx = 0; idx < arrayLength && stat->array_keyForeign; ++idx) {
+            SizeT rowIdx = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize_2 * idx));
+            SizeT tablePtr = read_unaligned<SizeT>(dataVariable + varOffset + (kPtrSize_2 * idx) + kPtrSize);
             if (rowIdx != kNull) {
               stat->array_keyForeign = (tablePtr == kZero);
             } else {
@@ -180,7 +191,7 @@ static void analyzeDat(
             }
           }
 
-          for (size_t idx = 0; idx < arrayLength && stat->array_boolean; ++idx) {
+          for (SizeT idx = 0; idx < arrayLength && stat->array_boolean; ++idx) {
             stat->array_boolean =
               dataVariable[varOffset + idx] <= 0x01;
           }
@@ -190,7 +201,7 @@ static void analyzeDat(
   }
 }
 
-static bool isUtf8StringAt(uint8_t* start, uint8_t* end) {
+static bool isUtf16StringAt(uint8_t* start, uint8_t* end) {
   for (;;) {
     if ((start + 3) >= end) {
       return false;
