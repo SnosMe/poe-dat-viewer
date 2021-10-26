@@ -1,14 +1,13 @@
 
 export interface ColumnStats {
-  bMax: number
+  maxValue: number
   nullableMemsize: boolean
   keySelf: boolean
+  keyForeign: boolean
   refString: boolean
   refArray: {
     boolean: boolean
-    short: boolean
-    long: boolean
-    longLong: boolean
+    numeric32: boolean
     string: boolean
     keyForeign: boolean
     keySelf: boolean

@@ -1,10 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(app)
 
-add_executable(app
-  analysis.c
-  analysis32.c
-  analysis64.c
+add_library(app
+  analysis.cpp
   )
 
 target_link_options(app PRIVATE

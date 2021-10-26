@@ -15,29 +15,29 @@ export function validateHeader (header: Header, columns: ColumnStats[], datFile:
   const stats = columns[header.offset]
 
   if (integer) {
-    if (size === 1 && !array) return space >= 1
-    if (size === 2 && !array) return space >= 2
+    // if (size === 1 && !array) return space >= 1
+    // if (size === 2 && !array) return space >= 2
     if (size === 4 && !array) return space >= 4
-    if (size === 8 && !array) return space >= 8
+    // if (size === 8 && !array) return space >= 8
 
-    if (size === 1 && array) return stats.refArray && true
-    if (size === 2 && array) return stats.refArray && stats.refArray.short
-    if (size === 4 && array) return stats.refArray && stats.refArray.long
-    if (size === 8 && array) return stats.refArray && stats.refArray.longLong
+    // if (size === 1 && array) return stats.refArray && true
+    // if (size === 2 && array) return stats.refArray && stats.refArray.short
+    if (size === 4 && array) return stats.refArray && stats.refArray.numeric32
+    // if (size === 8 && array) return stats.refArray && stats.refArray.longLong
   }
 
   if (decimal) {
     if (size === 4 && !array) return space >= 4
-    if (size === 8 && !array) return space >= 8
+    // if (size === 8 && !array) return space >= 8
 
-    if (size === 4 && array) return stats.refArray && stats.refArray.long
-    if (size === 8 && array) return stats.refArray && stats.refArray.longLong
+    if (size === 4 && array) return stats.refArray && stats.refArray.numeric32
+    // if (size === 8 && array) return stats.refArray && stats.refArray.longLong
   }
 
   if (boolean) {
     return array
       ? stats.refArray && stats.refArray.boolean
-      : stats.bMax <= 0x01
+      : stats.maxValue <= 0x01
   }
 
   if (string) {
@@ -49,7 +49,7 @@ export function validateHeader (header: Header, columns: ColumnStats[], datFile:
   if (key && key.foreign) {
     return array
       ? stats.refArray && stats.refArray.keyForeign
-      : space >= datFile.fieldSize.KEY_FOREIGN
+      : stats.keyForeign
   }
 
   if (key && !key.foreign) {
