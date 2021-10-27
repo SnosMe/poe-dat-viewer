@@ -8,8 +8,8 @@ type AnalyzeFn = (
 ) => void
 
 interface Native extends EmscriptenModule {
-  _app_analyze_dat32: AnalyzeFn
-  _app_analyze_dat64: AnalyzeFn
+  _fast_analyze_dat32: AnalyzeFn
+  _fast_analyze_dat64: AnalyzeFn
 }
 
 declare const ModuleFactory: EmscriptenModuleFactory<Native>

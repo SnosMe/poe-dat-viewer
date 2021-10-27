@@ -6,31 +6,31 @@ on:
       - 'lib/**'
 
 jobs:
-  dat-analysis-wasm:
+  compute-wasm:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: mymindstorm/setup-emsdk@v10
     - run: emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
-      working-directory: lib/src/dat-analysis
+      working-directory: lib/src
     - run: cmake --build build
-      working-directory: lib/src/dat-analysis
+      working-directory: lib/src
     - uses: actions/upload-artifact@v2
       with:
-        name: dat-analysis
-        path: lib/src/dat-analysis/build/app.js
+        name: compute
+        path: lib/src/build/compute.js
         retention-days: 1
         if-no-files-found: error
 
   build-lib:
-    needs: dat-analysis-wasm
+    needs: compute-wasm
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/download-artifact@v2
       with:
-        name: dat-analysis
-        path: lib/dat-analysis
+        name: compute
+        path: lib
     - uses: actions/setup-node@v2
       with:
         node-version: 14
