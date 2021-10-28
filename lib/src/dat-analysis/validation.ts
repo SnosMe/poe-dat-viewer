@@ -1,8 +1,7 @@
 import type { ColumnStats } from './stats'
 import type { Header } from '../dat/header'
-import type { DatFile } from '../dat/dat-file'
 
-export function validateHeader (header: Header, columns: ColumnStats[], datFile: DatFile): boolean {
+export function validateHeader (header: Header, columns: ColumnStats[]): boolean {
   const boolean = header.type.boolean
   const integer = header.type.integer
   const decimal = header.type.decimal
