@@ -47,7 +47,7 @@
 <script lang="ts">
 import { defineComponent, shallowRef, computed, watch } from 'vue'
 import FileSaver from 'file-saver'
-import { VirtualScroll } from '@/VirtualScroll.vue'
+import VirtualScroll, { VirtualScrollT } from '@/VirtualScroll.vue'
 import { getRootDirs, getDirContent } from 'pathofexile-dat/bundles/index-paths'
 import { index, loadFileContent } from '../patchcdn/index-store'
 import { openTab, activeTabId } from './workbench-core'
@@ -141,7 +141,7 @@ function useTreeNavigation () {
 }
 
 export default defineComponent({
-  components: { VirtualScroll: VirtualScroll<TreeItem>() },
+  components: { VirtualScroll: VirtualScroll as VirtualScrollT<TreeItem> },
   setup () {
     const showTree = shallowRef(true)
     function toggleTree () {
