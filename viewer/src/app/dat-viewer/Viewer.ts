@@ -44,7 +44,7 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
     scrollPos: shallowReactive({ x: 0, y: 0 })
   }
 
-  analyzeDatFile(viewer.datFile)
+  void analyzeDatFile(viewer.datFile)
     .then(async (stats) => {
       viewer.columnStats.value = stats
       await importHeaders(viewer)
@@ -69,7 +69,7 @@ export async function importHeaders (viewer: Viewer) {
   try {
     tryImportHeaders(headers, viewer)
   } catch (e) {
-    window.alert(`WARN: ${e.message}`)
+    window.alert(`WARN: ${(e as Error).message}`)
   } finally {
     triggerRef(viewer.headers)
   }
@@ -92,7 +92,7 @@ function tryImportHeaders (serialized: db.ViewerSerializedHeader[], viewer: View
 
     const isValid = (hdrSerialized.length)
       ? (viewer.datFile.rowLength - header.offset) >= header.length
-      : validateHeader(header, viewer.columnStats.value, viewer.datFile)
+      : validateHeader(header, viewer.columnStats.value)
     if (!isValid) {
       throw new Error('The schema is invalid.')
     }
@@ -116,10 +116,10 @@ export function exportAllRows (headers: Header[], datFile: DatFile) {
 
         if (header.type.key?.foreign) {
           if (!header.type.array) {
-            const data_ = data as ({ rid: number, unknown: number } | null)[]
-            return data_.map(row => row && row.rid)
+            const data_ = data as Array<{ rid: number, unknown: number } | null>
+            return data_.map(row => row?.rid)
           } else {
-            const data_ = data as (Array<{ rid: number, unknown: number }>)[]
+            const data_ = data as Array<Array<{ rid: number, unknown: number }>>
             return data_.map(row => row.map(entry => entry.rid))
           }
         }

@@ -1,4 +1,4 @@
-import { shallowRef, shallowReactive, DefineComponent, triggerRef } from 'vue'
+import { shallowRef, DefineComponent, triggerRef } from 'vue'
 import ImportDialog from './ImportDialog.vue'
 
 interface Tab {

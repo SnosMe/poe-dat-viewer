@@ -60,7 +60,7 @@ function keyForeignToString (value: { rid: number, unknown: number } | null, out
     out.color = '#098658'
   }
 }
-function keyForeignArrayToString (value: { rid: number, unknown: number }[], out: StringifyOut) {
+function keyForeignArrayToString (value: Array<{ rid: number, unknown: number }>, out: StringifyOut) {
   out.text = `[${value.map(key => `<${key.rid}, fk>`).join(', ')}]`
   out.color = '#098658'
 }
@@ -75,14 +75,14 @@ export function renderCellContent (ctx: CanvasRenderingContext2D, header: Header
       if (header.type.boolean) return booleanArrayToString
       if (header.type.string) return stringArrayToString
       if (header.type.integer || header.type.decimal) return numberArrayToString
-      if (header.type.key && header.type.key.foreign) return keyForeignArrayToString
-      if (header.type.key && !header.type.key.foreign) return keySelfArrayToString
+      if (header.type.key?.foreign) return keyForeignArrayToString
+      if (header.type.key) return keySelfArrayToString
     } else {
       if (header.type.boolean) return booleanToString
       if (header.type.string) return stringToString
       if (header.type.integer || header.type.decimal) return numberToString
-      if (header.type.key && header.type.key.foreign) return keyForeignToString
-      if (header.type.key && !header.type.key.foreign) return keySelfToString
+      if (header.type.key?.foreign) return keyForeignToString
+      if (header.type.key) return keySelfToString
     }
     throw new Error('never')
   })()

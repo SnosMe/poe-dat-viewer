@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, computed, provide, watch, shallowRef, shallowReactive, ref, render, onMounted } from 'vue'
+import { defineComponent, PropType, computed, provide, watch, ref, onMounted } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
 import { Viewer, createViewer } from '../Viewer'

@@ -74,5 +74,5 @@ export async function _fetchFile (patchVer: string, name: string): Promise<Array
     }))
     return buf.buffer
   }
-  return res.arrayBuffer()
+  return await res.arrayBuffer()
 }

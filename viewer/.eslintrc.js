@@ -9,6 +9,7 @@ module.exports = {
   ],
   parserOptions: {
     parser: '@typescript-eslint/parser',
+    project: './tsconfig.json',
     extraFileExtensions: ['.vue'],
     ecmaFeatures: {
       jsx: true
@@ -19,7 +20,8 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'multiline-ternary': ['off'],
     '@typescript-eslint/no-non-null-assertion': ['off'],
-    '@typescript-eslint/no-unused-vars': ['off'],
-    '@typescript-eslint/explicit-module-boundary-types': ['off']
+    '@typescript-eslint/explicit-function-return-type': ['off'],
+    '@typescript-eslint/strict-boolean-expressions': ['off'],
+    '@typescript-eslint/prefer-nullish-coalescing': ['off']
   }
 }

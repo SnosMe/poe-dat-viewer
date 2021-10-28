@@ -4,7 +4,7 @@
       <button v-for="col in headers" :key="col.offset"
         class="datv-header" :class="{ 'datv-col--border': col.border, 'datv-header--active': col.active }"
         :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
-        :title="col.name"
+        :title="(col.name == null) ? 'unidentified' : (col.name || 'unnamed')"
         @click="editHeader(col.offset)"
         @wheel="handleHeaderWheel(col.offset, $event)">
         <template v-if="col.name === null">&nbsp;</template>
@@ -22,7 +22,7 @@
         :style="{ width: col.widthPx + 'px', transform: `translate(${col.leftPx}px, 0)` }"
         @mousedown="selectStart(col.offset)"
         @mouseenter="selectContinue(col.offset, $event)"
-        :title="col.offset"
+        :title="String(col.offset)"
         v-text="col.text"
       />
     </div>
@@ -55,11 +55,11 @@
 <script lang="ts">
 import { toggleColsBetween } from '../selection'
 import { sortRows } from '../sorting'
-import { defineComponent, inject, shallowRef, shallowReactive, watch, computed, triggerRef } from 'vue'
+import { defineComponent, inject, shallowRef, computed, triggerRef, PropType } from 'vue'
 import { saveHeaders, Viewer } from '../Viewer'
 import * as rendering from '../rendering'
-import { Header } from '../headers'
 import { renderHeaderCols } from '../rendering/header-columns'
+import type { RenderByte } from '../rendering/byte-columns'
 
 export default defineComponent({
   props: {
@@ -72,7 +72,7 @@ export default defineComponent({
       required: true
     },
     columns: {
-      type: Array,
+      type: Array as PropType<RenderByte[]>,
       required: true
     }
   },

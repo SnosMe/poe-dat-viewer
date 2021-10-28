@@ -58,8 +58,8 @@
 <script lang="ts">
 import { defineComponent, shallowRef } from 'vue'
 import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
-import { fetchFile, progress } from '../patchcdn/cache'
-import { loadIndex, loadFileContent, index } from '../patchcdn/index-store'
+import { fetchFile } from '../patchcdn/cache'
+import { loadIndex, index } from '../patchcdn/index-store'
 import { publicSchema } from '../dat-viewer/db'
 import { openTab } from './workbench-core'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
@@ -107,7 +107,7 @@ export default defineComponent({
         await loadIndex(bundle)
         localStorage.setItem('POE_PATCH_VER', poePatch.value)
       } catch (e) {
-        window.alert(e.message)
+        window.alert((e as Error).message)
         throw e
       }
     }

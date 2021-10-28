@@ -51,7 +51,10 @@ export async function preloadDataTables (totalTables: Ref<number>) {
 
   const filesInfo = await getBatchFileInfo(filePaths, index.value!.bundlesInfo, index.value!.filesInfo)
 
-  const byBundle = filesInfo.reduce((byBundle, location, idx) => {
+  const byBundle = filesInfo.reduce<Array<{
+    name: string
+    files: Array<{ fullPath: string, location: ReturnType<typeof getFileInfo> }>
+  }>>((byBundle, location, idx) => {
     const found = byBundle.find(bundle => bundle.name === location.bundle)
     const fullPath = filePaths[idx]
     if (found) {
@@ -63,10 +66,7 @@ export async function preloadDataTables (totalTables: Ref<number>) {
       })
     }
     return byBundle
-  }, [] as Array<{
-    name: string
-    files: Array<{ fullPath: string, location: ReturnType<typeof getFileInfo> }>
-  }>)
+  }, [])
 
   for (const bundle of byBundle) {
     let bundleBin = await fetchFile(null, bundle.name)

@@ -42,7 +42,7 @@ const firstTableAt = shallowRef(0)
 export default defineComponent({
   setup () {
     const timeLeft = computed(() => {
-      if (!firstTableAt.value && index.value.tableStats.length) {
+      if (!firstTableAt.value && index.value!.tableStats.length) {
         firstTableAt.value = Date.now() / 1000
       }
       const now = Date.now() / 1000
@@ -61,7 +61,7 @@ export default defineComponent({
         await preloadDataTables(totalTables)
         isPreloading.value = false
       },
-      tables: computed(() => index.value.tableStats)
+      tables: computed(() => index.value!.tableStats)
     }
   }
 })

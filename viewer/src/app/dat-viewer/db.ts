@@ -77,7 +77,7 @@ function fromPublicSchema (name: string): ViewerSerializedHeader[] | null {
   if (!sch) return null
 
   return sch.columns.map(column => {
-    return { /* eslint-disable indent */
+    return { /* eslint-disable @typescript-eslint/indent */
       name: column.name || '',
       type: {
         array: column.array,

@@ -11,8 +11,8 @@ const WorkerBody = {
       slice: Comlink.transfer(slice, [slice.buffer])
     }
   },
-  analyzeDatFile (datFile: DatFile) {
-    return analyzeDatFile(datFile)
+  async analyzeDatFile (datFile: DatFile) {
+    return await analyzeDatFile(datFile)
   },
   async getBatchFileInfo (paths: string[], bundlesInfo: Uint8Array, filesInfo: Uint8Array) {
     return paths.map(fullPath =>
