@@ -34,7 +34,8 @@ export const FIELD_SIZE = {
 }
 
 export type DatKeySelf = number | null
-export type DatKeyForeign = { rid: number, unknown: number } | null
+export type DatKeyForeign = number | null
+// export type DatKeyForeign = { rid: number, unknown: number } | null
 
 export function readInteger (data: BinaryReader, size: number, unsigned: boolean): (offset: number) => number {
   if (size === 1 && unsigned) return (offset) => data.getUint8(offset)
@@ -86,9 +87,8 @@ export function readKeyForeign (data: BinaryReader): (offset: number) => DatKeyF
   const NULL = getNULL(data.ptrsize)
   return offset => {
     const rowIdx = data.getSizeT(offset)
-    return (rowIdx === NULL)
-      ? null
-      : { rid: rowIdx, unknown: data.getSizeT(offset + data.ptrsize) }
+    return (rowIdx === NULL) ? null : rowIdx
+    // return (rowIdx === NULL) ? null : { rid: rowIdx, unknown: data.getSizeT(offset + data.ptrsize) }
   }
 }
 
