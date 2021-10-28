@@ -63,6 +63,7 @@
           <label class="mr-4">Width</label>
           <input v-model.number="header.textLength"
             class="border w-16 text-center"> chars
+          <div class="italic mt-2">(move mouse over the column name in Viewer and use `ScrollWheel`, hold `Ctrl` to increase resize step)</div>
         </div>
       </div>
     </div>
@@ -198,9 +199,9 @@ export default defineComponent({
         } else if (type === 'string') {
           header.type.string = {}
         } else if (type === 'key_foreign') {
-          header.type.key = { foreign: true }
+          header.type.key = { foreign: true, table: null }
         } else if (type === 'key_self') {
-          header.type.key = { foreign: false }
+          header.type.key = { foreign: false, table: viewer.name }
         } else if (type === 'integer') {
           header.type.integer = { unsigned: false, size: header.length }
         } else if (type === 'decimal') {
@@ -234,9 +235,9 @@ export default defineComponent({
         if (type === 'string') {
           header.type.string = {}
         } else if (type === 'key_foreign') {
-          header.type.key = { foreign: true }
+          header.type.key = { foreign: true, table: null }
         } else if (type === 'key_self') {
-          header.type.key = { foreign: false }
+          header.type.key = { foreign: false, table: viewer.name }
         } else if (type === 'integer_1') {
           header.type.integer = { unsigned: false, size: 1 }
         } else if (type === 'integer_2') {

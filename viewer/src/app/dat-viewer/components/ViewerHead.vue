@@ -46,6 +46,7 @@
             class="datv-stat__line bg-pink-400" style="top: 14px;" />
           <div class="datv-stat__max" v-text="col.stat.max" />
         </template>
+        <span v-else-if="col.key" class="inline-flex mx-auto items-center h-full"><i class="codicon codicon-key" /></span>
       </div>
     </div>
   </div>

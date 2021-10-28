@@ -21,6 +21,7 @@ export interface RenderByte {
   leftPx: number
   text: string
   stat?: RenderStat
+  key: boolean
 }
 
 export function renderByteCols (
@@ -54,7 +55,8 @@ export function renderByteCols (
           widthPx: BYTE_WIDTH,
           leftPx: Math.ceil(textLeft),
           text: String(offset % 100).padStart(2, '0'),
-          stat: stats[offset]
+          stat: stats[offset],
+          key: false
         })
 
         textLeft += thisWidth
@@ -67,7 +69,8 @@ export function renderByteCols (
         border: sizes.hasBorder,
         widthPx: sizes.paddingWidth,
         leftPx: left,
-        text: String(header.offset % 100).padStart(2, '0')
+        text: String(header.offset % 100).padStart(2, '0'),
+        key: (header.type.key != null)
       })
     }
 

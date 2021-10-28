@@ -117,15 +117,9 @@ export function exportAllRows (headers: Header[], datFile: DatFile) {
         if (header.type.key?.foreign) {
           if (!header.type.array) {
             const data_ = data as ({ rid: number, unknown: number } | null)[]
-            if (!data_.every(row => row == null || row.unknown === 0)) {
-              throw new Error('never')
-            }
             return data_.map(row => row && row.rid)
           } else {
             const data_ = data as (Array<{ rid: number, unknown: number }>)[]
-            if (!data_.every(row => row.every(entry => entry.unknown === 0))) {
-              throw new Error('never')
-            }
             return data_.map(row => row.map(entry => entry.rid))
           }
         }

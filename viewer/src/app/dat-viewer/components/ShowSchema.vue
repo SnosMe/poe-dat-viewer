@@ -44,7 +44,7 @@ export default defineComponent({
           } else if (header.type.decimal?.size === 8) {
             type = 'f64'
           } else if (header.type.key) {
-            type = header.type.key.foreign ? 'rid' : name
+            type = header.type.key.foreign ? (header.type.key.table ?? 'rid') : name
           }
 
           if (header.type.array) {

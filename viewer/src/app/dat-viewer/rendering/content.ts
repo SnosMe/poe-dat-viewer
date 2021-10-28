@@ -56,12 +56,12 @@ function keyForeignToString (value: { rid: number, unknown: number } | null, out
     out.text = 'null'
     out.color = '#0000ff'
   } else {
-    out.text = `<${value.rid}, ${value.unknown}>`
+    out.text = `<${value.rid}, fk>`
     out.color = '#098658'
   }
 }
 function keyForeignArrayToString (value: { rid: number, unknown: number }[], out: StringifyOut) {
-  out.text = `[${value.map(key => `<${key.rid}, ${key.unknown}>`).join(', ')}]`
+  out.text = `[${value.map(key => `<${key.rid}, fk>`).join(', ')}]`
   out.color = '#098658'
 }
 
