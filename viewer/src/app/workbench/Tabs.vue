@@ -10,11 +10,13 @@
           @click="closeTab(tab.id)"><i class="codicon codicon-close"></i></button>
       </div>
     </div>
-    <div class="flex p-1.5 flex-shrink-0 space-x-1">
+    <div class="flex p-1.5 flex-shrink-0 gap-x-1">
       <button :class="$style.rightBtn"
-        @click="openImport">Import</button>
-      <button :class="$style.rightBtn" title="Help"><i class="codicon codicon-question"></i></button>
-      <button :class="$style.rightBtn" title="Settings"><i class="codicon codicon-settings"></i></button>
+        @click="openImport"><i class="codicon codicon-cloud-download"></i> Import</button>
+      <button v-if="showDataTables" :class="$style.rightBtn"
+        @click="openDataTables"><i class="codicon codicon-table"></i> Data Tables</button>
+      <!-- <button :class="$style.rightBtn" title="Help"><i class="codicon codicon-question"></i></button> -->
+      <!-- <button :class="$style.rightBtn" title="Settings"><i class="codicon codicon-settings"></i></button> -->
     </div>
   </div>
 </template>
@@ -22,7 +24,10 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { tabs, activeTabId, setActiveTab, closeTab, openTab } from './workbench-core'
+import { index } from '../patchcdn/index-store'
+import { publicSchema } from '../dat-viewer/db'
 import ImportDialog from './ImportDialog.vue'
+import DataTablesDialog from './DataTablesDialog.vue'
 
 export default defineComponent({
   setup () {
@@ -43,11 +48,24 @@ export default defineComponent({
       })
     }
 
+    function openDataTables () {
+      openTab({
+        id: 'poe-dat-viewer@data-tables',
+        title: 'Data Tables',
+        type: DataTablesDialog,
+        args: undefined
+      })
+    }
+
     return {
       tabs: _tabs,
       setActiveTab,
       closeTab,
-      openImport
+      openImport,
+      openDataTables,
+      showDataTables: computed(() => {
+        return index.value != null && publicSchema.value.length
+      })
     }
   }
 })
@@ -84,6 +102,9 @@ export default defineComponent({
 
 .rightBtn {
   @apply px-2;
+  @apply gap-x-1;
+  display: flex;
+  align-items: center;
 
   &:hover {
     @apply bg-gray-300;

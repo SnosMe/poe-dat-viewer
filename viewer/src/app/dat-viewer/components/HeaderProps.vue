@@ -20,7 +20,7 @@
         </div>
         <div class="mb-4 flex items-baseline">
           <div class="mr-2">View mode</div>
-          <div class="space-x-px flex">
+          <div class="gap-x-px flex">
             <button v-for="opt in viewModeOpts" :key="opt.value"
               class="px-2"
               :class="(byteViewMode === opt.value) ? 'bg-blue-600 text-white' : 'bg-gray-100 hover:bg-gray-300'"

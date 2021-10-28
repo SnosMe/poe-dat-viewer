@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 overflow-auto border-l flex-1 text-base">
-    <div class="flex space-x-4 items-baseline mt-4">
+    <div class="flex gap-x-4 items-baseline mt-4">
       <div :class="$style.importVariant">1</div>
       <div>
         <div class="max-w-xl mb-4 font-semibold">Useful when a new league is released. While the update is still downloading, you can review files and fix schema directly from the update servers.</div>
@@ -27,7 +27,7 @@
         </div>
       </div>
     </div>
-    <div class="flex space-x-4 items-baseline mt-4 border-b pb-3">
+    <div class="flex gap-x-4 items-baseline mt-4 border-b pb-3">
       <div :class="$style.importVariant">2</div>
       <div class="flex items-baseline">
         <span class="pr-2">or just</span>

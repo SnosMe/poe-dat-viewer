@@ -16,7 +16,7 @@
           v-text="range" />
       </template>
     </div>
-    <div class="flex space-x-1">
+    <div class="flex gap-x-1">
       <button v-if="rowSorting"
         class="bg-gray-600 hover:bg-gray-300 hover:text-black px-1.5 border border-gray-500"
         @click="rowSorting = null"
