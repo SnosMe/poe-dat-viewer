@@ -111,21 +111,7 @@ export function exportAllRows (headers: Header[], datFile: DatFile) {
     .filter(({ type }) => type.boolean || type.decimal || type.integer || type.key || type.string)
     .map((header, idx) => ({
       name: header.name || `Unknown${idx + 1}`,
-      data: (() => {
-        const data = readColumn(header, datFile)
-
-        if (header.type.key?.foreign) {
-          if (!header.type.array) {
-            const data_ = data as Array<{ rid: number, unknown: number } | null>
-            return data_.map(row => row?.rid)
-          } else {
-            const data_ = data as Array<Array<{ rid: number, unknown: number }>>
-            return data_.map(row => row.map(entry => entry.rid))
-          }
-        }
-
-        return data
-      })()
+      data: readColumn(header, datFile)
     }))
 
   columns.unshift({

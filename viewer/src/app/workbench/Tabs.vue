@@ -85,6 +85,7 @@ export default defineComponent({
 .tab {
   display: flex;
   align-items: center;
+  white-space: nowrap;
 
   &:hover {
     @apply bg-gray-600;

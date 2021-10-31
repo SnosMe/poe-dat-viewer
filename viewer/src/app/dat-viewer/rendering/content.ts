@@ -51,17 +51,17 @@ function keySelfArrayToString (value: number[], out: StringifyOut) {
   out.text = `[${value.map(key => `<${key}, self>`).join(', ')}]`
   out.color = '#098658'
 }
-function keyForeignToString (value: { rid: number, unknown: number } | null, out: StringifyOut) {
+function keyForeignToString (value: number | null, out: StringifyOut) {
   if (value === null) {
     out.text = 'null'
     out.color = '#0000ff'
   } else {
-    out.text = `<${value.rid}, fk>`
+    out.text = `<${value}>`
     out.color = '#098658'
   }
 }
-function keyForeignArrayToString (value: Array<{ rid: number, unknown: number }>, out: StringifyOut) {
-  out.text = `[${value.map(key => `<${key.rid}, fk>`).join(', ')}]`
+function keyForeignArrayToString (value: number[], out: StringifyOut) {
+  out.text = `[${value.map(key => `<${key}>`).join(', ')}]`
   out.color = '#098658'
 }
 

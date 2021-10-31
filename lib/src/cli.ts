@@ -104,7 +104,7 @@ export function exportAllRows (headers: NamedHeader[], datFile: DatFile) {
   const columns = headers
     .map(header => ({
       name: header.name,
-      data: (() => readColumn(header, datFile))()
+      data: readColumn(header, datFile)
     }))
 
   columns.unshift({

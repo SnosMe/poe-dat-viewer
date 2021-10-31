@@ -11,7 +11,7 @@ export interface Header {
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
     string?: { [key: string]: never }
-    key?: { foreign: boolean, table: string | null }
+    key?: { foreign: boolean, table: string | null, viewColumn: string | null }
   }
   textLength?: number
 }

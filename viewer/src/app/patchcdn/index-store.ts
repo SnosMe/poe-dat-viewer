@@ -35,7 +35,7 @@ export async function loadIndex (indexBin: ArrayBuffer) {
   }
 }
 
-interface TableStats {
+export interface TableStats {
   name: string
   totalRows: number
   headersValid: boolean

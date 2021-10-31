@@ -59,7 +59,16 @@
             <span class="ml-2 cursor-pointer">Unsigned</span>
           </label>
         </div>
-        <div class="mb-4 border-t pt-4" v-if="dataType">
+        <div class="mb-4" v-if="header.type.key">
+          <label for="datv-header-key-table">Table</label>
+          <select id="datv-header-key-table" class="border mt-1 w-full focus:border-blue-500"
+            v-model="header.type.key.table">
+            <option v-for="opt of keyTableOpts" :key="opt.label"
+              :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+        <hr class="my-6">
+        <div class="mb-4" v-if="dataType">
           <label class="mr-4">Width</label>
           <input v-model.number="header.textLength"
             class="border w-16 text-center"> chars
@@ -74,9 +83,11 @@
 import { defineComponent, inject, computed, triggerRef, reactive, watch, WatchStopHandle } from 'vue'
 import { Header, removeHeader } from '../headers'
 import { Viewer, saveHeaders } from '../Viewer'
-import type { DatFile } from 'pathofexile-dat'
+import { DatFile, readColumn } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
 import { HEADERS_HEIGHT } from '../rendering'
+import { index } from '@/app/patchcdn/index-store'
+import { foreignTableSuggestions } from './foreignTableSuggestions'
 
 function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   const opts = [] as Array<{ label: string, value: string }>
@@ -199,9 +210,9 @@ export default defineComponent({
         } else if (type === 'string') {
           header.type.string = {}
         } else if (type === 'key_foreign') {
-          header.type.key = { foreign: true, table: null }
+          header.type.key = { foreign: true, table: null, viewColumn: null }
         } else if (type === 'key_self') {
-          header.type.key = { foreign: false, table: viewer.name }
+          header.type.key = { foreign: false, table: viewer.name, viewColumn: null }
         } else if (type === 'integer') {
           header.type.integer = { unsigned: false, size: header.length }
         } else if (type === 'decimal') {
@@ -235,9 +246,9 @@ export default defineComponent({
         if (type === 'string') {
           header.type.string = {}
         } else if (type === 'key_foreign') {
-          header.type.key = { foreign: true, table: null }
+          header.type.key = { foreign: true, table: null, viewColumn: null }
         } else if (type === 'key_self') {
-          header.type.key = { foreign: false, table: viewer.name }
+          header.type.key = { foreign: false, table: viewer.name, viewColumn: null }
         } else if (type === 'integer_1') {
           header.type.integer = { unsigned: false, size: 1 }
         } else if (type === 'integer_2') {
@@ -290,6 +301,33 @@ export default defineComponent({
       }
     })
 
+    const maxKeyRid = computed(() => {
+      const values = readColumn(headerRef.value, viewer.datFile)
+      // Math.max(null) is 0, this is perfect for us
+      return Math.max(
+        ...(headerRef.value.type.array
+          ? (values as number[][]).flat()
+          : (values as number[])))
+    })
+
+    const keyTableOpts = computed(() => {
+      let out: Array<{ value: string | null, label: string }>
+
+      if (!headerRef.value.type.key!.foreign) {
+        out = [{ value: viewer.name, label: viewer.name }]
+        return out
+      }
+
+      out = [{ value: null, label: 'rid (unknown)' }]
+      if (index.value!.tableStats.length) {
+        const tables = foreignTableSuggestions(viewer.name, maxKeyRid.value, index.value!.tableStats)
+        out.push(...tables.map(table => ({ value: table.name, label: table.name })))
+      } else if (headerRef.value.type.key!.table !== null) {
+        out.push({ value: headerRef.value.type.key!.table, label: headerRef.value.type.key!.table })
+      }
+      return out
+    })
+
     function close () {
       viewer.editHeader.value = null
     }
@@ -311,6 +349,7 @@ export default defineComponent({
       close,
       remove,
       viewModeOpts,
+      keyTableOpts,
       dataTypeOpts: computed(() =>
         dataTypeOpts(headerRef.value, stats.value, viewer.datFile)),
       arrayTypeOpts: computed(() =>

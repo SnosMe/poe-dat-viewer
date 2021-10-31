@@ -15,7 +15,7 @@ export interface ViewerSerializedHeader {
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
     string?: { [key: string]: never }
-    key?: { foreign: boolean, table: string | null }
+    key?: { foreign: boolean, table: string | null, viewColumn: string | null }
   }
   textLength?: number
 }
@@ -107,7 +107,8 @@ function fromPublicSchema (name: string): ViewerSerializedHeader[] | null {
         key:
           (column.type === 'row' || column.type === 'foreignrow') ? {
             foreign: (column.type === 'foreignrow'),
-            table: column.references?.table ?? null
+            table: column.references?.table ?? null,
+            viewColumn: null
           }
           : undefined
       },
