@@ -184,8 +184,14 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
         res.push({
           left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
           width: sizes.paddingWidth,
-          exec: (ctx: CanvasRenderingContext2D, rows: number[]) =>
-            renderCellContent(ctx, header, datFile, rows)
+          exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
+            const referencedHeader =
+              header.type.key?.viewColumn != null &&
+              header.type.key.table === viewer.name &&
+              headers.find(h => h.name === header.type.key!.viewColumn)
+
+            return renderCellContent(ctx, header, datFile, rows, referencedHeader ? { header: referencedHeader, datFile: datFile } : undefined)
+          }
         })
       }
     }

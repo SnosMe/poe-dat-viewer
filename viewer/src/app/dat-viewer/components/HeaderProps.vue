@@ -68,6 +68,14 @@
           </select>
         </div>
         <hr class="my-6">
+        <div class="mb-4" v-if="keyDisplayColumnOpts.length">
+          <label for="datv-header-key-column">Display Column</label>
+          <select id="datv-header-key-column" class="border mt-1 w-full focus:border-blue-500"
+            v-model="header.type.key!.viewColumn">
+            <option v-for="opt of keyDisplayColumnOpts" :key="opt.label"
+              :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
         <div class="mb-4" v-if="dataType">
           <label class="mr-4">Width</label>
           <input v-model.number="header.textLength"
@@ -328,6 +336,24 @@ export default defineComponent({
       return out
     })
 
+    const keyDisplayColumnOpts = computed(() => {
+      if (!headerRef.value.type.key) return []
+
+      const out: Array<{ value: string | null, label: string }> = [
+        { value: null, label: 'row index' }
+      ]
+      if (!headerRef.value.type.key!.foreign) {
+        out.push(...viewer.headers.value
+          .filter(header =>
+            (header.name !== null && header.name.length) &&
+            !header.type.array)
+          .map(header => ({ label: header.name!, value: header.name! }))
+        )
+        return out
+      }
+      return []
+    })
+
     function close () {
       viewer.editHeader.value = null
     }
@@ -350,6 +376,7 @@ export default defineComponent({
       remove,
       viewModeOpts,
       keyTableOpts,
+      keyDisplayColumnOpts,
       dataTypeOpts: computed(() =>
         dataTypeOpts(headerRef.value, stats.value, viewer.datFile)),
       arrayTypeOpts: computed(() =>

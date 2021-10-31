@@ -1,8 +1,8 @@
 import { CHAR_WIDTH, LINE_HEIGHT } from '../rendering'
 import { getFieldReader } from 'pathofexile-dat/dat/reader'
-import type { DatFile } from 'pathofexile-dat'
+import type { DatFile, Header as DatHeader } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import type { Header } from '../headers'
+import type { Header as HeaderViewer } from '../headers'
 
 interface StringifyOut {
   text: string
@@ -27,7 +27,7 @@ function booleanArrayToString (value: boolean[], out: StringifyOut) {
 }
 function stringToString (value: string, out: StringifyOut) {
   if (value === '') {
-    out.text = 'null'
+    out.text = 'empty'
     out.color = '#0000ff'
   } else {
     out.text = String(value)
@@ -35,12 +35,12 @@ function stringToString (value: string, out: StringifyOut) {
   }
 }
 function stringArrayToString (value: string[], out: StringifyOut) {
-  out.text = `[${value.map(str => '"' + str + '"').join(', ')}]`
+  out.text = `[${value.map(str => JSON.stringify(str)).join(', ')}]`
   out.color = '#001080'
 }
 function keySelfToString (value: number | null, out: StringifyOut) {
   if (value === null) {
-    out.text = 'null'
+    out.text = '<null, self>'
     out.color = '#0000ff'
   } else {
     out.text = `<${value}, self>`
@@ -53,7 +53,7 @@ function keySelfArrayToString (value: number[], out: StringifyOut) {
 }
 function keyForeignToString (value: number | null, out: StringifyOut) {
   if (value === null) {
-    out.text = 'null'
+    out.text = '<null>'
     out.color = '#0000ff'
   } else {
     out.text = `<${value}>`
@@ -65,24 +65,37 @@ function keyForeignArrayToString (value: number[], out: StringifyOut) {
   out.color = '#098658'
 }
 
-export function renderCellContent (ctx: CanvasRenderingContext2D, header: Header, datFile: DatFile, rows: number[]) {
+export function renderCellContent (
+  ctx: CanvasRenderingContext2D,
+  header: DatHeader,
+  datFile: DatFile,
+  rows: number[],
+  referenced?: { header: DatHeader, datFile: DatFile }
+) {
   const read = getFieldReader(header, datFile)
+
+  if (referenced?.header.type.array) {
+    throw new Error('Can\'t show array of arrays.')
+  }
+  type ReadReferencedReturn = (rowIdx: number) => Exclude<ReturnType<ReturnType<typeof getFieldReader>>, any[]>
+  const readReferenced = referenced && getFieldReader(referenced.header, referenced.datFile) as ReadReferencedReturn
 
   const draw: StringifyOut = { text: '', color: '' }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const stringify: (value: any, out: StringifyOut) => void = (() => {
+    const type = (referenced != null) ? referenced.header.type : header.type
     if (header.type.array) {
-      if (header.type.boolean) return booleanArrayToString
-      if (header.type.string) return stringArrayToString
-      if (header.type.integer || header.type.decimal) return numberArrayToString
-      if (header.type.key?.foreign) return keyForeignArrayToString
-      if (header.type.key) return keySelfArrayToString
+      if (type.boolean) return booleanArrayToString
+      if (type.string) return stringArrayToString
+      if (type.integer || type.decimal) return numberArrayToString
+      if (type.key?.foreign) return keyForeignArrayToString
+      if (type.key) return keySelfArrayToString
     } else {
-      if (header.type.boolean) return booleanToString
-      if (header.type.string) return stringToString
-      if (header.type.integer || header.type.decimal) return numberToString
-      if (header.type.key?.foreign) return keyForeignToString
-      if (header.type.key) return keySelfToString
+      if (type.boolean) return booleanToString
+      if (type.string) return stringToString
+      if (type.integer || type.decimal) return numberToString
+      if (type.key?.foreign) return keyForeignToString
+      if (type.key) return keySelfToString
     }
     throw new Error('never')
   })()
@@ -90,7 +103,24 @@ export function renderCellContent (ctx: CanvasRenderingContext2D, header: Header
   let textY = 0
   let prevColor = ''
   for (const rid of rows) {
-    stringify(read(rid), draw)
+    let cellData = read(rid)
+    if (referenced) {
+      if (header.type.array) {
+        cellData = (cellData as number[]).map(rRid => readReferenced!(rRid))
+        stringify(cellData, draw)
+      } else {
+        if (cellData === null) {
+          const stringify = (header.type.key!.foreign) ? keyForeignToString : keySelfToString
+          stringify(cellData, draw)
+        } else {
+          cellData = readReferenced!(cellData as number)
+          stringify(cellData, draw)
+        }
+      }
+    } else {
+      stringify(cellData, draw)
+    }
+
     if (prevColor !== draw.color) {
       ctx.fillStyle = draw.color
       prevColor = draw.color
@@ -100,7 +130,7 @@ export function renderCellContent (ctx: CanvasRenderingContext2D, header: Header
   }
 }
 
-export function drawByteView (ctx: CanvasRenderingContext2D, header: Header, datFile: DatFile, rows: number[], begin: number, end: number) {
+export function drawByteView (ctx: CanvasRenderingContext2D, header: DatHeader, datFile: DatFile, rows: number[], begin: number, end: number) {
   ctx.fillStyle = '#000'
 
   let textY = 0
@@ -118,7 +148,7 @@ export function drawByteView (ctx: CanvasRenderingContext2D, header: Header, dat
   }
 }
 
-export function drawArrayVarData (ctx: CanvasRenderingContext2D, header: Header, datFile: DatFile, rows: number[], stats: ColumnStats) {
+export function drawArrayVarData (ctx: CanvasRenderingContext2D, header: HeaderViewer, datFile: DatFile, rows: number[], stats: ColumnStats) {
   ctx.fillStyle = '#000'
 
   const stat = stats.refArray as Exclude<typeof stats['refArray'], false>
