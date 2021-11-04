@@ -1,4 +1,7 @@
+import { DatFile, getHeaderLength } from 'pathofexile-dat'
+import { ColumnStats, validateHeader } from 'pathofexile-dat/dat-analysis'
 import { getColumnSelections } from './selection'
+import type { ViewerSerializedHeader } from './db'
 
 export interface Header {
   name: string | null
@@ -105,4 +108,35 @@ function mergeEmptyHeaders (h1: Header, h2: Header): Header | null {
   }
 
   return null
+}
+
+export function fromSerializedHeaders (
+  serialized: ViewerSerializedHeader[],
+  columnStats: ColumnStats[],
+  datFile: DatFile
+) {
+  const out: Header[] = []
+  let offset = 0
+  for (const hdrSerialized of serialized) {
+    if (hdrSerialized.name == null || hdrSerialized.length) {
+      return null
+    }
+    const headerLength = getHeaderLength(hdrSerialized, datFile)
+    const header: Header = {
+      ...hdrSerialized,
+      length: headerLength,
+      offset: offset
+    }
+    const isValid = validateHeader(header, columnStats)
+    if (!isValid) {
+      return null
+    } else {
+      out.push(header)
+      offset += headerLength
+    }
+  }
+  return {
+    headers: out,
+    increasedRowLength: (offset < datFile.rowLength)
+  }
 }

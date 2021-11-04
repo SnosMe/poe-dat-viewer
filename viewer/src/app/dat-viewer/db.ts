@@ -5,20 +5,8 @@ import type { Header } from './headers'
 
 export const publicSchema = shallowRef<SchemaFile['tables']>([])
 
-export interface ViewerSerializedHeader {
-  name: string | null
-  length?: number
-  type: {
-    byteView?: { array: boolean }
-    array?: boolean
-    boolean?: { [key: string]: never }
-    integer?: { unsigned: boolean, size: number }
-    decimal?: { size: number }
-    string?: { [key: string]: never }
-    key?: { foreign: boolean, table: string | null, viewColumn: string | null }
-  }
-  textLength?: number
-}
+export type ViewerSerializedHeader =
+  Omit<Header, 'offset' | 'length'> & { length?: number }
 
 interface DatSchema {
   name: string

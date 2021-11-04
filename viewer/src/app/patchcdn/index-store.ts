@@ -1,10 +1,10 @@
 import { shallowRef, shallowReactive, Ref } from 'vue'
-import { getHeaderLength, readDatFile } from 'pathofexile-dat'
+import { readDatFile } from 'pathofexile-dat'
 import { getDirContent, getFileInfo, readIndexBundle } from 'pathofexile-dat/bundles'
-import { validateHeader } from 'pathofexile-dat/dat-analysis'
 import { decompressBundle, decompressFileInBundle, getBatchFileInfo, analyzeDatFile } from '../worker/interface'
 import { fetchFile } from './cache'
 import { findByName } from '../dat-viewer/db'
+import { fromSerializedHeaders } from '@/app/dat-viewer/headers'
 
 export const index = shallowRef(null as {
   bundlesInfo: Uint8Array
@@ -78,30 +78,14 @@ export async function preloadDataTables (totalTables: Ref<number>) {
       const columnStats = await analyzeDatFile(datFile, { transfer: true })
       const name = fullPath.replace('Data/', '').replace('.dat64', '')
 
-      const headers = await findByName(name)
-      let headersValid = true
-      let increasedRowLength = false
-      {
-        let offset = 0
-        for (const hdrSerialized of headers) {
-          if (hdrSerialized.name == null) {
-            headersValid = false; break
-          }
-          const headerLength = getHeaderLength(hdrSerialized, datFile)
-          const isValid = validateHeader({ ...hdrSerialized, offset: offset }, columnStats)
-          if (!isValid) {
-            headersValid = false; break
-          }
-          offset += headerLength
-        }
-        increasedRowLength = (offset < datFile.rowLength)
-      }
+      const serialized = await findByName(name)
+      const headers = fromSerializedHeaders(serialized, columnStats, datFile)
 
       index.value!.tableStats.push({
         name: name,
         totalRows: datFile.rowCount,
-        headersValid: headersValid,
-        increasedRowLength: increasedRowLength
+        headersValid: (headers != null),
+        increasedRowLength: (headers) ? headers.increasedRowLength : false
       })
     }
   }

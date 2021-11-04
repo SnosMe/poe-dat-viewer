@@ -88,7 +88,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, computed, triggerRef, reactive, watch, WatchStopHandle } from 'vue'
+import { defineComponent, inject, computed, triggerRef, reactive, watch, WatchStopHandle, shallowRef } from 'vue'
 import { Header, removeHeader } from '../headers'
 import { Viewer, saveHeaders } from '../Viewer'
 import { DatFile, readColumn } from 'pathofexile-dat'
@@ -96,6 +96,7 @@ import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
 import { HEADERS_HEIGHT } from '../rendering'
 import { index } from '@/app/patchcdn/index-store'
 import { foreignTableSuggestions } from './foreignTableSuggestions'
+import { findByName, ViewerSerializedHeader } from '@/app/dat-viewer/db'
 
 function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   const opts = [] as Array<{ label: string, value: string }>
@@ -165,6 +166,18 @@ function arrayTypeOpts (header: Header, stats: ColumnStats) {
   // opts.push({ label: 'Integer - byte', value: 'integer_1' })
 
   return opts
+}
+
+function useHeadersLoader (tableName: string) {
+  const headers = shallowRef<ViewerSerializedHeader[]>([])
+
+  findByName(tableName)
+    .then(serialized => {
+      headers.value = serialized
+    })
+    .catch(() => {})
+
+  return headers
 }
 
 export default defineComponent({
@@ -336,22 +349,30 @@ export default defineComponent({
       return out
     })
 
+    const foreignTableColumns = computed(() => {
+      if (headerRef.value.type.key?.table) {
+        return useHeadersLoader(headerRef.value.type.key.table)
+      } else {
+        return null
+      }
+    })
+
     const keyDisplayColumnOpts = computed(() => {
       if (!headerRef.value.type.key) return []
 
       const out: Array<{ value: string | null, label: string }> = [
         { value: null, label: 'row index' }
       ]
-      if (!headerRef.value.type.key!.foreign) {
-        out.push(...viewer.headers.value
-          .filter(header =>
-            (header.name !== null && header.name.length) &&
-            !header.type.array)
-          .map(header => ({ label: header.name!, value: header.name! }))
-        )
-        return out
-      }
-      return []
+      const headers = (!headerRef.value.type.key!.foreign)
+        ? viewer.headers.value
+        : foreignTableColumns.value?.value ?? []
+      out.push(...headers
+        .filter(header =>
+          (header.name !== null && header.name.length) &&
+          !header.type.array)
+        .map(header => ({ label: header.name!, value: header.name! }))
+      )
+      return out
     })
 
     function close () {

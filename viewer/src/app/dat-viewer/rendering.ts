@@ -185,12 +185,16 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
           width: sizes.paddingWidth,
           exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
-            const referencedHeader =
-              header.type.key?.viewColumn != null &&
-              header.type.key.table === viewer.name &&
-              headers.find(h => h.name === header.type.key!.viewColumn)
-
-            return renderCellContent(ctx, header, datFile, rows, referencedHeader ? { header: referencedHeader, datFile: datFile } : undefined)
+            if (header.type.key?.viewColumn != null) {
+              const referenced = viewer.referencedTables.value.get(header.type.key.table!)!.value
+              if (referenced) {
+                const referencedHeader = referenced.headers.find(h => h.name === header.type.key!.viewColumn)
+                if (referencedHeader) {
+                  return renderCellContent(ctx, header, datFile, rows, { header: referencedHeader, datFile: referenced.datFile })
+                }
+              }
+            }
+            return renderCellContent(ctx, header, datFile, rows)
           }
         })
       }
