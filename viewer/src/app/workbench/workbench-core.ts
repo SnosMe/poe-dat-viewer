@@ -61,3 +61,7 @@ export function closeTab (id: string) {
   }
   tabs.value = tabs.value.filter(tab => tab.id !== id)
 }
+
+export function hasTabId (id: string) {
+  return tabs.value.some(tab => tab.id === id)
+}

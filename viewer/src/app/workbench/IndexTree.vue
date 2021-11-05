@@ -50,7 +50,7 @@ import FileSaver from 'file-saver'
 import VirtualScroll, { VirtualScrollT } from '@/VirtualScroll.vue'
 import { getRootDirs, getDirContent } from 'pathofexile-dat/bundles/index-paths'
 import { index, loadFileContent } from '../patchcdn/index-store'
-import { openTab, activeTabId } from './workbench-core'
+import { openTab, activeTabId, hasTabId, setActiveTab } from './workbench-core'
 import type { BundleLoader } from '@/app/patchcdn/cache'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 import * as perf from '../../perf'
@@ -112,6 +112,13 @@ function useTreeNavigation (loader: BundleLoader) {
     if (!item.isFile) {
       currentDir.value = item.fullPath
     } else {
+      if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
+        if (hasTabId(`bundles@${item.fullPath}`)) {
+          setActiveTab(`bundles@${item.fullPath}`)
+          return
+        }
+      }
+
       const fileContent = await loadFileContent(item.fullPath, loader)
 
       if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
