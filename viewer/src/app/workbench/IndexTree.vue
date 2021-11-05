@@ -69,11 +69,16 @@ function useTreeNavigation (loader: BundleLoader) {
     currentDir.value = ''
   })
 
+  const dirContent = computed(() => {
+    return perf.fn(`[Index] getting "${currentDir.value}" dir`, () =>
+      getDirContent(currentDir.value, index.value!.pathReps, index.value!.dirsInfo))
+  })
+
   const tree = computed<TreeItem[]>(() => {
     if (!index.value) return []
 
     if (currentDir.value === '') {
-      const dirs = perf.fn('Getting root dirs', () =>
+      const dirs = perf.fn('[Index] getting root dirs', () =>
         getRootDirs(index.value!.pathReps, index.value!.dirsInfo))
 
       return dirs.map(dirName => ({
@@ -83,9 +88,6 @@ function useTreeNavigation (loader: BundleLoader) {
       })).sort((a, b) => a.label.localeCompare(b.label))
     }
 
-    const content = perf.fn(`Getting "${currentDir.value}" dir`, () =>
-      getDirContent(currentDir.value, index.value!.pathReps, index.value!.dirsInfo))
-
     return [
       {
         label: '../',
@@ -94,12 +96,12 @@ function useTreeNavigation (loader: BundleLoader) {
           : currentDir.value.split('/').slice(0, -1).join('/'),
         isFile: false
       },
-      ...content.dirs.map(dirName => ({
+      ...dirContent.value.dirs.map(dirName => ({
         label: dirName.substr(currentDir.value.length + 1),
         fullPath: dirName,
         isFile: false
       })).sort((a, b) => a.label.localeCompare(b.label)),
-      ...content.files.map(fileName => ({
+      ...dirContent.value.files.map(fileName => ({
         label: fileName.substr(currentDir.value.length + 1),
         fullPath: fileName,
         isFile: true,

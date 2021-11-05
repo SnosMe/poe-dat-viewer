@@ -1,4 +1,5 @@
 import { shallowReactive, computed } from 'vue'
+import ExpiryMap from 'expiry-map'
 
 const BUNDLE_DIR = 'Bundles2'
 
@@ -13,8 +14,18 @@ export class BundleLoader {
     active: null as Promise<unknown> | null
   })
 
+  private readonly registry = new FinalizationRegistry<string>(name => {
+    console.log(`[Bundle] garbage-collected, name: "${name}"`)
+  })
+
+  private readonly weakCache = new ExpiryMap<string, ArrayBuffer>(20 * 1000)
+
   async setPatch (version: string) {
+    if (this.state.active) {
+      await this.state.active
+    }
     if (this.patchVer && this.patchVer !== version) {
+      this.weakCache.clear()
       await window.caches.delete('bundles')
     }
     this.patchVer = version
@@ -29,6 +40,13 @@ export class BundleLoader {
   })
 
   async fetchFile (name: string): Promise<ArrayBuffer> {
+    let bundle = this.weakCache.get(name)
+    if (bundle) {
+      console.log(`[Bundle] name: "${name}", source: memory.`)
+      this.weakCache.set(name, bundle) // refresh ttl
+      return bundle
+    }
+
     const { state } = this
 
     if (state.active) {
@@ -39,7 +57,10 @@ export class BundleLoader {
     const promise = this._fetchFile(name)
     state.active = promise
     try {
-      return await promise
+      bundle = await promise
+      this.registry.register(bundle, name)
+      this.weakCache.set(name, bundle)
+      return bundle
     } catch (e) {
       window.alert('You may need to adjust the patch version.')
       throw e
