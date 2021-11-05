@@ -1,78 +1,104 @@
-import { reactive } from 'vue'
+import { shallowReactive, computed } from 'vue'
 
 const BUNDLE_DIR = 'Bundles2'
 
-export const progress = reactive({
-  totalSize: 0,
-  received: 0,
-  active: false,
-  bundleName: ''
-})
+export class BundleLoader {
+  private patchVer = ''
 
-export async function fetchFile (patchVer: string | null, name: string) {
-  if (patchVer == null) {
-    patchVer = localStorage.getItem('POE_PATCH_VER')
-    if (!patchVer) throw new Error('never')
-  }
+  private readonly state = shallowReactive({
+    totalSize: 0,
+    received: 0,
+    bundleName: '',
+    isDownloading: false,
+    active: null as Promise<unknown> | null
+  })
 
-  try {
-    return await _fetchFile(patchVer, name)
-  } catch (e) {
-    window.alert('You may need to adjust the patch version.')
-    throw e
-  }
-}
-
-export async function _fetchFile (patchVer: string, name: string): Promise<ArrayBuffer> {
-  const path = `${patchVer}/${BUNDLE_DIR}/${name}`
-  let cache = await caches.open('bundles')
-  let res = await cache.match(path)
-  if (!res) {
-    progress.totalSize = 0
-    progress.received = 0
-    progress.active = true
-    progress.bundleName = name
-
-    res = await fetch(`https://poe-bundles.snos.workers.dev/${path}`)
-    if (res.status !== 200) {
-      progress.active = false
-      throw new Error(`patchcdn: ${res.status} ${res.statusText}`)
+  async setPatch (version: string) {
+    if (this.patchVer && this.patchVer !== version) {
+      await window.caches.delete('bundles')
     }
-    progress.totalSize = Number(res.headers.get('content-length'))
+    this.patchVer = version
+  }
 
-    let buf: Uint8Array
+  readonly progress = computed(() => {
+    return (this.state.isDownloading) ? {
+      totalSize: this.state.totalSize,
+      received: this.state.received,
+      bundleName: this.state.bundleName
+    } : null
+  })
+
+  async fetchFile (name: string): Promise<ArrayBuffer> {
+    const { state } = this
+
+    if (state.active) {
+      await state.active
+      return await this.fetchFile(name)
+    }
+
+    const promise = this._fetchFile(name)
+    state.active = promise
     try {
-      const reader = res.body!.getReader()
-      const chunks = [] as Uint8Array[]
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        chunks.push(value!)
-        progress.received += value!.length
-      }
-
-      buf = new Uint8Array(progress.received)
-      let bufPos = 0
-      for (const chunk of chunks) {
-        buf.set(chunk, bufPos)
-        bufPos += chunk.length
-      }
+      return await promise
+    } catch (e) {
+      window.alert('You may need to adjust the patch version.')
+      throw e
     } finally {
-      progress.active = false
+      state.active = null
     }
-
-    if (localStorage.getItem('POE_PATCH_VER') !== patchVer) {
-      await caches.delete('bundles')
-      cache = await caches.open('bundles')
-    }
-
-    await cache.put(path, new Response(buf, {
-      headers: {
-        'content-length': String(buf.byteLength),
-        'content-type': 'application/octet-stream'
-      }
-    }))
-    return buf.buffer
   }
-  return await res.arrayBuffer()
+
+  private async _fetchFile (name: string): Promise<ArrayBuffer> {
+    const { state, patchVer } = this
+    const path = `${patchVer}/${BUNDLE_DIR}/${name}`
+    const cache = await window.caches.open('bundles')
+    let res = await cache.match(path)
+    if (res) {
+      console.log(`[Bundle] name: "${name}", source: disk cache.`)
+    } else {
+      console.log(`[Bundle] name: "${name}", source: network.`)
+
+      state.totalSize = 0
+      state.received = 0
+      state.isDownloading = true
+      state.bundleName = name
+
+      res = await fetch(`https://poe-bundles.snos.workers.dev/${path}`)
+      if (res.status !== 200) {
+        state.isDownloading = false
+        throw new Error(`patchcdn: ${res.status} ${res.statusText}`)
+      }
+      state.totalSize = Number(res.headers.get('content-length'))
+
+      let buf: Uint8Array
+      try {
+        const reader = res.body!.getReader()
+        const chunks = [] as Uint8Array[]
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          chunks.push(value!)
+          state.received += value!.length
+        }
+
+        buf = new Uint8Array(state.received)
+        let bufPos = 0
+        for (const chunk of chunks) {
+          buf.set(chunk, bufPos)
+          bufPos += chunk.length
+        }
+      } finally {
+        state.isDownloading = false
+      }
+
+      await cache.put(path, new Response(buf, {
+        headers: {
+          'content-length': String(buf.byteLength),
+          'content-type': 'application/octet-stream'
+        }
+      }))
+      return buf.buffer
+    }
+    return await res.arrayBuffer()
+  }
 }

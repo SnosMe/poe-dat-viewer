@@ -2,7 +2,7 @@ import { shallowRef, shallowReactive, Ref } from 'vue'
 import { readDatFile } from 'pathofexile-dat'
 import { getDirContent, getFileInfo, readIndexBundle } from 'pathofexile-dat/bundles'
 import { decompressBundle, decompressFileInBundle, getBatchFileInfo, analyzeDatFile } from '../worker/interface'
-import { fetchFile } from './cache'
+import type { BundleLoader } from './cache'
 import { findByName } from '../dat-viewer/db'
 import { fromSerializedHeaders } from '@/app/dat-viewer/headers'
 
@@ -14,9 +14,9 @@ export const index = shallowRef(null as {
   tableStats: TableStats[]
 } | null)
 
-export async function loadFileContent (fullPath: string) {
+export async function loadFileContent (fullPath: string, loader: BundleLoader) {
   const location = getFileInfo(fullPath, index.value!.bundlesInfo, index.value!.filesInfo)
-  const bundleBin = await fetchFile(null, location.bundle)
+  const bundleBin = await loader.fetchFile(location.bundle)
 
   const { slice } = await decompressFileInBundle(bundleBin.slice(0), location.offset, location.size)
   return slice
@@ -42,7 +42,7 @@ export interface TableStats {
   increasedRowLength: boolean
 }
 
-export async function preloadDataTables (totalTables: Ref<number>) {
+export async function preloadDataTables (totalTables: Ref<number>, loader: BundleLoader) {
   const filePaths = getDirContent('Data', index.value!.pathReps, index.value!.dirsInfo)
     .files
     .filter(file => file.endsWith('.dat64')) // this also removes special `Languages.dat`
@@ -69,7 +69,7 @@ export async function preloadDataTables (totalTables: Ref<number>) {
   }, [])
 
   for (const bundle of byBundle) {
-    let bundleBin = await fetchFile(null, bundle.name)
+    let bundleBin = await loader.fetchFile(bundle.name)
     for (const { fullPath, location } of bundle.files) {
       const res = await decompressFileInBundle(bundleBin, location.offset, location.size)
       bundleBin = res.bundle

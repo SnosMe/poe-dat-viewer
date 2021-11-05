@@ -56,9 +56,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, shallowRef } from 'vue'
+import { defineComponent, shallowRef, inject } from 'vue'
 import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
-import { fetchFile } from '../patchcdn/cache'
+import type { BundleLoader } from '@/app/patchcdn/cache'
 import { loadIndex, index } from '../patchcdn/index-store'
 import { publicSchema } from '../dat-viewer/db'
 import { openTab } from './workbench-core'
@@ -66,6 +66,8 @@ import DatViewer from '../dat-viewer/components/DatViewer.vue'
 
 export default defineComponent({
   setup () {
+    const loader = inject<BundleLoader>('bundle-loader')!
+
     const poePatch = shallowRef(localStorage.getItem('POE_PATCH_VER') || '')
     const latestPoEPatch = shallowRef('')
     const isCdnImportRunning = shallowRef(false)
@@ -98,7 +100,8 @@ export default defineComponent({
       let bundle
       try {
         isCdnImportRunning.value = true
-        bundle = await fetchFile(poePatch.value, '_.index.bin')
+        await loader.setPatch(poePatch.value)
+        bundle = await loader.fetchFile('_.index.bin')
       } finally {
         isCdnImportRunning.value = false
       }

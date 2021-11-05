@@ -22,15 +22,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, provide } from 'vue'
 import ViewerTabs from './Tabs.vue'
 import IndexTree from './IndexTree.vue'
 import DownloadProgress from './DownloadProgress.vue'
 import { tabs, activeTabId } from './workbench-core'
+import { BundleLoader } from '@/app/patchcdn/cache'
 
 export default defineComponent({
   components: { IndexTree, ViewerTabs, DownloadProgress },
   setup () {
+    provide('bundle-loader', new BundleLoader())
+
     const activeTab = computed(() =>
       tabs.value.find(tab => tab.id === activeTabId.value)
     )

@@ -1,14 +1,14 @@
 <template>
-  <div v-if="active" :class="$style.notification">
-    <template v-if="totalSize">
+  <div v-if="progress" :class="$style.notification">
+    <template v-if="progress.totalSize">
       <div class="bg-gray-200 h-1"></div>
       <div class="bg-blue-500 h-1 absolute top-0"
-        :style="{ width: `${received/totalSize * 100}%` }"></div>
+        :style="{ width: `${progress.received/progress.totalSize * 100}%` }"></div>
     </template>
     <div class="p-3">
-      <div class="font-semibold truncate">{{ bundleName }}</div>
+      <div class="font-semibold truncate">{{ progress.bundleName }}</div>
       <div class="text-grey text-sm">
-        <template v-if="totalSize">{{ (totalSize / 1000000).toFixed(1) }} MB</template>
+        <template v-if="progress.totalSize">{{ (progress.totalSize / 1000000).toFixed(1) }} MB</template>
         <template v-else>Downloading...</template>
       </div>
     </div>
@@ -16,12 +16,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { progress } from '../patchcdn/cache'
+import { defineComponent, inject } from 'vue'
+import type { BundleLoader } from '@/app/patchcdn/cache'
 
 export default defineComponent({
   setup () {
-    return progress
+    const loader = inject<BundleLoader>('bundle-loader')!
+    return {
+      progress: loader.progress
+    }
   }
 })
 </script>

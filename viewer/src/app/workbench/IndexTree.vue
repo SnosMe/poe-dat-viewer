@@ -45,12 +45,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, shallowRef, computed, watch } from 'vue'
+import { defineComponent, shallowRef, computed, watch, inject } from 'vue'
 import FileSaver from 'file-saver'
 import VirtualScroll, { VirtualScrollT } from '@/VirtualScroll.vue'
 import { getRootDirs, getDirContent } from 'pathofexile-dat/bundles/index-paths'
 import { index, loadFileContent } from '../patchcdn/index-store'
 import { openTab, activeTabId } from './workbench-core'
+import type { BundleLoader } from '@/app/patchcdn/cache'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 import * as perf from '../../perf'
 
@@ -61,7 +62,7 @@ interface TreeItem {
   isActive?: boolean
 }
 
-function useTreeNavigation () {
+function useTreeNavigation (loader: BundleLoader) {
   const currentDir = shallowRef('')
 
   watch(index, () => {
@@ -111,7 +112,7 @@ function useTreeNavigation () {
     if (!item.isFile) {
       currentDir.value = item.fullPath
     } else {
-      const fileContent = await loadFileContent(item.fullPath)
+      const fileContent = await loadFileContent(item.fullPath, loader)
 
       if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
         openTab({
@@ -143,6 +144,8 @@ function useTreeNavigation () {
 export default defineComponent({
   components: { VirtualScroll: VirtualScroll as VirtualScrollT<TreeItem> },
   setup () {
+    const loader = inject<BundleLoader>('bundle-loader')!
+
     const showTree = shallowRef(true)
     function toggleTree () {
       showTree.value = !showTree.value
@@ -152,7 +155,7 @@ export default defineComponent({
       return Boolean(index.value)
     })
 
-    const { tree, handleTreeNav, currentDir } = useTreeNavigation()
+    const { tree, handleTreeNav, currentDir } = useTreeNavigation(loader)
 
     const searchExtension = shallowRef('.dat64')
     const extensionOpts = computed(() => {
