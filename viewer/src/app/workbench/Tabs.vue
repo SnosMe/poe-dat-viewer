@@ -25,13 +25,14 @@
 import { defineComponent, computed, inject } from 'vue'
 import { tabs, activeTabId, setActiveTab, closeTab, openTab } from './workbench-core'
 import type { BundleIndex } from '@/app/patchcdn/index-store'
-import { publicSchema } from '../dat-viewer/db'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 import ImportDialog from './ImportDialog.vue'
 import DataTablesDialog from './DataTablesDialog.vue'
 
 export default defineComponent({
   setup () {
     const index = inject<BundleIndex>('bundle-index')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const _tabs = computed(() =>
       tabs.value.map(tab => ({
@@ -66,7 +67,7 @@ export default defineComponent({
       openImport,
       openDataTables,
       showDataTables: computed(() => {
-        return index.isLoaded && publicSchema.value.length
+        return index.isLoaded && db.isLoaded
       })
     }
   }

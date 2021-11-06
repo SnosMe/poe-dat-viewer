@@ -32,8 +32,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, shallowRef, inject } from 'vue'
-import type { BundleIndex } from '@/app/patchcdn/index-store'
-import { preloadDataTables } from '../patchcdn/index-store'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 const isPreloading = shallowRef(false)
 const totalTables = shallowRef(0)
@@ -42,14 +41,14 @@ const firstTableAt = shallowRef(0)
 
 export default defineComponent({
   setup () {
-    const index = inject<BundleIndex>('bundle-index')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const timeLeft = computed(() => {
-      if (!firstTableAt.value && index.tableStats.length) {
+      if (!firstTableAt.value && db.tableStats.length) {
         firstTableAt.value = Date.now() / 1000
       }
       const now = Date.now() / 1000
-      const predicted = (totalTables.value * (now - firstTableAt.value) / index.tableStats.length)
+      const predicted = (totalTables.value * (now - firstTableAt.value) / db.tableStats.length)
       return Math.max(Math.ceil(predicted - now + firstTableAt.value), 0)
     })
 
@@ -61,10 +60,10 @@ export default defineComponent({
         firstTableAt.value = 0
         startedAt.value = Date.now() / 1000
         isPreloading.value = true
-        await preloadDataTables(totalTables, index)
+        await db.preloadDataTables(totalTables)
         isPreloading.value = false
       },
-      tables: computed(() => index.tableStats)
+      tables: computed(() => db.tableStats)
     }
   }
 })

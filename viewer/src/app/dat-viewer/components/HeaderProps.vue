@@ -94,9 +94,8 @@ import { Viewer, saveHeaders } from '../Viewer'
 import { DatFile, readColumn } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
 import { HEADERS_HEIGHT } from '../rendering'
-import type { BundleIndex } from '@/app/patchcdn/index-store'
+import type { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db'
 import { foreignTableSuggestions } from './foreignTableSuggestions'
-import { findByName, ViewerSerializedHeader } from '@/app/dat-viewer/db'
 
 function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   const opts = [] as Array<{ label: string, value: string }>
@@ -168,10 +167,10 @@ function arrayTypeOpts (header: Header, stats: ColumnStats) {
   return opts
 }
 
-function useHeadersLoader (tableName: string) {
+function useHeadersLoader (tableName: string, db: DatSchemasDatabase) {
   const headers = shallowRef<ViewerSerializedHeader[]>([])
 
-  findByName(tableName)
+  db.findByName(tableName)
     .then(serialized => {
       headers.value = serialized
     })
@@ -183,7 +182,7 @@ function useHeadersLoader (tableName: string) {
 export default defineComponent({
   setup () {
     const viewer = inject<Viewer>('viewer')!
-    const index = inject<BundleIndex>('bundle-index')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const headerRef = computed(() => (viewer.editHeader.value && reactive(viewer.editHeader.value))!)
     {
@@ -341,8 +340,8 @@ export default defineComponent({
       }
 
       out = [{ value: null, label: 'rid (unknown)' }]
-      if (index.tableStats.length) {
-        const tables = foreignTableSuggestions(viewer.name, maxKeyRid.value, index.tableStats)
+      if (db.tableStats.length) {
+        const tables = foreignTableSuggestions(viewer.name, maxKeyRid.value, db.tableStats)
         out.push(...tables.map(table => ({ value: table.name, label: table.name })))
       } else if (headerRef.value.type.key!.table !== null) {
         out.push({ value: headerRef.value.type.key!.table, label: headerRef.value.type.key!.table })
@@ -352,7 +351,7 @@ export default defineComponent({
 
     const foreignTableColumns = computed(() => {
       if (headerRef.value.type.key?.table) {
-        return useHeadersLoader(headerRef.value.type.key.table)
+        return useHeadersLoader(headerRef.value.type.key.table, db)
       } else {
         return null
       }

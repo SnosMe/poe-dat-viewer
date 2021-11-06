@@ -29,14 +29,17 @@ import DownloadProgress from './DownloadProgress.vue'
 import { tabs, activeTabId } from './workbench-core'
 import { BundleLoader } from '@/app/patchcdn/cache'
 import { BundleIndex } from '@/app/patchcdn/index-store'
+import { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
   components: { IndexTree, ViewerTabs, DownloadProgress },
   setup () {
     const loader = new BundleLoader()
     const index = new BundleIndex(loader)
+    const schemaDb = new DatSchemasDatabase(index)
     provide('bundle-loader', loader)
     provide('bundle-index', index)
+    provide('dat-schemas', schemaDb)
 
     const activeTab = computed(() =>
       tabs.value.find(tab => tab.id === activeTabId.value)

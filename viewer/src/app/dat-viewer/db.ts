@@ -1,9 +1,10 @@
 import { openDB, DBSchema } from 'idb'
-import { shallowRef } from 'vue'
-import { SchemaFile } from 'pathofexile-dat-schema'
-import type { Header } from './headers'
-
-export const publicSchema = shallowRef<SchemaFile['tables']>([])
+import { Ref, shallowRef } from 'vue'
+import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
+import { fromSerializedHeaders, Header } from './headers'
+import { BundleIndex } from '@/app/patchcdn/index-store'
+import { readDatFile } from 'pathofexile-dat'
+import { decompressFileInBundle, analyzeDatFile } from '../worker/interface'
 
 export type ViewerSerializedHeader =
   Omit<Header, 'offset' | 'length'> & { length?: number }
@@ -20,29 +21,113 @@ interface PoeDatViewerSchema extends DBSchema {
   }
 }
 
-const db = openDB<PoeDatViewerSchema>('poe-dat-viewer', 3, {
-  upgrade (db) {
-    db.createObjectStore('dat-schemas', { keyPath: 'name' })
+export interface TableStats {
+  name: string
+  totalRows: number
+  headersValid: boolean
+  increasedRowLength: boolean
+}
+
+export class DatSchemasDatabase {
+  private readonly publicSchema = shallowRef<SchemaFile['tables']>([])
+  private readonly _isLoading = shallowRef(false)
+  get isLoaded () { return this.publicSchema.value.length > 0 }
+  get isLoading () { return this._isLoading.value }
+
+  private readonly _tableStats = shallowRef<TableStats[]>([])
+  get tableStats () {
+    return this._tableStats.value as readonly TableStats[]
   }
-})
 
-export async function findByName (name: string) {
-  const record = await (await db).get('dat-schemas', name)
-  return record?.headers || fromPublicSchema(name) || []
-}
+  constructor (
+    private readonly index: BundleIndex
+  ) {}
 
-export async function saveHeaders (
-  name: string,
-  headers: Header[]
-) {
-  await (await db).put('dat-schemas', {
-    name,
-    headers: serializeHeaders(headers)
+  private readonly db = openDB<PoeDatViewerSchema>('poe-dat-viewer', 3, {
+    upgrade (db) {
+      db.createObjectStore('dat-schemas', { keyPath: 'name' })
+    }
   })
-}
 
-export async function removeHeaders (name: string) {
-  await (await db).delete('dat-schemas', name)
+  async fetchSchema () {
+    this._isLoading.value = true
+    const response = await fetch('https://poe-bundles.snos.workers.dev/schema.min.json')
+    const schema: SchemaFile = await response.json()
+    if (schema.version === SCHEMA_VERSION) {
+      this.publicSchema.value = schema.tables
+    } else {
+      console.warn('Latest schema version is not supported.')
+    }
+    this._isLoading.value = false
+  }
+
+  async findByName (name: string) {
+    const record = await (await this.db).get('dat-schemas', name)
+    return record?.headers || fromPublicSchema(name, this.publicSchema.value) || []
+  }
+
+  async saveHeaders (
+    name: string,
+    headers: Header[]
+  ) {
+    await (await this.db).put('dat-schemas', {
+      name,
+      headers: serializeHeaders(headers)
+    })
+  }
+
+  async removeHeaders (name: string) {
+    await (await this.db).delete('dat-schemas', name)
+  }
+
+  async preloadDataTables (totalTables: Ref<number>) {
+    const filePaths = this.index.getDirContent('Data')
+      .files
+      .filter(file => file.endsWith('.dat64')) // this also removes special `Languages.dat`
+
+    totalTables.value = filePaths.length
+
+    const filesInfo = await this.index.getBatchFileInfo(filePaths)
+
+    const byBundle = filesInfo.reduce<Array<{
+      name: string
+      files: Array<{ fullPath: string, location: { offset: number, size: number } }>
+    }>>((byBundle, location, idx) => {
+      const found = byBundle.find(bundle => bundle.name === location.bundle)
+      const fullPath = filePaths[idx]
+      if (found) {
+        found.files.push({ fullPath, location })
+      } else {
+        byBundle.push({
+          name: location.bundle,
+          files: [{ fullPath: filePaths[idx], location }]
+        })
+      }
+      return byBundle
+    }, [])
+
+    for (const bundle of byBundle) {
+      let bundleBin = await this.index.loader.fetchFile(bundle.name)
+      for (const { fullPath, location } of bundle.files) {
+        const res = await decompressFileInBundle(bundleBin, location.offset, location.size)
+        bundleBin = res.bundle
+
+        const datFile = readDatFile(fullPath, res.slice)
+        const columnStats = await analyzeDatFile(datFile, { transfer: true })
+        const name = fullPath.replace('Data/', '').replace('.dat64', '')
+
+        const serialized = await this.findByName(name)
+        const headers = fromSerializedHeaders(serialized, columnStats, datFile)
+
+        this._tableStats.value.push({
+          name: name,
+          totalRows: datFile.rowCount,
+          headersValid: (headers != null),
+          increasedRowLength: (headers) ? headers.increasedRowLength : false
+        })
+      }
+    }
+  }
 }
 
 function serializeHeaders (headers: Header[]) {
@@ -60,8 +145,8 @@ function serializeHeaders (headers: Header[]) {
   }))
 }
 
-function fromPublicSchema (name: string): ViewerSerializedHeader[] | null {
-  const sch = publicSchema.value.find(s => s.name === name)
+function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): ViewerSerializedHeader[] | null {
+  const sch = publicSchema.find(s => s.name === name)
   if (!sch) return null
 
   return sch.columns.map(column => {

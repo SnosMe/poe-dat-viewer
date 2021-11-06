@@ -57,25 +57,24 @@
 
 <script lang="ts">
 import { defineComponent, shallowRef, computed, inject } from 'vue'
-import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
 import type { BundleIndex } from '@/app/patchcdn/index-store'
-import { publicSchema } from '../dat-viewer/db'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 import { openTab } from './workbench-core'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 
 export default defineComponent({
   setup () {
     const index = inject<BundleIndex>('bundle-index')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const poePatch = shallowRef(localStorage.getItem('POE_PATCH_VER') || '')
     const latestPoEPatch = shallowRef('')
-    const isFetchingSchema = shallowRef(false)
 
     if (poePatch.value && !index.isLoaded) {
       cdnImport()
     }
-    if (!publicSchema.value.length) {
-      fetchSchema()
+    if (!db.isLoaded) {
+      db.fetchSchema()
     }
     getLatestPoEPatch()
 
@@ -105,18 +104,6 @@ export default defineComponent({
       }
     }
 
-    async function fetchSchema () {
-      isFetchingSchema.value = true
-      const response = await fetch('https://poe-bundles.snos.workers.dev/schema.min.json')
-      const schema: SchemaFile = await response.json()
-      if (schema.version === SCHEMA_VERSION) {
-        publicSchema.value = schema.tables
-      } else {
-        console.warn('Latest schema version is not supported.')
-      }
-      isFetchingSchema.value = false
-    }
-
     async function getLatestPoEPatch () {
       const res = await fetch('https://raw.githubusercontent.com/poe-tool-dev/latest-patch-version/main/latest.txt')
       const version = await res.text()
@@ -127,7 +114,7 @@ export default defineComponent({
       poePatch,
       latestPoEPatch,
       isCdnImportRunning: computed(() => index.loader.progress.value != null),
-      isFetchingSchema,
+      isFetchingSchema: computed(() => db.isLoading),
       handleFile,
       cdnImport
     }
