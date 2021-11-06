@@ -28,11 +28,15 @@ import IndexTree from './IndexTree.vue'
 import DownloadProgress from './DownloadProgress.vue'
 import { tabs, activeTabId } from './workbench-core'
 import { BundleLoader } from '@/app/patchcdn/cache'
+import { BundleIndex } from '@/app/patchcdn/index-store'
 
 export default defineComponent({
   components: { IndexTree, ViewerTabs, DownloadProgress },
   setup () {
-    provide('bundle-loader', new BundleLoader())
+    const loader = new BundleLoader()
+    const index = new BundleIndex(loader)
+    provide('bundle-loader', loader)
+    provide('bundle-index', index)
 
     const activeTab = computed(() =>
       tabs.value.find(tab => tab.id === activeTabId.value)

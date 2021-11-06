@@ -32,8 +32,8 @@
 
 <script lang="ts">
 import { computed, defineComponent, shallowRef, inject } from 'vue'
-import type { BundleLoader } from '@/app/patchcdn/cache'
-import { preloadDataTables, index } from '../patchcdn/index-store'
+import type { BundleIndex } from '@/app/patchcdn/index-store'
+import { preloadDataTables } from '../patchcdn/index-store'
 
 const isPreloading = shallowRef(false)
 const totalTables = shallowRef(0)
@@ -42,14 +42,14 @@ const firstTableAt = shallowRef(0)
 
 export default defineComponent({
   setup () {
-    const loader = inject<BundleLoader>('bundle-loader')!
+    const index = inject<BundleIndex>('bundle-index')!
 
     const timeLeft = computed(() => {
-      if (!firstTableAt.value && index.value!.tableStats.length) {
+      if (!firstTableAt.value && index.tableStats.length) {
         firstTableAt.value = Date.now() / 1000
       }
       const now = Date.now() / 1000
-      const predicted = (totalTables.value * (now - firstTableAt.value) / index.value!.tableStats.length)
+      const predicted = (totalTables.value * (now - firstTableAt.value) / index.tableStats.length)
       return Math.max(Math.ceil(predicted - now + firstTableAt.value), 0)
     })
 
@@ -61,10 +61,10 @@ export default defineComponent({
         firstTableAt.value = 0
         startedAt.value = Date.now() / 1000
         isPreloading.value = true
-        await preloadDataTables(totalTables, loader)
+        await preloadDataTables(totalTables, index)
         isPreloading.value = false
       },
-      tables: computed(() => index.value!.tableStats)
+      tables: computed(() => index.tableStats)
     }
   }
 })

@@ -22,15 +22,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, inject } from 'vue'
 import { tabs, activeTabId, setActiveTab, closeTab, openTab } from './workbench-core'
-import { index } from '../patchcdn/index-store'
+import type { BundleIndex } from '@/app/patchcdn/index-store'
 import { publicSchema } from '../dat-viewer/db'
 import ImportDialog from './ImportDialog.vue'
 import DataTablesDialog from './DataTablesDialog.vue'
 
 export default defineComponent({
   setup () {
+    const index = inject<BundleIndex>('bundle-index')!
+
     const _tabs = computed(() =>
       tabs.value.map(tab => ({
         id: tab.id,
@@ -64,7 +66,7 @@ export default defineComponent({
       openImport,
       openDataTables,
       showDataTables: computed(() => {
-        return index.value != null && publicSchema.value.length
+        return index.isLoaded && publicSchema.value.length
       })
     }
   }

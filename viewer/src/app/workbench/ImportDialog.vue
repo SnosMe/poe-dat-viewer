@@ -56,24 +56,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, shallowRef, inject } from 'vue'
+import { defineComponent, shallowRef, computed, inject } from 'vue'
 import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
-import type { BundleLoader } from '@/app/patchcdn/cache'
-import { loadIndex, index } from '../patchcdn/index-store'
+import type { BundleIndex } from '@/app/patchcdn/index-store'
 import { publicSchema } from '../dat-viewer/db'
 import { openTab } from './workbench-core'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 
 export default defineComponent({
   setup () {
-    const loader = inject<BundleLoader>('bundle-loader')!
+    const index = inject<BundleIndex>('bundle-index')!
 
     const poePatch = shallowRef(localStorage.getItem('POE_PATCH_VER') || '')
     const latestPoEPatch = shallowRef('')
-    const isCdnImportRunning = shallowRef(false)
     const isFetchingSchema = shallowRef(false)
 
-    if (poePatch.value && !index.value) {
+    if (poePatch.value && !index.isLoaded) {
       cdnImport()
     }
     if (!publicSchema.value.length) {
@@ -97,17 +95,9 @@ export default defineComponent({
     }
 
     async function cdnImport () {
-      let bundle
       try {
-        isCdnImportRunning.value = true
-        await loader.setPatch(poePatch.value)
-        bundle = await loader.fetchFile('_.index.bin')
-      } finally {
-        isCdnImportRunning.value = false
-      }
-
-      try {
-        await loadIndex(bundle)
+        await index.loader.setPatch(poePatch.value)
+        await index.loadIndex()
         localStorage.setItem('POE_PATCH_VER', poePatch.value)
       } catch (e) {
         window.alert((e as Error).message)
@@ -136,7 +126,7 @@ export default defineComponent({
     return {
       poePatch,
       latestPoEPatch,
-      isCdnImportRunning,
+      isCdnImportRunning: computed(() => index.loader.progress.value != null),
       isFetchingSchema,
       handleFile,
       cdnImport

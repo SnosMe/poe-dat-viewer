@@ -15,7 +15,7 @@ export class BundleLoader {
   })
 
   private readonly registry = new FinalizationRegistry<string>(name => {
-    console.log(`[Bundle] garbage-collected, name: "${name}"`)
+    console.debug(`[Bundle] garbage-collected, name: "${name}"`)
   })
 
   private readonly weakCache = new ExpiryMap<string, ArrayBuffer>(20 * 1000)
@@ -41,7 +41,7 @@ export class BundleLoader {
 
   async fetchFile (name: string): Promise<ArrayBuffer> {
     let bundle = this.weakCache.get(name)
-    if (bundle) {
+    if (bundle && bundle.byteLength !== 0) {
       console.log(`[Bundle] name: "${name}", source: memory.`)
       this.weakCache.set(name, bundle) // refresh ttl
       return bundle

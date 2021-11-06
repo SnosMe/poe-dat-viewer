@@ -45,15 +45,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, shallowRef, computed, watch, inject } from 'vue'
+import { defineComponent, shallowRef, computed, inject } from 'vue'
 import FileSaver from 'file-saver'
 import VirtualScroll, { VirtualScrollT } from '@/VirtualScroll.vue'
-import { getRootDirs, getDirContent } from 'pathofexile-dat/bundles/index-paths'
-import { index, loadFileContent } from '../patchcdn/index-store'
 import { openTab, activeTabId, hasTabId, setActiveTab } from './workbench-core'
-import type { BundleLoader } from '@/app/patchcdn/cache'
+import type { BundleIndex } from '@/app/patchcdn/index-store'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
-import * as perf from '../../perf'
 
 interface TreeItem {
   label: string
@@ -62,24 +59,20 @@ interface TreeItem {
   isActive?: boolean
 }
 
-function useTreeNavigation (loader: BundleLoader) {
+function useTreeNavigation (index: BundleIndex) {
   const currentDir = shallowRef('')
 
-  watch(index, () => {
+  index.watch(() => {
     currentDir.value = ''
   })
 
-  const dirContent = computed(() => {
-    return perf.fn(`[Index] getting "${currentDir.value}" dir`, () =>
-      getDirContent(currentDir.value, index.value!.pathReps, index.value!.dirsInfo))
-  })
+  const dirContent = computed(() => index.getDirContent(currentDir.value))
 
   const tree = computed<TreeItem[]>(() => {
-    if (!index.value) return []
+    if (!index.isLoaded) return []
 
     if (currentDir.value === '') {
-      const dirs = perf.fn('[Index] getting root dirs', () =>
-        getRootDirs(index.value!.pathReps, index.value!.dirsInfo))
+      const dirs = index.getRootDirs()
 
       return dirs.map(dirName => ({
         label: dirName,
@@ -121,7 +114,7 @@ function useTreeNavigation (loader: BundleLoader) {
         }
       }
 
-      const fileContent = await loadFileContent(item.fullPath, loader)
+      const fileContent = await index.loadFileContent(item.fullPath)
 
       if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
         openTab({
@@ -153,18 +146,14 @@ function useTreeNavigation (loader: BundleLoader) {
 export default defineComponent({
   components: { VirtualScroll: VirtualScroll as VirtualScrollT<TreeItem> },
   setup () {
-    const loader = inject<BundleLoader>('bundle-loader')!
+    const index = inject<BundleIndex>('bundle-index')!
 
     const showTree = shallowRef(true)
     function toggleTree () {
       showTree.value = !showTree.value
     }
 
-    const isIndexLoaded = computed(() => {
-      return Boolean(index.value)
-    })
-
-    const { tree, handleTreeNav, currentDir } = useTreeNavigation(loader)
+    const { tree, handleTreeNav, currentDir } = useTreeNavigation(index)
 
     const searchExtension = shallowRef('.dat64')
     const extensionOpts = computed(() => {
@@ -193,7 +182,7 @@ export default defineComponent({
       tree: filteredTree,
       handleTreeNav,
       searchText,
-      isIndexLoaded,
+      isIndexLoaded: computed(() => index.isLoaded),
       extensionOpts
     }
   }
