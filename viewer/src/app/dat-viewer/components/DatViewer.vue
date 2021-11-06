@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, provide, watch, ref, onMounted } from 'vue'
+import { defineComponent, PropType, computed, provide, watch, ref, onMounted, inject } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
 import { Viewer, createViewer } from '../Viewer'
@@ -42,6 +42,8 @@ import HeaderProps from './HeaderProps.vue'
 import * as rendering from '../rendering'
 import { renderByteCols, renderColStats } from '../rendering/byte-columns'
 import { renderHeaderCols } from '../rendering/header-columns'
+import type { BundleIndex } from '@/app/patchcdn/index-store'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
   components: { ResizeObserver, CanvasScroll, ViewerActions, ViewerHead, HeaderProps },
@@ -60,11 +62,14 @@ export default defineComponent({
     }
   },
   setup (props, ctx) {
+    const index = inject<BundleIndex>('bundle-index')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
+
     let viewer: Viewer
     if (props.kaState) {
       viewer = props.kaState // eslint-disable-line vue/no-setup-props-destructure
     } else {
-      viewer = createViewer(props.args.fullPath, props.args.fileContent)
+      viewer = createViewer(props.args.fullPath, props.args.fileContent, index, db)
       ctx.emit('update:kaState', viewer)
     }
     provide('viewer', viewer)

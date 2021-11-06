@@ -60,6 +60,7 @@ import { saveHeaders, Viewer } from '../Viewer'
 import * as rendering from '../rendering'
 import { renderHeaderCols } from '../rendering/header-columns'
 import type { RenderByte } from '../rendering/byte-columns'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
   props: {
@@ -82,6 +83,7 @@ export default defineComponent({
     let colsBeforeSelection = [] as readonly boolean[]
 
     const viewer = inject<Viewer>('viewer')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     function selectStart (offset: number) {
       selectionStart = offset
@@ -149,7 +151,7 @@ export default defineComponent({
         header.textLength = Math.max(1, header.textLength -
           Math.sign(e.deltaY) * (e.ctrlKey ? 4 * 3 - 2 : 1))
         triggerRef(viewer.headers)
-        saveHeaders(viewer)
+        saveHeaders(viewer, db)
       }
     }
 

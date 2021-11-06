@@ -195,7 +195,7 @@ export default defineComponent({
         if (value) {
           watchStop = watch(value, () => {
             triggerRef(viewer.headers)
-            saveHeaders(viewer)
+            saveHeaders(viewer, db)
           }, { deep: true })
         }
       })
@@ -383,7 +383,7 @@ export default defineComponent({
       removeHeader(headerRef.value, viewer.headers.value)
       viewer.editHeader.value = null
       triggerRef(viewer.headers)
-      saveHeaders(viewer)
+      saveHeaders(viewer, db)
     }
 
     return {

@@ -3,12 +3,11 @@ import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
 import { validateHeader } from 'pathofexile-dat/dat-analysis/validation'
 import { getHeaderLength } from 'pathofexile-dat/dat/header'
 import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers'
-import * as db from './db'
 import { clearColumnSelection, selectColsByHeader } from './selection'
 import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed } from 'vue'
 import { analyzeDatFile } from '../worker/interface'
-import { loadFileContent } from '../patchcdn/index-store'
-import { findByName } from './db'
+import { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db'
+import { BundleIndex } from '@/app/patchcdn/index-store'
 
 type ReferencedTable = null | { headers: Header[], datFile: DatFile }
 
@@ -28,12 +27,12 @@ export interface Viewer {
 
 export const TABLES_WEAK_CACHE = new Map<string, WeakRef<Ref<ReferencedTable>>>()
 
-function getTableFromCache (path: string): Ref<ReferencedTable> {
+function getTableFromCache (path: string, index: BundleIndex, db: DatSchemasDatabase): Ref<ReferencedTable> {
   const found = TABLES_WEAK_CACHE.get(path)?.deref()
   if (found) return found
 
   const out = shallowRef<ReferencedTable>(null)
-  loadFromFile(path)
+  loadFromFile(path, index, db)
     .then(result => {
       if (result) {
         out.value = result
@@ -45,11 +44,11 @@ function getTableFromCache (path: string): Ref<ReferencedTable> {
   return out
 }
 
-async function loadFromFile (path: string) {
-  const fileContent = await loadFileContent(path)
+async function loadFromFile (path: string, index: BundleIndex, db: DatSchemasDatabase) {
+  const fileContent = await index.loadFileContent(path)
   const datFile = readDatFile(path, fileContent)
   const columnStats = await analyzeDatFile(datFile)
-  const serialized = await findByName(getNamePart(path))
+  const serialized = await db.findByName(getNamePart(path))
   const headers = fromSerializedHeaders(serialized, columnStats, datFile)
   if (headers) {
     return {
@@ -59,7 +58,7 @@ async function loadFromFile (path: string) {
   }
 }
 
-export function createViewer (path: string, fileContent: Uint8Array): Viewer {
+export function createViewer (path: string, fileContent: Uint8Array, index: BundleIndex, db: DatSchemasDatabase): Viewer {
   const parsed = readDatFile(path, fileContent)
 
   const viewer: Viewer = {
@@ -90,7 +89,7 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
             out.has(header.type.key.table)) continue
 
         const path = viewer.path.replace(`/${viewer.name}.`, `/${header.type.key.table}.`)
-        out.set(header.type.key.table, getTableFromCache(path))
+        out.set(header.type.key.table, getTableFromCache(path, index, db))
       }
       return out
     })
@@ -99,13 +98,13 @@ export function createViewer (path: string, fileContent: Uint8Array): Viewer {
   void analyzeDatFile(viewer.datFile)
     .then(async (stats) => {
       viewer.columnStats.value = stats
-      await importHeaders(viewer)
+      await importHeaders(viewer, db)
     })
 
   return viewer
 }
 
-export async function importHeaders (viewer: Viewer) {
+export async function importHeaders (viewer: Viewer, db: DatSchemasDatabase) {
   viewer.editHeader.value = null
 
   viewer.headers.value = viewer.datFile.rowLength
@@ -127,7 +126,7 @@ export async function importHeaders (viewer: Viewer) {
   }
 }
 
-function tryImportHeaders (serialized: db.ViewerSerializedHeader[], viewer: Viewer): void {
+function tryImportHeaders (serialized: ViewerSerializedHeader[], viewer: Viewer): void {
   let offset = 0
   for (const hdrSerialized of serialized) {
     const headerLength = hdrSerialized.length || getHeaderLength(hdrSerialized, viewer.datFile)
@@ -182,10 +181,10 @@ function getNamePart (path: string) {
   return path.match(/[^/]+(?=\..+$)/)![0]
 }
 
-export async function saveHeaders (viewer: Viewer) {
+export async function saveHeaders (viewer: Viewer, db: DatSchemasDatabase) {
   await db.saveHeaders(viewer.name, viewer.headers.value)
 }
 
-export async function removeHeaders (viewer: Viewer) {
+export async function removeHeaders (viewer: Viewer, db: DatSchemasDatabase) {
   await db.removeHeaders(viewer.name)
 }

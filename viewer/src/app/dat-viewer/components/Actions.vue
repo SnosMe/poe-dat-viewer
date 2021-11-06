@@ -45,10 +45,12 @@ import FileSaver from 'file-saver'
 import { Viewer, exportAllRows, saveHeaders, removeHeaders, importHeaders } from '../Viewer'
 import { openTab } from '../../workbench/workbench-core'
 import ShowSchema from './ShowSchema.vue'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
   setup () {
     const viewer = inject<Viewer>('viewer')!
+    const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const selections = computed(() =>
       getColumnSelections(viewer.columnSelection.value)
@@ -61,7 +63,7 @@ export default defineComponent({
       clearColumnSelection(columnSelection.value)
       triggerRef(headers)
       triggerRef(columnSelection)
-      saveHeaders(viewer)
+      saveHeaders(viewer, db)
     }
 
     function exportDataJson () {
@@ -86,8 +88,8 @@ export default defineComponent({
     }
 
     async function restoreSchema () {
-      await removeHeaders(viewer)
-      await importHeaders(viewer)
+      await removeHeaders(viewer, db)
+      await importHeaders(viewer, db)
     }
 
     return {
