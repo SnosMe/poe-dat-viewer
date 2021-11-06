@@ -8,6 +8,7 @@
         :is="activeTab.type"
         :args="activeTab.args"
         :key="activeTab.id"
+        :ka-scope="activeTab.kaScope"
         v-model:ka-state="activeTab.kaState" />
       <div v-else
         class="bg-gray-50 flex-1 text-lg text-gray-500 flex items-center justify-center"

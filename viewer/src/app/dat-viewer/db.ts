@@ -1,5 +1,5 @@
 import { openDB, DBSchema } from 'idb'
-import { Ref, shallowRef } from 'vue'
+import { Ref, shallowRef, triggerRef } from 'vue'
 import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
 import { fromSerializedHeaders, Header } from './headers'
 import { BundleIndex } from '@/app/patchcdn/index-store'
@@ -125,6 +125,7 @@ export class DatSchemasDatabase {
           headersValid: (headers != null),
           increasedRowLength: (headers) ? headers.increasedRowLength : false
         })
+        triggerRef(this._tableStats)
       }
     }
   }

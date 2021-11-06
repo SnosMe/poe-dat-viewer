@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, provide, watch, ref, onMounted, inject } from 'vue'
+import { defineComponent, PropType, computed, provide, watch, ref, onMounted, inject, EffectScope } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
 import { Viewer, createViewer } from '../Viewer'
@@ -59,6 +59,10 @@ export default defineComponent({
     kaState: {
       type: Object as PropType<Viewer | undefined>,
       default: undefined
+    },
+    kaScope: {
+      type: Object as PropType<EffectScope>,
+      required: true
     }
   },
   setup (props, ctx) {
@@ -69,7 +73,7 @@ export default defineComponent({
     if (props.kaState) {
       viewer = props.kaState // eslint-disable-line vue/no-setup-props-destructure
     } else {
-      viewer = createViewer(props.args.fullPath, props.args.fileContent, index, db)
+      viewer = createViewer(props.args.fullPath, props.args.fileContent, index, db, props.kaScope)
       ctx.emit('update:kaState', viewer)
     }
     provide('viewer', viewer)
@@ -141,7 +145,15 @@ export default defineComponent({
         scrollPos.x + Math.min(rowsFullWidth.value, rowsWidth.value))
     )
 
-    watch([scrollPos, renderColumns, rowIndices, viewer.selectedRow], () => { draw() })
+    const tablesLoadWatcher = computed(() => {
+      for (const entry of viewer.referencedTables.value.values()) {
+        // eslint-disable-next-line no-void
+        void entry.value // vue-reactivity: subscribe
+      }
+      return undefined
+    })
+
+    watch([scrollPos, renderColumns, rowIndices, viewer.selectedRow, tablesLoadWatcher], () => { draw() })
 
     function draw () {
       const ctx = canvasRef.value!.getContext('2d', { alpha: false })!

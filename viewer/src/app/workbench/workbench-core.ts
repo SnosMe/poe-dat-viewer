@@ -1,4 +1,4 @@
-import { shallowRef, DefineComponent, triggerRef } from 'vue'
+import { shallowRef, DefineComponent, triggerRef, EffectScope, effectScope } from 'vue'
 import ImportDialog from './ImportDialog.vue'
 
 interface Tab {
@@ -6,6 +6,7 @@ interface Tab {
   title: string
   type: DefineComponent
   args: unknown
+  kaScope: EffectScope
   kaState: unknown
 }
 
@@ -21,6 +22,7 @@ export const tabs = shallowRef<Tab[]>([
     title: 'Import',
     type: ImportDialog as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     args: undefined,
+    kaScope: effectScope(true),
     kaState: undefined
   }
 ])
@@ -41,6 +43,7 @@ export function openTab (params: OpenTabParams) {
       title: params.title,
       type: params.type,
       args: params.args,
+      kaScope: effectScope(true),
       kaState: undefined
     })
   }
@@ -59,6 +62,7 @@ export function closeTab (id: string) {
       setActiveTab(null)
     }
   }
+  tabs.value[idx].kaScope.stop()
   tabs.value = tabs.value.filter(tab => tab.id !== id)
 }
 

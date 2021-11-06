@@ -4,7 +4,7 @@ import { validateHeader } from 'pathofexile-dat/dat-analysis/validation'
 import { getHeaderLength } from 'pathofexile-dat/dat/header'
 import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers'
 import { clearColumnSelection, selectColsByHeader } from './selection'
-import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed } from 'vue'
+import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed, EffectScope } from 'vue'
 import { analyzeDatFile } from '../worker/interface'
 import { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db'
 import { BundleIndex } from '@/app/patchcdn/index-store'
@@ -58,7 +58,13 @@ async function loadFromFile (path: string, index: BundleIndex, db: DatSchemasDat
   }
 }
 
-export function createViewer (path: string, fileContent: Uint8Array, index: BundleIndex, db: DatSchemasDatabase): Viewer {
+export function createViewer (
+  path: string,
+  fileContent: Uint8Array,
+  index: BundleIndex,
+  db: DatSchemasDatabase,
+  scope: EffectScope
+): Viewer {
   const parsed = readDatFile(path, fileContent)
 
   const viewer: Viewer = {
@@ -81,7 +87,7 @@ export function createViewer (path: string, fileContent: Uint8Array, index: Bund
     selectedRow: shallowRef(null),
     rowSorting: shallowRef(null),
     scrollPos: shallowReactive({ x: 0, y: 0 }),
-    referencedTables: computed(() => {
+    referencedTables: scope.run(() => computed(() => {
       const out = new Map<string, Ref<ReferencedTable>>()
       out.set(viewer.name, shallowRef({ headers: viewer.headers.value, datFile: viewer.datFile }))
       for (const header of viewer.headers.value) {
@@ -92,7 +98,7 @@ export function createViewer (path: string, fileContent: Uint8Array, index: Bund
         out.set(header.type.key.table, getTableFromCache(path, index, db))
       }
       return out
-    })
+    }))!
   }
 
   void analyzeDatFile(viewer.datFile)

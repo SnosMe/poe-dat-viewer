@@ -185,8 +185,8 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
           width: sizes.paddingWidth,
           exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
-            if (header.type.key?.viewColumn != null) {
-              const referenced = viewer.referencedTables.value.get(header.type.key.table!)!.value
+            if (header.type.key?.table && header.type.key.viewColumn) {
+              const referenced = viewer.referencedTables.value.get(header.type.key.table)!.value
               if (referenced) {
                 const referencedHeader = referenced.headers.find(h => h.name === header.type.key!.viewColumn)
                 if (referencedHeader) {
