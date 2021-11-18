@@ -120,11 +120,18 @@ let schema: SchemaFile
   {
     const files = config.files.filter(path => !SPRITE_LISTS.some(list => path.startsWith(list.namePrefix)))
     for (const filePath of files) {
-      const name = path.basename(filePath)
-      fs.writeFileSync(
-        path.join(process.cwd(), 'files', name.replace(/\//g, '@')),
-        await getFileContent(filePath)
-      )
+      if (filePath.endsWith('.dds')) {
+        await imagemagickConvertDDS(
+          await getFileContent(filePath),
+          null,
+          `files/${filePath.replace(/\//g, '@').replace(/\.dds$/, '')}.png`
+        )
+      } else {
+        fs.writeFileSync(
+          path.join(process.cwd(), 'files', filePath.replace(/\//g, '@')),
+          await getFileContent(filePath)
+        )
+      }
     }
   }
 
@@ -312,10 +319,10 @@ function importHeaders (name: string, datFile: DatFile): NamedHeader[] {
 
 function imagemagickConvertDDS (
   ddsFile: Uint8Array,
-  crop: { width: number, height: number, top: number, left: number },
+  crop: { width: number, height: number, top: number, left: number } | null,
   outName: string
 ) {
-  const cropArg = `${crop.width}x${crop.height}+${crop.top}+${crop.left}`
+  const cropArg = (crop) ? `${crop.width}x${crop.height}+${crop.top}+${crop.left}` : '100%'
   return new Promise<void>((resolve, reject) => {
     const magick = spawn('magick', ['dds:-', '-crop', cropArg, outName], { stdio: ['pipe', 'ignore', 'ignore'] })
     magick.on('exit', () => { resolve() })
