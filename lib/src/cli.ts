@@ -5,11 +5,13 @@ import { getFileInfo, readIndexBundle } from './bundles/index-bundle'
 import { Header, getHeaderLength } from './dat/header'
 import { DatFile, readDatFile } from './dat/dat-file'
 import { readColumn } from './dat/reader'
+import { parseFile as parseSpriteIndex, SpriteImage } from './sprites/layout-parser'
 import { SCHEMA_URL, SCHEMA_VERSION, SchemaFile } from 'pathofexile-dat-schema'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as https from 'https'
 import * as v8 from 'v8'
+import { spawn } from 'child_process'
 
 v8.setFlagsFromString('--experimental-wasm-simd')
 
@@ -22,6 +24,7 @@ interface ExportConfig {
   }>
 }
 
+const BUNDLE_CACHE = new Map<string, ArrayBuffer>()
 let PATCH_VER: string
 let CACHE_DIR: string
 let INDEX: {
@@ -41,6 +44,19 @@ const TRANSLATIONS = [
   { name: 'Spanish', path: 'Data/Spanish' },
   { name: 'Thai', path: 'Data/Thai' }
 ]
+const SPRITE_LISTS = [{
+  path: 'Art/UIImages1.txt',
+  namePrefix: 'Art/2DArt/UIImages/',
+  spritePrefix: 'Art/Textures/Interface/2D/'
+}, {
+  path: 'Art/UIDivinationImages.txt',
+  namePrefix: 'Art/2DItems/Divination/Images/',
+  spritePrefix: 'Art/Textures/Interface/2D/DivinationCards/'
+}, {
+  path: 'Art/UIShopImages.txt',
+  namePrefix: 'Art/2DArt/Shop/',
+  spritePrefix: 'Art/Textures/Interface/2D/Shop/'
+}]
 
 let schema: SchemaFile
 
@@ -57,6 +73,7 @@ let schema: SchemaFile
   }
 
   await loadIndex()
+  BUNDLE_CACHE.clear()
 
   console.log('Loading schema for dat files')
   schema = await fetchSchema()
@@ -67,20 +84,57 @@ let schema: SchemaFile
 
   fs.rmSync(path.join(process.cwd(), 'files'), { recursive: true, force: true })
   fs.mkdirSync(path.join(process.cwd(), 'files'))
-  for (const filePath of config.files) {
-    const name = path.basename(filePath)
-    fs.writeFileSync(
-      path.join(process.cwd(), 'files', name),
-      await getFileContent(filePath)
-    )
+  {
+    const PARSED_LISTS: SpriteImage[][] = []
+    for (const sprite of SPRITE_LISTS) {
+      const file = await getFileContent(sprite.path)
+      PARSED_LISTS.push(parseSpriteIndex(file))
+    }
+
+    const images = config.files.map(path => {
+      const idx = SPRITE_LISTS.findIndex(list => path.startsWith(list.namePrefix))
+      if (idx === -1) return null
+      return PARSED_LISTS[idx].find(img => img.name === path)!
+    }).filter((el): el is SpriteImage => el != null)
+
+    const bySprite = images.reduce<Array<{
+      path: string
+      images: SpriteImage[]
+    }>>((bySprite, img) => {
+      const found = bySprite.find(sprite => sprite.path === img.spritePath)
+      if (found) {
+        found.images.push(img)
+      } else {
+        bySprite.push({ path: img.spritePath, images: [img] })
+      }
+      return bySprite
+    }, [])
+
+    for (const sprite of bySprite) {
+      const ddsFile = await getFileContent(sprite.path)
+      for (const image of sprite.images) {
+        await imagemagickConvertDDS(ddsFile, image, `files/${image.name.replace(/\//g, '@')}.png`)
+      }
+    }
+  }
+  {
+    const files = config.files.filter(path => !SPRITE_LISTS.some(list => path.startsWith(list.namePrefix)))
+    for (const filePath of files) {
+      const name = path.basename(filePath)
+      fs.writeFileSync(
+        path.join(process.cwd(), 'files', name.replace(/\//g, '@')),
+        await getFileContent(filePath)
+      )
+    }
   }
 
   for (const tr of TRANSLATIONS) {
     fs.rmSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true, force: true })
     fs.mkdirSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true })
   }
-  for (const target of config.tables) {
-    for (const tr of TRANSLATIONS) {
+  for (const tr of TRANSLATIONS) {
+    BUNDLE_CACHE.clear()
+    for (const target of config.tables) {
       const datFile = await getDatFile(`${tr.path}/${target.name}.dat64`)
       const headers = importHeaders(target.name, datFile)
         .filter(hdr => target.columns.includes(hdr.name))
@@ -149,14 +203,20 @@ async function getFileContent (fullPath: string) {
 
   const location = getFileInfo(fullPath, INDEX.bundlesInfo, INDEX.filesInfo)
   const bundleBin = await fetchFile(location.bundle)
-  return decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
+  return await decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
 }
 
 async function fetchFile (name: string): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
-    const cachedFilePath = path.join(CACHE_DIR, name.replace(/\//g, '_'))
+    const cachedFilePath = path.join(CACHE_DIR, name.replace(/\//g, '@'))
+    if (BUNDLE_CACHE.has(cachedFilePath)) {
+      resolve(BUNDLE_CACHE.get(cachedFilePath)!)
+      return
+    }
     if (fs.existsSync(cachedFilePath)) {
-      resolve(fs.readFileSync(cachedFilePath))
+      const bundleBin = fs.readFileSync(cachedFilePath)
+      BUNDLE_CACHE.set(cachedFilePath, bundleBin)
+      resolve(bundleBin)
       return
     }
 
@@ -179,7 +239,9 @@ async function fetchFile (name: string): Promise<ArrayBuffer> {
     })
     out.on('finish', () => {
       out.close()
-      resolve(fs.readFileSync(cachedFilePath))
+      const bundleBin = fs.readFileSync(cachedFilePath)
+      BUNDLE_CACHE.set(cachedFilePath, bundleBin)
+      resolve(bundleBin)
     })
   })
 }
@@ -246,4 +308,18 @@ function importHeaders (name: string, datFile: DatFile): NamedHeader[] {
     offset += getHeaderLength(headers[headers.length - 1], datFile)
   }
   return headers
+}
+
+function imagemagickConvertDDS (
+  ddsFile: Uint8Array,
+  crop: { width: number, height: number, top: number, left: number },
+  outName: string
+) {
+  const cropArg = `${crop.width}x${crop.height}+${crop.top}+${crop.left}`
+  return new Promise<void>((resolve, reject) => {
+    const magick = spawn('magick', ['dds:-', '-crop', cropArg, outName], { stdio: ['pipe', 'ignore', 'ignore'] })
+    magick.on('exit', () => { resolve() })
+    magick.stdin.write(ddsFile)
+    magick.stdin.end()
+  })
 }
