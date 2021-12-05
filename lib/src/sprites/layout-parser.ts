@@ -13,16 +13,16 @@ export function parse (text: string) {
     .trim()
     .split('\n')
     .map<SpriteImage>((line) => {
-      const separated = line.split(' ')
-      const top = Number(separated[2])
-      const left = Number(separated[3])
+      const separated = line.match(/^"([^"]+)" "([^"]+)" ([^ ]+) ([^ ]+) ([^ ]+) ([^ ]+)$/)!
+      const top = Number(separated[3])
+      const left = Number(separated[4])
       return {
-        name: separated[0].slice(1, -1),
-        spritePath: separated[1].slice(1, -1),
+        name: separated[1],
+        spritePath: separated[2],
         top: top,
         left: left,
-        width: Number(separated[4]) - top + 1,
-        height: Number(separated[5]) - left + 1,
+        width: Number(separated[5]) - top + 1,
+        height: Number(separated[6]) - left + 1,
       }
     })
 }
