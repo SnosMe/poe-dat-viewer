@@ -9,13 +9,13 @@ jobs:
   compute-wasm:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: mymindstorm/setup-emsdk@v10
+    - uses: actions/checkout@v3
+    - uses: mymindstorm/setup-emsdk@v11
     - run: emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
       working-directory: lib/src
     - run: cmake --build build
       working-directory: lib/src
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: compute
         path: lib/src/build/compute.js
@@ -26,21 +26,19 @@ jobs:
     needs: compute-wasm
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/download-artifact@v2
+    - uses: actions/checkout@v3
+    - uses: actions/download-artifact@v3
       with:
         name: compute
         path: lib
-    - uses: actions/setup-node@v2
-      with:
-        node-version: 14
+    - uses: actions/setup-node@v3
     - run: yarn
       working-directory: lib
     - run: yarn tsc
       working-directory: lib
     - run: npm pack
       working-directory: lib
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v3
       with:
         name: package
         path: lib/pathofexile-dat-*.tgz

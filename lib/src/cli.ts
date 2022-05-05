@@ -139,7 +139,7 @@ let schema: SchemaFile
   }
 
   const includeTranslations = (config.translations)
-    ? TRANSLATIONS.filter(tr => config.translations.includes(tr.name))
+    ? TRANSLATIONS.filter(tr => config.translations!.includes(tr.name))
     : TRANSLATIONS
   for (const tr of includeTranslations) {
     fs.rmSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true, force: true })
