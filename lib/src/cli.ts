@@ -18,6 +18,7 @@ v8.setFlagsFromString('--experimental-wasm-simd')
 interface ExportConfig {
   patch: string
   files: string[]
+  translations?: string[]
   tables: Array<{
     name: string
     columns: string[]
@@ -38,11 +39,13 @@ const TRANSLATIONS = [
   { name: 'English', path: 'Data' },
   { name: 'French', path: 'Data/French' },
   { name: 'German', path: 'Data/German' },
+  { name: 'Japanese', path: 'Data/Japanese' },
   { name: 'Korean', path: 'Data/Korean' },
   { name: 'Portuguese', path: 'Data/Portuguese' },
   { name: 'Russian', path: 'Data/Russian' },
   { name: 'Spanish', path: 'Data/Spanish' },
-  { name: 'Thai', path: 'Data/Thai' }
+  { name: 'Thai', path: 'Data/Thai' },
+  { name: 'Traditional Chinese', path: 'Data/Traditional Chinese' }
 ]
 const SPRITE_LISTS = [{
   path: 'Art/UIImages1.txt',
@@ -135,11 +138,14 @@ let schema: SchemaFile
     }
   }
 
-  for (const tr of TRANSLATIONS) {
+  const includeTranslations = (config.translations)
+    ? TRANSLATIONS.filter(tr => config.translations.includes(tr.name))
+    : TRANSLATIONS
+  for (const tr of includeTranslations) {
     fs.rmSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true, force: true })
     fs.mkdirSync(path.join(process.cwd(), 'tables', tr.name), { recursive: true })
   }
-  for (const tr of TRANSLATIONS) {
+  for (const tr of includeTranslations) {
     BUNDLE_CACHE.clear()
     for (const target of config.tables) {
       const datFile = await getDatFile(`${tr.path}/${target.name}.dat64`)
