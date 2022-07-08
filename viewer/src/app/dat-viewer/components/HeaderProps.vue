@@ -301,7 +301,7 @@ export default defineComponent({
       return opts
     })
 
-    const byteViewMode = computed({
+    const byteViewMode = computed<string>({
       get () {
         const type = headerRef.value.type
         if (type.byteView) {

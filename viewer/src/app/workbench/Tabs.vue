@@ -10,7 +10,7 @@
           @click="closeTab(tab.id)"><i class="codicon codicon-close"></i></button>
       </div>
     </div>
-    <div class="flex p-1.5 flex-shrink-0 gap-x-1">
+    <div class="flex p-1.5 shrink-0 gap-x-1">
       <button :class="$style.rightBtn"
         @click="openImport"><i class="codicon codicon-cloud-download"></i> Import</button>
       <button v-if="showDataTables" :class="$style.rightBtn"

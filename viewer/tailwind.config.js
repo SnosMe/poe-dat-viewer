@@ -2,7 +2,7 @@
 const colors = require('tailwindcss/colors')
 
 module.exports = {
-  purge: [
+  content: [
     './src/**/*.vue'
   ],
   theme: {
@@ -44,7 +44,7 @@ module.exports = {
     },
     extend: {
       colors: {
-        gray: colors.blueGray,
+        gray: colors.slate,
         blue: colors.sky,
         green: colors.teal
       }
