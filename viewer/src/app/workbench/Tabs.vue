@@ -30,6 +30,7 @@ import ImportDialog from './ImportDialog.vue'
 import DataTablesDialog from './DataTablesDialog.vue'
 
 export default defineComponent({
+  name: 'WorkbenchTabs',
   setup () {
     const index = inject<BundleIndex>('bundle-index')!
     const db = inject<DatSchemasDatabase>('dat-schemas')!

@@ -48,6 +48,7 @@ import ShowSchema from './ShowSchema.vue'
 import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
+  name: 'ViewerActions',
   setup () {
     const viewer = inject<Viewer>('viewer')!
     const db = inject<DatSchemasDatabase>('dat-schemas')!
