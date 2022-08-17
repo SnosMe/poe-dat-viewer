@@ -1,5 +1,5 @@
-import { findSequence } from '../utils/findSequence'
-import { fnv1a64 } from '../utils/fnv1a64'
+import { findSequence } from '../utils/findSequence.js'
+import { fnv1a64 } from '../utils/fnv1a64.js'
 
 /* eslint-disable */
 const S_HASH        = 8; const S_HASH$        = 0

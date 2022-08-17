@@ -1,5 +1,5 @@
-import type { ColumnStats } from './stats'
-import type { Header } from '../dat/header'
+import type { ColumnStats } from './stats.js'
+import type { Header } from '../dat/header.js'
 
 export function validateHeader (header: Header, columns: ColumnStats[]): boolean {
   const boolean = header.type.boolean

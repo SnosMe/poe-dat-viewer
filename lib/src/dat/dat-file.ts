@@ -1,6 +1,6 @@
-import { BinaryReaderFactory, BinaryReader } from '../utils/BinaryReader'
-import { findSequence } from '../utils/findSequence'
-import { FIELD_SIZE } from './reader'
+import { BinaryReaderFactory, BinaryReader } from '../utils/BinaryReader.js'
+import { findSequence } from '../utils/findSequence.js'
+import { FIELD_SIZE } from './reader.js'
 
 const INT_ROWCOUNT = 4
 const VDATA_MAGIC = [0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb, 0xbb]

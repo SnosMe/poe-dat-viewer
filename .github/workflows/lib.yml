@@ -30,7 +30,7 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: compute
-        path: lib
+        path: lib/dist
     - uses: actions/setup-node@v3
     - run: yarn
       working-directory: lib

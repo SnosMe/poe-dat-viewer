@@ -1,9 +1,13 @@
 {
   "name": "pathofexile-dat",
-  "version": "5.2.0",
-  "main": "index.js",
-  "types": "index.d.ts",
-  "bin": "cli.js",
+  "version": "6.0.0",
+  "type": "module",
+  "bin": "./dist/cli.js",
+  "exports": {
+    "./bundles.js": "./dist/bundles.js",
+    "./dat.js": "./dist/dat.js"
+  },
+  "files": ["dist/**/*"],
   "license": "MIT",
   "repository": {
     "url": "https://github.com/SnosMe/poe-dat-viewer"

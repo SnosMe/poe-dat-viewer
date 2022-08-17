@@ -1,6 +1,6 @@
-import type { DatFile } from './dat/dat-file'
-import type { ColumnStats } from './dat-analysis/stats'
-import Module from './compute'
+import type { DatFile } from './dat/dat-file.js'
+import type { ColumnStats } from './dat-analysis/stats.js'
+import Module from './compute.js'
 
 let module_: ReturnType<typeof Module>
 

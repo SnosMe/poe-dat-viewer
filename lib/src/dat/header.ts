@@ -1,4 +1,4 @@
-import type { DatFile } from '../dat/dat-file'
+import type { DatFile } from '../dat/dat-file.js'
 
 export interface Header {
   offset: number

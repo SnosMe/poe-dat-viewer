@@ -1,7 +1,7 @@
-import { findZeroSequence } from '../utils/findSequence'
-import type { BinaryReader } from '../utils/BinaryReader'
-import type { DatFile } from './dat-file'
-import type { Header } from './header'
+import { findZeroSequence } from '../utils/findSequence.js'
+import type { BinaryReader } from '../utils/BinaryReader.js'
+import type { DatFile } from './dat-file.js'
+import type { Header } from './header.js'
 
 export const INT32_NULL = 0xfefefefe
 export const INT64_NULL = 0xfefefefefefefefe

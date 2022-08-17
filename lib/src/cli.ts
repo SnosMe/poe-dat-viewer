@@ -1,19 +1,16 @@
 #!/usr/bin/env node
 
-import { decompressSliceInBundle } from './bundles/bundle'
-import { getFileInfo, readIndexBundle } from './bundles/index-bundle'
-import { Header, getHeaderLength } from './dat/header'
-import { DatFile, readDatFile } from './dat/dat-file'
-import { readColumn } from './dat/reader'
-import { parseFile as parseSpriteIndex, SpriteImage } from './sprites/layout-parser'
+import { decompressSliceInBundle } from './bundles/bundle.js'
+import { getFileInfo, readIndexBundle } from './bundles/index-bundle.js'
+import { Header, getHeaderLength } from './dat/header.js'
+import { DatFile, readDatFile } from './dat/dat-file.js'
+import { readColumn } from './dat/reader.js'
+import { parseFile as parseSpriteIndex, SpriteImage } from './sprites/layout-parser.js'
 import { SCHEMA_URL, SCHEMA_VERSION, SchemaFile } from 'pathofexile-dat-schema'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as https from 'https'
-import * as v8 from 'v8'
 import { spawn } from 'child_process'
-
-v8.setFlagsFromString('--experimental-wasm-simd')
 
 interface ExportConfig {
   patch: string
