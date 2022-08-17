@@ -15,7 +15,7 @@
         >The viewer is ready to fulfill your wishes 👾</div>
     </div>
     <div class="app-footer">
-      <div>Made by Alexander Drozdov, v{{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
+      <div>Made by Alexander Drozdov, {{ appVersion }} <a class="q-link text-white border-b" href="https://github.com/SnosMe/poe-dat-viewer">GitHub</a></div>
       <a href="https://discord.gg/SJjBdT3" class="flex ml-8"><img src="@/assets/discord-badge.svg" /></a>
     </div>
   </div>

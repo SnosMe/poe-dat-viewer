@@ -11,6 +11,6 @@ export default defineConfig({
     }
   },
   define: {
-    'import.meta.env.APP_VERSION': JSON.stringify(require('./package.json').version)
+    'import.meta.env.APP_VERSION': JSON.stringify(process.env.GITHUB_SHA || 'dev')
   }
 })
