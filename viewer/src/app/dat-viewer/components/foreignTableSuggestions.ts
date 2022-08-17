@@ -1,5 +1,5 @@
 import { singular } from 'pluralize'
-import type { TableStats } from '@/app/dat-viewer/db'
+import type { TableStats } from '@/app/dat-viewer/db.js'
 
 function quickSimilar (a: string[], b: string[]): number {
   let common = 0

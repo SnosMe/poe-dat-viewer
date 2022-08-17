@@ -1,7 +1,7 @@
 import { DatFile, getHeaderLength } from 'pathofexile-dat'
 import { ColumnStats, validateHeader } from 'pathofexile-dat/dat-analysis'
-import { getColumnSelections } from './selection'
-import type { ViewerSerializedHeader } from './db'
+import { getColumnSelections } from './selection.js'
+import type { ViewerSerializedHeader } from './db.js'
 
 export interface Header {
   name: string | null

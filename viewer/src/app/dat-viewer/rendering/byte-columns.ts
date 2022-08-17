@@ -1,5 +1,5 @@
-import { BORDER_WIDTH, CHAR_WIDTH, columnSizes } from '../rendering'
-import type { Header } from '../headers'
+import { BORDER_WIDTH, CHAR_WIDTH, columnSizes } from '../rendering.js'
+import type { Header } from '../headers.js'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
 import type { DatFile } from 'pathofexile-dat'
 

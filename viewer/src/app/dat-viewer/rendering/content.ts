@@ -1,8 +1,8 @@
-import { CHAR_WIDTH, LINE_HEIGHT } from '../rendering'
-import { getFieldReader } from 'pathofexile-dat/dat/reader'
+import { CHAR_WIDTH, LINE_HEIGHT } from '../rendering.js'
+import { getFieldReader } from 'pathofexile-dat/dat/reader.js'
 import type { DatFile, Header as DatHeader } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import type { Header as HeaderViewer } from '../headers'
+import type { Header as HeaderViewer } from '../headers.js'
 
 interface StringifyOut {
   text: string

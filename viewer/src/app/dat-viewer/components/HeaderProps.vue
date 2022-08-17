@@ -89,13 +89,13 @@
 
 <script lang="ts">
 import { defineComponent, inject, computed, triggerRef, reactive, watch, WatchStopHandle, shallowRef } from 'vue'
-import { Header, removeHeader } from '../headers'
-import { Viewer, saveHeaders } from '../Viewer'
+import { Header, removeHeader } from '../headers.js'
+import { Viewer, saveHeaders } from '../Viewer.js'
 import { DatFile, readColumn } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import { HEADERS_HEIGHT } from '../rendering'
-import type { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db'
-import { foreignTableSuggestions } from './foreignTableSuggestions'
+import { HEADERS_HEIGHT } from '../rendering.js'
+import type { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db.js'
+import { foreignTableSuggestions } from './foreignTableSuggestions.js'
 
 function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   const opts = [] as Array<{ label: string, value: string }>

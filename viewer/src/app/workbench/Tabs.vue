@@ -23,9 +23,9 @@
 
 <script lang="ts">
 import { defineComponent, computed, inject } from 'vue'
-import { tabs, activeTabId, setActiveTab, closeTab, openTab } from './workbench-core'
-import type { BundleIndex } from '@/app/patchcdn/index-store'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import { tabs, activeTabId, setActiveTab, closeTab, openTab } from './workbench-core.js'
+import type { BundleIndex } from '@/app/patchcdn/index-store.js'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 import ImportDialog from './ImportDialog.vue'
 import DataTablesDialog from './DataTablesDialog.vue'
 

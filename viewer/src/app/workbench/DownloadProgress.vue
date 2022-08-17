@@ -17,7 +17,7 @@
 
 <script lang="ts">
 import { defineComponent, inject } from 'vue'
-import type { BundleLoader } from '@/app/patchcdn/cache'
+import type { BundleLoader } from '@/app/patchcdn/cache.js'
 
 export default defineComponent({
   setup () {

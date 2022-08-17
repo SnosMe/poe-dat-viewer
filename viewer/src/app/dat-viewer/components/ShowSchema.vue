@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType, computed } from 'vue'
-import { Header } from '../headers'
+import { Header } from '../headers.js'
 
 export default defineComponent({
   props: {

@@ -5,8 +5,6 @@
 </template>
 
 <script lang="ts">
-/// <reference types="resize-observer-browser" />
-
 import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue'
 
 export default defineComponent({

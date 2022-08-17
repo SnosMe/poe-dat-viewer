@@ -1,4 +1,4 @@
-import type { Header } from './headers'
+import type { Header } from './headers.js'
 
 export function selectColsByHeader (header: Header, selection: boolean[]) {
   for (let offset = header.offset; offset < (header.offset + header.length); ++offset) {

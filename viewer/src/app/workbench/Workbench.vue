@@ -27,10 +27,10 @@ import { defineComponent, computed, provide } from 'vue'
 import ViewerTabs from './Tabs.vue'
 import IndexTree from './IndexTree.vue'
 import DownloadProgress from './DownloadProgress.vue'
-import { tabs, activeTabId } from './workbench-core'
-import { BundleLoader } from '@/app/patchcdn/cache'
-import { BundleIndex } from '@/app/patchcdn/index-store'
-import { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import { tabs, activeTabId } from './workbench-core.js'
+import { BundleLoader } from '@/app/patchcdn/cache.js'
+import { BundleIndex } from '@/app/patchcdn/index-store.js'
+import { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 
 export default defineComponent({
   name: 'AppWorkbench',

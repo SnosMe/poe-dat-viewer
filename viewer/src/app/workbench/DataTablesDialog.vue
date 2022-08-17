@@ -32,7 +32,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, shallowRef, inject } from 'vue'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 
 const isPreloading = shallowRef(false)
 const totalTables = shallowRef(0)

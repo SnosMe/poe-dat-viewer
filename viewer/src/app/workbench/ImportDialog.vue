@@ -57,9 +57,9 @@
 
 <script lang="ts">
 import { defineComponent, shallowRef, computed, inject } from 'vue'
-import type { BundleIndex } from '@/app/patchcdn/index-store'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
-import { openTab } from './workbench-core'
+import type { BundleIndex } from '@/app/patchcdn/index-store.js'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
+import { openTab } from './workbench-core.js'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'
 
 export default defineComponent({

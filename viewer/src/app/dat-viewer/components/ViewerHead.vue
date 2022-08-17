@@ -53,14 +53,14 @@
 </template>
 
 <script lang="ts">
-import { toggleColsBetween } from '../selection'
-import { sortRows } from '../sorting'
+import { toggleColsBetween } from '../selection.js'
+import { sortRows } from '../sorting.js'
 import { defineComponent, inject, shallowRef, computed, triggerRef, PropType } from 'vue'
-import { saveHeaders, Viewer } from '../Viewer'
-import * as rendering from '../rendering'
-import { renderHeaderCols } from '../rendering/header-columns'
-import type { RenderByte } from '../rendering/byte-columns'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import { saveHeaders, Viewer } from '../Viewer.js'
+import * as rendering from '../rendering.js'
+import { renderHeaderCols } from '../rendering/header-columns.js'
+import type { RenderByte } from '../rendering/byte-columns.js'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 
 export default defineComponent({
   props: {

@@ -39,13 +39,13 @@
 
 <script lang="ts">
 import { defineComponent, computed, inject, triggerRef } from 'vue'
-import { clearColumnSelection, getColumnSelections } from '../selection'
-import { createHeaderFromSelected } from '../headers'
+import { clearColumnSelection, getColumnSelections } from '../selection.js'
+import { createHeaderFromSelected } from '../headers.js'
 import FileSaver from 'file-saver'
-import { Viewer, exportAllRows, saveHeaders, removeHeaders, importHeaders } from '../Viewer'
-import { openTab } from '../../workbench/workbench-core'
+import { Viewer, exportAllRows, saveHeaders, removeHeaders, importHeaders } from '../Viewer.js'
+import { openTab } from '../../workbench/workbench-core.js'
 import ShowSchema from './ShowSchema.vue'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 
 export default defineComponent({
   name: 'ViewerActions',

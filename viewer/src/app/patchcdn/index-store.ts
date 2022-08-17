@@ -1,8 +1,8 @@
 import { shallowRef, watch } from 'vue'
 import { getDirContent, getRootDirs, getFileInfo, readIndexBundle } from 'pathofexile-dat/bundles'
-import { decompressBundle, decompressFileInBundle, getBatchFileInfo } from '../worker/interface'
-import type { BundleLoader } from './cache'
-import * as perf from '@/perf'
+import { decompressBundle, decompressFileInBundle, getBatchFileInfo } from '../worker/interface.js'
+import type { BundleLoader } from './cache.js'
+import * as perf from '@/perf.js'
 
 export class BundleIndex {
   constructor (

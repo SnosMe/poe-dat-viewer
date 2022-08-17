@@ -1,7 +1,7 @@
-import type { Header } from './headers'
-import type { RenderByte } from './rendering/byte-columns'
-import type { Viewer } from './Viewer'
-import { renderCellContent, drawByteView, drawArrayVarData } from './rendering/content'
+import type { Header } from './headers.js'
+import type { RenderByte } from './rendering/byte-columns.js'
+import type { Viewer } from './Viewer.js'
+import { renderCellContent, drawByteView, drawArrayVarData } from './rendering/content.js'
 
 /* eslint-disable */
 export const FONT_FAMILY    = 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'

@@ -1,10 +1,10 @@
 import { openDB, DBSchema } from 'idb'
 import { Ref, shallowRef, triggerRef } from 'vue'
 import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
-import { fromSerializedHeaders, Header } from './headers'
-import { BundleIndex } from '@/app/patchcdn/index-store'
+import { fromSerializedHeaders, Header } from './headers.js'
+import { BundleIndex } from '@/app/patchcdn/index-store.js'
 import { readDatFile } from 'pathofexile-dat'
-import { decompressFileInBundle, analyzeDatFile } from '../worker/interface'
+import { decompressFileInBundle, analyzeDatFile } from '../worker/interface.js'
 
 export type ViewerSerializedHeader =
   Omit<Header, 'offset' | 'length'> & { length?: number }

@@ -35,15 +35,15 @@
 import { defineComponent, PropType, computed, provide, watch, ref, onMounted, inject, EffectScope } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
-import { Viewer, createViewer } from '../Viewer'
+import { Viewer, createViewer } from '../Viewer.js'
 import ViewerActions from './Actions.vue'
 import ViewerHead from './ViewerHead.vue'
 import HeaderProps from './HeaderProps.vue'
-import * as rendering from '../rendering'
-import { renderByteCols, renderColStats } from '../rendering/byte-columns'
-import { renderHeaderCols } from '../rendering/header-columns'
-import type { BundleIndex } from '@/app/patchcdn/index-store'
-import type { DatSchemasDatabase } from '@/app/dat-viewer/db'
+import * as rendering from '../rendering.js'
+import { renderByteCols, renderColStats } from '../rendering/byte-columns.js'
+import { renderHeaderCols } from '../rendering/header-columns.js'
+import type { BundleIndex } from '@/app/patchcdn/index-store.js'
+import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
 
 export default defineComponent({
   components: { ResizeObserver, CanvasScroll, ViewerActions, ViewerHead, HeaderProps },

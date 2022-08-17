@@ -1,5 +1,5 @@
-import type { Header } from '../headers'
-import { columnSizes } from '../rendering'
+import type { Header } from '../headers.js'
+import { columnSizes } from '../rendering.js'
 
 interface RenderHeader {
   offset: number

@@ -1,13 +1,13 @@
 import { DatFile, readDatFile, readColumn } from 'pathofexile-dat'
 import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import { validateHeader } from 'pathofexile-dat/dat-analysis/validation'
-import { getHeaderLength } from 'pathofexile-dat/dat/header'
-import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers'
-import { clearColumnSelection, selectColsByHeader } from './selection'
+import { validateHeader } from 'pathofexile-dat/dat-analysis/validation.js'
+import { getHeaderLength } from 'pathofexile-dat/dat/header.js'
+import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers.js'
+import { clearColumnSelection, selectColsByHeader } from './selection.js'
 import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed, EffectScope } from 'vue'
-import { analyzeDatFile } from '../worker/interface'
-import { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db'
-import { BundleIndex } from '@/app/patchcdn/index-store'
+import { analyzeDatFile } from '../worker/interface.js'
+import { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db.js'
+import { BundleIndex } from '@/app/patchcdn/index-store.js'
 
 type ReferencedTable = null | { headers: Header[], datFile: DatFile }
 
