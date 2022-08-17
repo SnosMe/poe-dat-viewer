@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-column flex-shrink-0" :style="{ 'width': showTree ? '300px' : undefined }">
+  <div class="layout-column shrink-0" :style="{ 'width': showTree ? '300px' : undefined }">
     <div class="flex p-1 items-center mb-px">
       <button
         title="Toggle tree visibility"

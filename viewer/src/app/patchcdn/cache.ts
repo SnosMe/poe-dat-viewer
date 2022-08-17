@@ -98,8 +98,8 @@ export class BundleLoader {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
-          chunks.push(value!)
-          state.received += value!.length
+          chunks.push(value)
+          state.received += value.length
         }
 
         buf = new Uint8Array(state.received)

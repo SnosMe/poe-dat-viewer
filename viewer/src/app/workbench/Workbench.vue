@@ -33,6 +33,7 @@ import { BundleIndex } from '@/app/patchcdn/index-store'
 import { DatSchemasDatabase } from '@/app/dat-viewer/db'
 
 export default defineComponent({
+  name: 'AppWorkbench',
   components: { IndexTree, ViewerTabs, DownloadProgress },
   setup () {
     const loader = new BundleLoader()
