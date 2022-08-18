@@ -1,7 +1,4 @@
-import { DatFile, readDatFile, readColumn } from 'pathofexile-dat'
-import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import { validateHeader } from 'pathofexile-dat/dat-analysis/validation.js'
-import { getHeaderLength } from 'pathofexile-dat/dat/header.js'
+import { DatFile, readDatFile, readColumn, ColumnStats, validateHeader, getHeaderLength } from 'pathofexile-dat/dat.js'
 import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers.js'
 import { clearColumnSelection, selectColsByHeader } from './selection.js'
 import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed, EffectScope } from 'vue'

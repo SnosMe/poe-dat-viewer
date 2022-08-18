@@ -1,5 +1,4 @@
-import { DatFile, getHeaderLength } from 'pathofexile-dat'
-import { ColumnStats, validateHeader } from 'pathofexile-dat/dat-analysis'
+import { DatFile, getHeaderLength, ColumnStats, validateHeader } from 'pathofexile-dat/dat.js'
 import { getColumnSelections } from './selection.js'
 import type { ViewerSerializedHeader } from './db.js'
 

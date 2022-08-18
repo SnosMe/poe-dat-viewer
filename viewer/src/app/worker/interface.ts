@@ -1,7 +1,7 @@
 import Worker from './script?worker'
 import * as Comlink from 'comlink'
 import type { WorkerRPC } from './script.js'
-import type { DatFile } from 'pathofexile-dat'
+import type { DatFile } from 'pathofexile-dat/dat.js'
 
 const thread = Comlink.wrap<WorkerRPC>(new Worker())
 

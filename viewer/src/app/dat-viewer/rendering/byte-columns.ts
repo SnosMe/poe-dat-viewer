@@ -1,7 +1,6 @@
 import { BORDER_WIDTH, CHAR_WIDTH, columnSizes } from '../rendering.js'
 import type { Header } from '../headers.js'
-import type { ColumnStats } from 'pathofexile-dat/dat-analysis'
-import type { DatFile } from 'pathofexile-dat'
+import type { DatFile, ColumnStats } from 'pathofexile-dat/dat.js'
 
 const BYTE_WIDTH = Math.ceil(CHAR_WIDTH * 3)
 

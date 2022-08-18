@@ -1,7 +1,6 @@
 import * as Comlink from 'comlink'
-import { decompressSliceInBundle, getFileInfo } from 'pathofexile-dat/bundles'
-import { analyzeDatFile } from 'pathofexile-dat/dat-analysis'
-import type { DatFile } from 'pathofexile-dat'
+import { decompressSliceInBundle, getFileInfo } from 'pathofexile-dat/bundles.js'
+import { DatFile, analyzeDatFile } from 'pathofexile-dat/dat.js'
 
 const WorkerBody = {
   async decompressSliceInBundle (bundle: ArrayBuffer, sliceOffset?: number, sliceSize?: number) {

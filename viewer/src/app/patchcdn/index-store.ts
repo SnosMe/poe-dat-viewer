@@ -1,5 +1,5 @@
 import { shallowRef, watch } from 'vue'
-import { getDirContent, getRootDirs, getFileInfo, readIndexBundle } from 'pathofexile-dat/bundles'
+import { getDirContent, getRootDirs, getFileInfo, readIndexBundle } from 'pathofexile-dat/bundles.js'
 import { decompressBundle, decompressFileInBundle, getBatchFileInfo } from '../worker/interface.js'
 import type { BundleLoader } from './cache.js'
 import * as perf from '@/perf.js'
