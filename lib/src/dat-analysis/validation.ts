@@ -2,6 +2,10 @@ import type { ColumnStats } from './stats.js'
 import type { Header } from '../dat/header.js'
 
 export function validateHeader (header: Header, columns: ColumnStats[]): boolean {
+  if (header.offset >= columns.length) {
+    return false
+  }
+
   const boolean = header.type.boolean
   const integer = header.type.integer
   const decimal = header.type.decimal
