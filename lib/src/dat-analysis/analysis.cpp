@@ -30,13 +30,6 @@ static void analyzeDat(
 
 extern "C" {
 
-void fast_analyze_dat32(
-  uint8_t* a1, size_t a2,
-  uint8_t* a3, size_t a4,
-  size_t a5, DatAnalyzedColumn* a6
-) {
-  analyzeDat<uint32_t>(a1, a2, a3, a4, a5, a6);
-}
 void fast_analyze_dat64(
   uint8_t* a1, size_t a2,
   uint8_t* a3, size_t a4,

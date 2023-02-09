@@ -8,7 +8,6 @@ type AnalyzeFn = (
 ) => void
 
 interface Native extends EmscriptenModule {
-  _fast_analyze_dat32: AnalyzeFn
   _fast_analyze_dat64: AnalyzeFn
 }
 

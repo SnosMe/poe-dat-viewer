@@ -1,18 +1,7 @@
+export class BinaryReader {
+  private _data: DataView
 
-export type BinaryReader = BinaryReader4 | BinaryReader8
-
-export class BinaryReaderFactory {
-  protected _data: DataView
-
-  static create (memsize: number, data: DataView) {
-    if (memsize === 4) {
-      return new BinaryReader4(data)
-    } else {
-      return new BinaryReader8(data)
-    }
-  }
-
-  protected constructor (data: DataView) {
+  constructor (data: DataView) {
     this._data = data
   }
 
@@ -66,25 +55,6 @@ export class BinaryReaderFactory {
 
   getUint32 (byteOffset: number): number {
     return this._data.getUint32(byteOffset, true)
-  }
-}
-
-class BinaryReader4 extends BinaryReaderFactory {
-  readonly ptrsize = 4
-  
-  constructor (data: DataView) {
-    super(data)
-  }
-
-  getSizeT (byteOffset: number) {
-    return this._data.getUint32(byteOffset, true)
-  }
-}
-class BinaryReader8 extends BinaryReaderFactory {
-  readonly ptrsize = 8
-
-  constructor (data: DataView) {
-    super(data)
   }
 
   getSizeT (byteOffset: number) {

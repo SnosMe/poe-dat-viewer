@@ -21,10 +21,7 @@ export async function analyzeDatFile (file: DatFile) {
 
   const statsPtr = module._malloc(STATS_SIZE * file.rowLength)
 
-  const analyzeDat = (file.memsize === 4)
-    ? module._fast_analyze_dat32
-    : module._fast_analyze_dat64
-  analyzeDat(
+  module._fast_analyze_dat64(
     dataFixedPtr, file.dataFixed.byteLength,
     dataVariablePtr, file.dataVariable.byteLength,
     file.rowLength,

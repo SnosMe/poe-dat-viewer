@@ -13,7 +13,7 @@ target_link_options(compute PRIVATE
   "SHELL:-s ALLOW_MEMORY_GROWTH=1"
   "SHELL:-s MEMORY_GROWTH_GEOMETRIC_STEP=0"
   "SHELL:-s ENVIRONMENT='worker'"
-  "SHELL:-s EXPORTED_FUNCTIONS='[_malloc,_free,_fast_analyze_dat32,_fast_analyze_dat64]'"
+  "SHELL:-s EXPORTED_FUNCTIONS='[_malloc,_free,_fast_analyze_dat64]'"
   "-O3"
   "-fno-rtti"
   "-fno-exceptions"

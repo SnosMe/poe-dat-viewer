@@ -3,7 +3,6 @@ import type { BinaryReader } from '../utils/BinaryReader.js'
 import type { DatFile } from './dat-file.js'
 import type { Header } from './header.js'
 
-export const INT32_NULL = 0xfefefefe
 export const INT64_NULL = 0xfefefefefefefefe
 
 const TEXT_DECODER = new TextDecoder('utf-16le')
@@ -15,22 +14,10 @@ export const FIELD_SIZE = {
   SHORT: 2,
   LONG: 4,
   LONGLONG: 8,
-  STRING: {
-    4: 4,
-    8: 8
-  } as Record<number, number>,
-  KEY: {
-    4: 4,
-    8: 8
-  } as Record<number, number>,
-  KEY_FOREIGN: {
-    4: 4 + 4,
-    8: 8 + 8
-  } as Record<number, number>,
-  ARRAY: {
-    4: 4 + 4,
-    8: 8 + 8
-  } as Record<number, number>
+  STRING: 8, // uint16_t*
+  KEY: 8, // size_t
+  KEY_FOREIGN: 8 + 8, // struct { size_t rid; size_t unknown; }
+  ARRAY: 8 + 8 // struct { size_t length; size_t offset; }
 }
 
 export type DatKeySelf = number | null
@@ -67,27 +54,17 @@ export function readString (data: Uint8Array): (offset: number) => string {
   }
 }
 
-export function isNULL (value: number, memsize: number) {
-  return value === (memsize === 4 ? INT32_NULL : INT64_NULL)
-}
-
-export function getNULL (memsize: number) {
-  return (memsize === 4) ? INT32_NULL : INT64_NULL
-}
-
 export function readKeySelf (data: BinaryReader): (offset: number) => DatKeySelf {
-  const NULL = getNULL(data.ptrsize)
   return offset => {
     const rowIdx = data.getSizeT(offset)
-    return (rowIdx === NULL) ? null : rowIdx
+    return (rowIdx === INT64_NULL) ? null : rowIdx
   }
 }
 
 export function readKeyForeign (data: BinaryReader): (offset: number) => DatKeyForeign {
-  const NULL = getNULL(data.ptrsize)
   return offset => {
     const rowIdx = data.getSizeT(offset)
-    return (rowIdx === NULL) ? null : rowIdx
+    return (rowIdx === INT64_NULL) ? null : rowIdx
     // return (rowIdx === NULL) ? null : { rid: rowIdx, unknown: data.getSizeT(offset + data.ptrsize) }
   }
 }
