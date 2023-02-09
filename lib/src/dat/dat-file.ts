@@ -1,4 +1,3 @@
-import { BinaryReader } from '../utils/BinaryReader.js'
 import { findSequence } from '../utils/findSequence.js'
 import { FIELD_SIZE } from './reader.js'
 
@@ -12,8 +11,8 @@ export interface DatFile {
   rowLength: number
   dataFixed: Uint8Array
   dataVariable: Uint8Array
-  readerFixed: BinaryReader
-  readerVariable: BinaryReader
+  readerFixed: DataView
+  readerVariable: DataView
   fieldSize: typeof FIELD_SIZE
 }
 
@@ -49,8 +48,8 @@ export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFi
     rowLength,
     dataFixed,
     dataVariable,
-    readerFixed: new BinaryReader(readerFixed),
-    readerVariable: new BinaryReader(readerVariable),
+    readerFixed,
+    readerVariable,
     fieldSize: FIELD_SIZE
   }
 }
