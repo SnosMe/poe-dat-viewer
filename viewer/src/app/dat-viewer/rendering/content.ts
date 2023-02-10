@@ -7,12 +7,20 @@ interface StringifyOut {
   color: string
 }
 
-function numberToString (value: number, out: StringifyOut) {
+function integerToString (value: number, out: StringifyOut) {
   out.text = String(value)
   out.color = '#098658'
 }
-function numberArrayToString (value: number[], out: StringifyOut) {
+function decimalToString (value: number, out: StringifyOut) {
+  out.text = value.toLocaleString(undefined, { maximumFractionDigits: 6, minimumFractionDigits: 1 })
+  out.color = '#098658'
+}
+function integerArrayToString (value: number[], out: StringifyOut) {
   out.text = `[${value.join(', ')}]`
+  out.color = '#098658'
+}
+function decimalArrayToString (value: number[], out: StringifyOut) {
+  out.text = `[${value.map(value => value.toLocaleString(undefined, { maximumFractionDigits: 6, minimumFractionDigits: 1 })).join(', ')}]`
   out.color = '#098658'
 }
 function booleanToString (value: boolean, out: StringifyOut) {
@@ -85,13 +93,15 @@ export function renderCellContent (
     if (header.type.array) {
       if (type.boolean) return booleanArrayToString
       if (type.string) return stringArrayToString
-      if (type.integer || type.decimal) return numberArrayToString
+      if (type.integer) return integerArrayToString
+      if (type.decimal) return decimalArrayToString
       if (type.key?.foreign) return keyForeignArrayToString
       if (type.key) return keySelfArrayToString
     } else {
       if (type.boolean) return booleanToString
       if (type.string) return stringToString
-      if (type.integer || type.decimal) return numberToString
+      if (type.integer) return integerToString
+      if (type.decimal) return decimalToString
       if (type.key?.foreign) return keyForeignToString
       if (type.key) return keySelfToString
     }
