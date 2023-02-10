@@ -28,28 +28,28 @@ type One<T> = (reader: DataView, offset: number, dataVariable: Uint8Array) => T
 
 const oneBool: One<boolean> = (reader, offset) => Boolean(reader.getUint8(offset))
 const oneUint1: One<number> = (reader, offset) => reader.getUint8(offset)
-const oneUint2: One<number> = (reader, offset) => reader.getUint16(offset)
-const oneUint4: One<number> = (reader, offset) => reader.getUint32(offset)
-const oneUint8: One<number> = (reader, offset) => Number(reader.getBigUint64(offset))
+const oneUint2: One<number> = (reader, offset) => reader.getUint16(offset, true)
+const oneUint4: One<number> = (reader, offset) => reader.getUint32(offset, true)
+const oneUint8: One<number> = (reader, offset) => Number(reader.getBigUint64(offset, true))
 const oneInt1: One<number> = (reader, offset) => reader.getInt8(offset)
-const oneInt2: One<number> = (reader, offset) => reader.getInt16(offset)
-const oneInt4: One<number> = (reader, offset) => reader.getInt32(offset)
-const oneInt8: One<number> = (reader, offset) => Number(reader.getBigInt64(offset))
-const oneDecimal4: One<number> = (reader, offset) => reader.getFloat32(offset)
-const oneDecimal8: One<number> = (reader, offset) => reader.getFloat64(offset)
+const oneInt2: One<number> = (reader, offset) => reader.getInt16(offset, true)
+const oneInt4: One<number> = (reader, offset) => reader.getInt32(offset, true)
+const oneInt8: One<number> = (reader, offset) => Number(reader.getBigInt64(offset, true))
+const oneDecimal4: One<number> = (reader, offset) => reader.getFloat32(offset, true)
+const oneDecimal8: One<number> = (reader, offset) => reader.getFloat64(offset, true)
 
 const oneString: One<string> = (reader, offset, dataVariable) => {
-  const varOffset = reader.getUint32(offset)
+  const varOffset = reader.getUint32(offset, true)
   return readStringAt(dataVariable, varOffset)
 }
 const oneKeySelf: One<DatKeySelf> = (reader, offset) => {
-  const rowIdx = reader.getUint32(offset)
+  const rowIdx = reader.getUint32(offset, true)
   return (rowIdx === MEM32_NULL) ? null : rowIdx
 }
 const oneKeyForeign: One<DatKeyForeign> = (reader, offset) => {
-  const rowIdx = reader.getUint32(offset)
+  const rowIdx = reader.getUint32(offset, true)
   return (rowIdx === MEM32_NULL) ? null : rowIdx
-  // return (rowIdx === NULL) ? null : { rid: rowIdx, unknown: reader.getUint32(offset + data.memsize) }
+  // return (rowIdx === NULL) ? null : { rid: rowIdx, unknown: reader.getUint32(offset + data.memsize, true) }
 }
 function readStringAt (data: Uint8Array, offset: number): string {
   let end = findZeroSequence(data, STRING_TERMINATOR, offset)
@@ -61,11 +61,11 @@ function readStringAt (data: Uint8Array, offset: number): string {
 
 function readMany<T> (datFile: DatFile, offset: number, fn: One<T>, elSize: number): T[] {
   const { readerFixed } = datFile
-  const arrayLength = readerFixed.getUint32(offset)
+  const arrayLength = readerFixed.getUint32(offset, true)
   if (arrayLength === 0) return []
 
   const { memsize, readerVariable, dataVariable } = datFile
-  const varOffset = readerFixed.getUint32(offset + memsize)
+  const varOffset = readerFixed.getUint32(offset + memsize, true)
   const out: T[] = []
   for (let i = 0; i < arrayLength; ++i) {
     out.push(fn(readerVariable, varOffset + i * elSize, dataVariable))

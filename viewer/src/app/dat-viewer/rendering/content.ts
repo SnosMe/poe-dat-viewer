@@ -163,11 +163,11 @@ export function drawArrayVarData (ctx: CanvasRenderingContext2D, header: HeaderV
 
   let textY = 0
   for (const rowIdx of rows) {
-    const arrayLength = datFile.readerFixed.getSizeT((rowIdx * datFile.rowLength) + header.offset)
+    const arrayLength = datFile.readerFixed.getUint32((rowIdx * datFile.rowLength) + header.offset, true)
     if (arrayLength === 0) {
       ctx.fillText('[]', 0, textY)
     } else {
-      const varOffset = datFile.readerFixed.getSizeT((rowIdx * datFile.rowLength) + header.offset + datFile.memsize)
+      const varOffset = datFile.readerFixed.getUint32((rowIdx * datFile.rowLength) + header.offset + datFile.memsize, true)
 
       const data = datFile.dataVariable.subarray(
         varOffset,
