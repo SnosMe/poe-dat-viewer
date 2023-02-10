@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink'
 import { decompressSliceInBundle, getFileInfo } from 'pathofexile-dat/bundles.js'
-import { DatFile, analyzeDatFile } from 'pathofexile-dat/dat.js'
+import { DatFile, analyzeDatFile, setWasmExports } from 'pathofexile-dat/dat.js'
+import computeInit from 'pathofexile-dat/analysis.wasm?init'
 
 const WorkerBody = {
   async decompressSliceInBundle (bundle: ArrayBuffer, sliceOffset?: number, sliceSize?: number) {
@@ -11,7 +12,9 @@ const WorkerBody = {
     }
   },
   async analyzeDatFile (datFile: DatFile) {
-    return await analyzeDatFile(datFile)
+    const insance = await computeInit({})
+    setWasmExports(insance.exports as any)
+    return analyzeDatFile(datFile)
   },
   async getBatchFileInfo (paths: string[], bundlesInfo: Uint8Array, filesInfo: Uint8Array) {
     return paths.map(fullPath =>

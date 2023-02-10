@@ -6,30 +6,30 @@ on:
       - 'lib/**'
 
 jobs:
-  compute-wasm:
+  build-wasm:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: mymindstorm/setup-emsdk@v11
-    - run: emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release
-      working-directory: lib/src
-    - run: cmake --build build
-      working-directory: lib/src
+    - uses: goto-bus-stop/setup-zig@v2
+      with:
+        version: 0.10.1
+    - run: zig build -Drelease-fast
+      working-directory: lib/src/dat-analysis
     - uses: actions/upload-artifact@v3
       with:
-        name: compute
-        path: lib/src/build/compute.js
+        name: wasm-artifact
+        path: lib/src/dat-analysis/zig-out/lib/analysis.wasm
         retention-days: 1
         if-no-files-found: error
 
   build-lib:
-    needs: compute-wasm
+    needs: build-wasm
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - uses: actions/download-artifact@v3
       with:
-        name: compute
+        name: wasm-artifact
         path: lib/dist
     - uses: actions/setup-node@v3
     - run: yarn
