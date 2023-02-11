@@ -1,4 +1,4 @@
-import { DatFile, getHeaderLength, ColumnStats, validateHeader } from 'pathofexile-dat/dat.js'
+import { type DatFile, getHeaderLength, type ColumnStats, validateHeader } from 'pathofexile-dat/dat.js'
 import { getColumnSelections } from './selection.js'
 import type { ViewerSerializedHeader } from './db.js'
 
@@ -9,10 +9,10 @@ export interface Header {
   type: {
     byteView?: { array: boolean }
     array?: boolean
-    boolean?: { [key: string]: never }
+    boolean?: Record<any, never>
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
-    string?: { [key: string]: never }
+    string?: Record<any, never>
     key?: { foreign: boolean, table: string | null, viewColumn: string | null }
   }
   textLength?: number
@@ -124,7 +124,7 @@ export function fromSerializedHeaders (
     const header: Header = {
       ...hdrSerialized,
       length: headerLength,
-      offset: offset
+      offset
     }
     const isValid = validateHeader(header, columnStats)
     if (!isValid) {

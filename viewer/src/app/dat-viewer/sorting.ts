@@ -1,4 +1,4 @@
-import { readColumn, DatFile, Header } from 'pathofexile-dat/dat.js'
+import { readColumn, type DatFile, type Header } from 'pathofexile-dat/dat.js'
 
 export function sortRows (header: Header, order: 1 | -1, datFile: DatFile): number[] {
   const data = readColumn(header, datFile)

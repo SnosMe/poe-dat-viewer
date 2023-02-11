@@ -29,7 +29,7 @@ export class BundleIndex {
       bundlesInfo: _index.bundlesInfo,
       filesInfo: _index.filesInfo,
       dirsInfo: _index.dirsInfo,
-      pathReps: pathReps
+      pathReps
     }
   }
 

@@ -164,7 +164,7 @@ export default defineComponent({
         top: renderItems.value.top,
         rows: renderItems.value.ids,
         columns: renderColumns.value,
-        viewer: viewer,
+        viewer,
         ctx
       })
     }

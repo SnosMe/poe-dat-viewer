@@ -1,8 +1,8 @@
-import { openDB, DBSchema } from 'idb'
-import { Ref, shallowRef, triggerRef } from 'vue'
-import { SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
-import { fromSerializedHeaders, Header } from './headers.js'
-import { BundleIndex } from '@/app/patchcdn/index-store.js'
+import { openDB, type DBSchema } from 'idb'
+import { type Ref, shallowRef, triggerRef } from 'vue'
+import { type SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
+import { fromSerializedHeaders, type Header } from './headers.js'
+import type { BundleIndex } from '@/app/patchcdn/index-store.js'
 import { readDatFile } from 'pathofexile-dat/dat.js'
 import { decompressFileInBundle, analyzeDatFile } from '../worker/interface.js'
 
@@ -120,7 +120,7 @@ export class DatSchemasDatabase {
         const headers = fromSerializedHeaders(serialized, columnStats, datFile)
 
         this._tableStats.value.push({
-          name: name,
+          name,
           totalRows: datFile.rowCount,
           headersValid: (headers != null),
           increasedRowLength: (headers) ? headers.increasedRowLength : false

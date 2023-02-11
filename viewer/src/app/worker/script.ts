@@ -1,6 +1,6 @@
 import * as Comlink from 'comlink'
 import { decompressSliceInBundle, getFileInfo } from 'pathofexile-dat/bundles.js'
-import { DatFile, analyzeDatFile, setWasmExports } from 'pathofexile-dat/dat.js'
+import { type DatFile, analyzeDatFile, setWasmExports } from 'pathofexile-dat/dat.js'
 import computeInit from 'pathofexile-dat/analysis.wasm?init'
 
 const WorkerBody = {

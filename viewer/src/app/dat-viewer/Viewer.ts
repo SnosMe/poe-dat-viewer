@@ -1,10 +1,10 @@
-import { DatFile, readDatFile, readColumn, ColumnStats, validateHeader, getHeaderLength } from 'pathofexile-dat/dat.js'
-import { Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers.js'
+import { type DatFile, readDatFile, readColumn, type ColumnStats, validateHeader, getHeaderLength } from 'pathofexile-dat/dat.js'
+import { type Header, createHeaderFromSelected, byteView, fromSerializedHeaders } from './headers.js'
 import { clearColumnSelection, selectColsByHeader } from './selection.js'
-import { shallowRef, Ref, triggerRef, shallowReactive, ComputedRef, computed, EffectScope } from 'vue'
+import { shallowRef, type Ref, triggerRef, shallowReactive, type ComputedRef, computed, type EffectScope } from 'vue'
 import { analyzeDatFile } from '../worker/interface.js'
-import { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db.js'
-import { BundleIndex } from '@/app/patchcdn/index-store.js'
+import type { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db.js'
+import type { BundleIndex } from '@/app/patchcdn/index-store.js'
 
 type ReferencedTable = null | { headers: Header[], datFile: DatFile }
 
@@ -50,7 +50,7 @@ async function loadFromFile (path: string, index: BundleIndex, db: DatSchemasDat
   if (headers) {
     return {
       headers: headers.headers,
-      datFile: datFile
+      datFile
     }
   }
 }
@@ -77,7 +77,7 @@ export function createViewer (
     ),
     datFile: parsed,
     name: getNamePart(path),
-    path: path,
+    path,
     columnStats: shallowRef([]),
     columnSelection: shallowRef(new Array(parsed.rowLength).fill(false)),
     editHeader: shallowRef(null),
@@ -141,7 +141,7 @@ function tryImportHeaders (serialized: ViewerSerializedHeader[], viewer: Viewer)
     const header: Header = {
       ...hdrSerialized,
       length: headerLength,
-      offset: offset
+      offset
     }
 
     const isValid = (hdrSerialized.length)

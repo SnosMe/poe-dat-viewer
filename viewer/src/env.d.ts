@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 interface TextMetrics {
   // experimental
   alphabeticBaseline?: number

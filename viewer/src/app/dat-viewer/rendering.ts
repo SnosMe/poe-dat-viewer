@@ -167,8 +167,9 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           res.push({
             left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
             width: sizes.paddingWidth,
-            exec: (ctx: CanvasRenderingContext2D, rows: number[]) =>
+            exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
               drawArrayVarData(ctx, header, datFile, rows, stats[header.offset])
+            }
           })
         } else {
           const hexBegin = Math.max(0, Math.floor((paintBegin - left) / (CHAR_WIDTH * 3)))
@@ -176,8 +177,9 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           res.push({
             left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
             width: sizes.paddingWidth,
-            exec: (ctx: CanvasRenderingContext2D, rows: number[]) =>
+            exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
               drawByteView(ctx, header, datFile, rows, hexBegin, hexEnd)
+            }
           })
         }
       } else {
@@ -190,11 +192,12 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
               if (referenced) {
                 const referencedHeader = referenced.headers.find(h => h.name === header.type.key!.viewColumn)
                 if (referencedHeader) {
-                  return renderCellContent(ctx, header, datFile, rows, { header: referencedHeader, datFile: referenced.datFile })
+                  renderCellContent(ctx, header, datFile, rows, { header: referencedHeader, datFile: referenced.datFile })
+                  return
                 }
               }
             }
-            return renderCellContent(ctx, header, datFile, rows)
+            renderCellContent(ctx, header, datFile, rows)
           }
         })
       }
