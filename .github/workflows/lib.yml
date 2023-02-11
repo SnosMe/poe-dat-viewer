@@ -32,6 +32,8 @@ jobs:
         name: wasm-artifact
         path: lib/dist
     - uses: actions/setup-node@v3
+      with:
+        node-version: 18
     - run: yarn
       working-directory: lib
     - run: yarn tsc
