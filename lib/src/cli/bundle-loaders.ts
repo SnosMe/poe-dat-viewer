@@ -13,8 +13,6 @@ export class FileLoader {
     private index: {
       bundlesInfo: Uint8Array
       filesInfo: Uint8Array
-      dirsInfo: Uint8Array
-      pathReps: Uint8Array
     }
   ) {}
 
@@ -28,8 +26,6 @@ export class FileLoader {
     return new FileLoader(bundleLoader, {
       bundlesInfo: _index.bundlesInfo,
       filesInfo: _index.filesInfo,
-      dirsInfo: _index.dirsInfo,
-      pathReps: await decompressSliceInBundle(_index.pathRepsBundle)
     })
   }
 

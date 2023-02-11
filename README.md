@@ -8,7 +8,11 @@ https://snosme.github.io/poe-dat-viewer
 - Can upload file from PC or import from PoE patch server
 - Performs file analysis to find possible columns
 
-![](./viewer/src/assets/showcase.png?raw=true) 
+![](./viewer/src/assets/showcase.png?raw=true)
+
+## Exporting game data
+
+Visit another [README.md file](./lib/README.md) in the lib directory.
 
 ## Related projects
 
