@@ -14,7 +14,7 @@ or as a command line tool to extract them.
 2. Create a directory to store the exported data.
 Create a `config.json` in it:
 
-```json
+```jsonc
 {
   // Game data will be downloaded from PoE update servers.
   // Latest version can be found by visiting https://raw.githubusercontent.com/poe-tool-dev/latest-patch-version/main/latest.txt
