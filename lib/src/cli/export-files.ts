@@ -28,6 +28,8 @@ export async function exportFiles (
   outDir: string,
   loader: FileLoader
 ) {
+  if (!config.files?.length) return
+
   await fs.rm(outDir, { recursive: true, force: true })
   await fs.mkdir(outDir, { recursive: true })
 

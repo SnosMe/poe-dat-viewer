@@ -3,9 +3,9 @@ export interface ExportConfig {
   patch?: string
   // "...steamapps/common/Path of Exile"
   steam?: string
-  files: string[]
+  files?: string[]
   translations?: string[]
-  tables: Array<{
+  tables?: Array<{
     name: string
     columns: string[]
   }>

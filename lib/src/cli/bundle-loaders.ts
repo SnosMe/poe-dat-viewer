@@ -84,7 +84,10 @@ export class CdnBundleLoader {
 
     const webpath = `${this.patchVer}/${BUNDLE_DIR}/${name}`
     const response = await fetch(`http://patchcdn.pathofexile.com/${webpath}`)
-    if (!response.ok) throw new Error(`Failed to fetch ${name} from CDN.`)
+    if (!response.ok) {
+      console.error(`Failed to fetch ${name} from CDN.`)
+      process.exit(1)
+    }
     const bundleBin = await response.arrayBuffer()
     await fs.writeFile(cachedFilePath, Buffer.from(bundleBin, 0, bundleBin.byteLength))
     return bundleBin

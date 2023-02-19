@@ -27,6 +27,8 @@ export async function exportTables (
   outDir: string,
   loader: FileLoader
 ) {
+  if (!config.tables?.length) return
+
   console.log('Loading schema for dat files')
   schema = await (await fetch(SCHEMA_URL)).json()
   if (schema.version !== SCHEMA_VERSION) {
