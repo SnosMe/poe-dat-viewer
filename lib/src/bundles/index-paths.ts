@@ -1,5 +1,5 @@
 import { findSequence } from '../utils/findSequence.js'
-import { fnv1a64 } from '../utils/fnv1a64.js'
+import { murmur64a } from '../utils/murmur2.js'
 
 /* eslint-disable */
 const S_HASH        = 8; const S_HASH$        = 0
@@ -48,7 +48,7 @@ export function getDirContent (dirPath: string, pathReps: Uint8Array, dirsInfo: 
   let childrenEnd: number
   let files: string[]
   {
-    const hash = fnv1a64(dirPath + '++')
+    const hash = murmur64a(dirPath)
 
     const structOffset = findSequence(dirsInfo, hash)
     if (structOffset === -1) {
@@ -64,9 +64,9 @@ export function getDirContent (dirPath: string, pathReps: Uint8Array, dirsInfo: 
     childrenEnd = offset + dirsReader.getInt32(structOffset + S_ALL_SIZE$, true)
   }
 
-  // Art dir is special
-  if (dirPath === 'Art') {
-    const dirs = getChildDirectories('Art', pathReps, dirsInfo)
+  // "art" dir is special
+  if (dirPath === 'art') {
+    const dirs = getChildDirectories('art', pathReps, dirsInfo)
     return { files, dirs }
   }
 
@@ -182,7 +182,7 @@ function _pathsSanityCheck (pathReps: Uint8Array, dirsInfo: Uint8Array) {
   }
 
   for (const [dir, hasChildDirs] of dirs.entries()) {
-    const hash = fnv1a64(dir + '++')
+    const hash = murmur64a(dir)
 
     const structOffset = findSequence(dirsInfo, hash)
     if (structOffset === -1) {

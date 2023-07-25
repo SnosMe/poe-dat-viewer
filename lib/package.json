@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "7.0.1",
+  "version": "8.0.0",
   "type": "module",
   "bin": "./dist/cli/run.js",
   "exports": {
@@ -14,7 +14,6 @@
     "url": "https://github.com/SnosMe/poe-dat-viewer"
   },
   "dependencies": {
-    "@sindresorhus/fnv1a": "^3.0.0",
     "ooz-wasm": "^1.0.0",
     "pathofexile-dat-schema": "^3.0.0"
   },

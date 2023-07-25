@@ -1,5 +1,5 @@
 import { findSequence } from '../utils/findSequence.js'
-import { fnv1a64 } from '../utils/fnv1a64.js'
+import { murmur64a } from '../utils/murmur2.js'
 
 // https://github.com/poe-tool-dev/ggpk.discussion/wiki/Bundle-scheme#bundle-index-format
 
@@ -79,7 +79,7 @@ export function readIndexBundle (indexBundle: Uint8Array) {
 }
 
 export function getFileInfo (path: string, bundlesInfo: Uint8Array, filesInfo: Uint8Array) {
-  const hash = fnv1a64(path.toLowerCase() + '++')
+  const hash = murmur64a(path.toLowerCase())
 
   const structOffset = findSequence(filesInfo, hash)
   if (structOffset === -1) {
