@@ -64,12 +64,6 @@ export function getDirContent (dirPath: string, pathReps: Uint8Array, dirsInfo: 
     childrenEnd = offset + dirsReader.getInt32(structOffset + S_ALL_SIZE$, true)
   }
 
-  // "art" dir is special
-  if (dirPath === 'art') {
-    const dirs = getChildDirectories('art', pathReps, dirsInfo)
-    return { files, dirs }
-  }
-
   const dirs = new Set<string>()
   for (let idx = 0; idx < dirsCount; ++idx) {
     let offset = dirsReader.getInt32((STRUCT_SIZE * idx) + S_OFFSET$, true)
