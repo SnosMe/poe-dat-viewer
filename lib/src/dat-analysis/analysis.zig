@@ -1,5 +1,5 @@
 const std = @import("std");
-const readInt = std.mem.readIntLittle;
+const readInt = std.mem.readIntSliceLittle;
 
 pub export fn malloc(size: usize) [*]u8 {
   const slice = std.heap.page_allocator.alloc(u8, size) catch unreachable;
@@ -60,7 +60,7 @@ fn analyzeDat(
   const kStrTerminatorSize = 4;
   const rowLength = stats.len;
 
-  for (stats) |*stat, bi| {
+  for (stats, 0..) |*stat, bi| {
     stat.maxValue = 0x00;
     stat.nullableMemsize = false;
     stat.value_keySelf = ((rowLength - bi) >= kPtrSize);
@@ -83,32 +83,32 @@ fn analyzeDat(
   while (ri < rowCount) : (ri += 1) {
     const row = dataFixed[ri*rowLength .. (ri + 1)*rowLength];
 
-    for (stats) |*stat, bi| {
+    for (stats, 0..) |*stat, bi| {
       const byte = row[bi];
       if (byte > stat.maxValue) {
         stat.maxValue = byte;
       }
 
       if (byte == kNullStart and !stat.nullableMemsize and ((rowLength - bi) >= kPtrSize)) {
-        stat.nullableMemsize = (kNull == readInt(SizeT, &row[bi]));
+        stat.nullableMemsize = (kNull == readInt(SizeT, row[bi..]));
       }
 
       if (stat.value_refString) {
-        const varOffset = readInt(SizeT, &row[bi]);
+        const varOffset = readInt(SizeT, row[bi..]);
         stat.value_refString = isValidVaroffset(SizeT, varOffset, kStrTerminatorSize, dataVariable.len, 1) and
-          isUtf16StringAt(dataVariable[@intCast(usize, varOffset)..]);
+          isUtf16StringAt(dataVariable[@intCast(varOffset)..]);
       }
 
       if (stat.value_keySelf) {
-        const rowIdx = readInt(SizeT, &row[bi]);
+        const rowIdx = readInt(SizeT, row[bi..]);
         if (rowIdx != kNull) {
           stat.value_keySelf = (rowIdx < rowCount);
         }
       }
 
       if (stat.value_keyForeign) {
-        const rowIdx = readInt(SizeT, &row[bi]);
-        const tablePtr = readInt(SizeT, &row[bi + kPtrSize]);
+        const rowIdx = readInt(SizeT, row[bi..]);
+        const tablePtr = readInt(SizeT, row[bi + kPtrSize..]);
         if (rowIdx != kNull) {
           stat.value_keyForeign = (tablePtr == kZero);
         } else {
@@ -117,8 +117,8 @@ fn analyzeDat(
       }
 
       if (stat.array_element8) {
-        const arrayLength = readInt(SizeT, &row[bi]);
-        const varOffset = readInt(SizeT, &row[bi + kPtrSize]);
+        const arrayLength = readInt(SizeT, row[bi..]);
+        const varOffset = readInt(SizeT, row[bi + kPtrSize..]);
         if (
           !isValidVaroffset(SizeT, varOffset, 0, dataVariable.len, 1) or
           !isValidVaroffset(SizeT, varOffset, 1, dataVariable.len, arrayLength)
@@ -142,14 +142,14 @@ fn analyzeDat(
 
           var idx: usize = 0;
           while (idx < arrayLength and stat.array_refString) : (idx += 1) {
-            const strOffset = readInt(SizeT, &dataVariable[@intCast(usize, varOffset) + (kPtrSize * idx)]);
+            const strOffset = readInt(SizeT, dataVariable[@intCast(varOffset + (kPtrSize * idx))..]);
             stat.array_refString = isValidVaroffset(SizeT, strOffset, kStrTerminatorSize, dataVariable.len, 1) and
-              isUtf16StringAt(dataVariable[@intCast(usize, strOffset)..]);
+              isUtf16StringAt(dataVariable[@intCast(strOffset)..]);
           }
 
           idx = 0;
           while (idx < arrayLength and stat.array_keySelf) : (idx += 1) {
-            const rowIdx = readInt(SizeT, &dataVariable[@intCast(usize, varOffset) + (kPtrSize * idx)]);
+            const rowIdx = readInt(SizeT, dataVariable[@intCast(varOffset + (kPtrSize * idx))..]);
             if (rowIdx != kNull) {
               stat.array_keySelf = (rowIdx < rowCount);
             }
@@ -157,8 +157,8 @@ fn analyzeDat(
 
           idx = 0;
           while (idx < arrayLength and stat.array_keyForeign) : (idx += 1) {
-            const rowIdx = readInt(SizeT, &dataVariable[@intCast(usize, varOffset) + (kPtrSize_2 * idx)]);
-            const tablePtr = readInt(SizeT, &dataVariable[@intCast(usize, varOffset) + (kPtrSize_2 * idx) + kPtrSize]);
+            const rowIdx = readInt(SizeT, dataVariable[@intCast(varOffset + (kPtrSize_2 * idx))..]);
+            const tablePtr = readInt(SizeT, dataVariable[@intCast(varOffset + (kPtrSize_2 * idx) + kPtrSize)..]);
             if (rowIdx != kNull) {
               stat.array_keyForeign = (tablePtr == kZero);
             } else {
@@ -169,7 +169,7 @@ fn analyzeDat(
           idx = 0;
           while (idx < arrayLength and stat.array_boolean) : (idx += 1) {
             stat.array_boolean =
-              dataVariable[@intCast(usize, varOffset) + idx] <= 0x01;
+              dataVariable[@intCast(varOffset + idx)] <= 0x01;
           }
         }
       }
@@ -183,8 +183,8 @@ fn isUtf16StringAt(data: []const u8) bool {
     if (bytes.len < 4) {
       return false;
     }
-    const c1 = readInt(u16, &bytes[0]);
-    const c2 = readInt(u16, &bytes[2]);
+    const c1 = readInt(u16, bytes[0..]);
+    const c2 = readInt(u16, bytes[2..]);
     if (c1 == 0x0000 and c2 == 0x0000) {
       return true;
     }

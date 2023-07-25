@@ -20,5 +20,5 @@ pub fn build(b: *std.Build) void {
     module.export_symbol_names = &[_][]const u8{
         "malloc", "free", "fast_analyze_dat64",
     };
-    module.install();
+    b.installArtifact(module);
 }
