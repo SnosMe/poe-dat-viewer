@@ -157,7 +157,7 @@ export default defineComponent({
 
     const searchExtension = shallowRef('.dat64')
     const extensionOpts = computed(() => {
-      if (!currentDir.value.startsWith('Data')) return null
+      if (!currentDir.value.startsWith('data')) return null
 
       return ['.dat', '.dat64', '.datl', '.datl64'].map(ext => ({
         value: ext,

@@ -81,7 +81,7 @@ export class DatSchemasDatabase {
   }
 
   async preloadDataTables (totalTables: Ref<number>) {
-    const filePaths = this.index.getDirContent('Data')
+    const filePaths = this.index.getDirContent('data')
       .files
       .filter(file => file.endsWith('.dat64')) // this also removes special `Languages.dat`
 
@@ -114,7 +114,7 @@ export class DatSchemasDatabase {
 
         const datFile = readDatFile(fullPath, res.slice)
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
-        const name = fullPath.replace('Data/', '').replace('.dat64', '')
+        const name = fullPath.replace('data/', '').replace('.dat64', '')
 
         const serialized = await this.findByName(name)
         const headers = fromSerializedHeaders(serialized, columnStats, datFile)
@@ -147,7 +147,8 @@ function serializeHeaders (headers: Header[]) {
 }
 
 function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): ViewerSerializedHeader[] | null {
-  const sch = publicSchema.find(s => s.name === name)
+  name = name.toLowerCase()
+  const sch = publicSchema.find(s => s.name.toLowerCase() === name)
   if (!sch) return null
 
   return sch.columns.map(column => {
