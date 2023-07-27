@@ -61,9 +61,14 @@ export class DatSchemasDatabase {
     this._isLoading.value = false
   }
 
-  async findByName (name: string) {
+  async findSchemaByName (name: string): Promise<DatSchema | null> {
     const record = await (await this.db).get('dat-schemas', name)
-    return record?.headers || fromPublicSchema(name, this.publicSchema.value) || []
+    return record ?? fromPublicSchema(name, this.publicSchema.value)
+  }
+
+  async findByName (name: string) {
+    const schema = await this.findSchemaByName(name)
+    return schema?.headers ?? []
   }
 
   async saveHeaders (
@@ -116,11 +121,11 @@ export class DatSchemasDatabase {
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
         const name = fullPath.replace('data/', '').replace('.dat64', '')
 
-        const serialized = await this.findByName(name)
-        const headers = fromSerializedHeaders(serialized, columnStats, datFile)
+        const schema = await this.findSchemaByName(name)
+        const headers = fromSerializedHeaders(schema?.headers ?? [], columnStats, datFile)
 
         this._tableStats.value.push({
-          name,
+          name: schema?.name ?? name,
           totalRows: datFile.rowCount,
           headersValid: (headers != null),
           increasedRowLength: (headers) ? headers.increasedRowLength : false
@@ -146,12 +151,12 @@ function serializeHeaders (headers: Header[]) {
   }))
 }
 
-function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): ViewerSerializedHeader[] | null {
+function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): DatSchema | null {
   name = name.toLowerCase()
   const sch = publicSchema.find(s => s.name.toLowerCase() === name)
   if (!sch) return null
 
-  return sch.columns.map(column => {
+  const headers: ViewerSerializedHeader[] = sch.columns.map(column => {
     return { /* eslint-disable @typescript-eslint/indent */
       name: column.name || '',
       type: {
@@ -191,4 +196,9 @@ function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): Vi
       textLength: 4 * 3 - 1
     }
   })
+
+  return {
+    name: sch.name,
+    headers
+  }
 }

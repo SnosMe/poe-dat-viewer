@@ -17,14 +17,13 @@
     "idb": "^7.0.0",
     "ooz-wasm": "^1.0.0",
     "pathofexile-dat": "^8.0.0",
-    "pathofexile-dat-schema": "^3.0.0",
-    "pluralize": "^8.0.0",
+    "pathofexile-dat-schema": "^4.0.0",
+    "string-metric": "^0.3.3",
     "tailwindcss": "^3.0.0",
     "vue": "^3.2.16"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.1",
-    "@types/pluralize": "^0.0.29",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "@vitejs/plugin-vue": "^4.0.0",
