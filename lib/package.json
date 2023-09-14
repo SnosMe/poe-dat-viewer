@@ -26,10 +26,10 @@
   },
   "typesVersions": {
     "*": {
-      "bundles": [
+      "bundles.js": [
         "dist/bundles.d.ts"
       ],
-      "dat": [
+      "dat.js": [
         "dist/dat.d.ts"
       ]
     }
