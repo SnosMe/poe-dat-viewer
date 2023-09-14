@@ -23,5 +23,15 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "typesVersions": {
+    "*": {
+      "bundles.js": [
+        "dist/bundles.d.ts"
+      ],
+      "dat.js": [
+        "dist/dat.d.ts"
+      ]
+    }
   }
 }
