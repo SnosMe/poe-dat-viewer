@@ -5,6 +5,22 @@ import vue from '@vitejs/plugin-vue'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
+  build: {
+    target: 'esnext'
+  },
+  worker: {
+    format: 'es'
+  },
+  // development only
+  optimizeDeps: {
+    exclude: ['pathofexile-dat', 'ooz-wasm']
+  },
+  // development only
+  server: {
+    fs: {
+      allow: ['..']
+    }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
