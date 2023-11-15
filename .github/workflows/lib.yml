@@ -18,7 +18,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: wasm-artifact
-        path: lib/src/dat-analysis/zig-out/lib/analysis.wasm
+        path: lib/src/dat-analysis/zig-out/bin/analysis.wasm
         retention-days: 1
         if-no-files-found: error
 

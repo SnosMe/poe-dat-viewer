@@ -20,7 +20,7 @@ export class FileLoader {
     console.log('Loading bundles index...')
 
     const indexBin = await bundleLoader.fetchFile('_.index.bin')
-    const indexBundle = await decompressSliceInBundle(new Uint8Array(indexBin))
+    const indexBundle = decompressSliceInBundle(new Uint8Array(indexBin))
     const _index = readIndexBundle(indexBundle)
 
     return new FileLoader(bundleLoader, {
@@ -41,7 +41,7 @@ export class FileLoader {
   async getFileContents (fullPath: string) {
     const location = getFileInfo(fullPath, this.index.bundlesInfo, this.index.filesInfo)
     const bundleBin = await this.fetchBundle(location.bundle)
-    return await decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
+    return decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
   }
 
   clearBundleCache () {

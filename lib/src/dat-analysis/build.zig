@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
     });
     const optimize = b.standardOptimizeOption(.{});
 
-    const module = b.addSharedLibrary(.{
+    const module = b.addExecutable(.{
         .name = "analysis",
         .root_source_file = .{ .path = "./analysis.zig" },
         .target = target,
@@ -20,5 +20,6 @@ pub fn build(b: *std.Build) void {
     module.export_symbol_names = &[_][]const u8{
         "malloc", "free", "fast_analyze_dat64",
     };
+    module.entry = .disabled;
     b.installArtifact(module);
 }

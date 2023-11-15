@@ -1,5 +1,8 @@
 const std = @import("std");
-const readInt = std.mem.readIntSliceLittle;
+
+inline fn readInt(comptime T: type, buffer: []const u8) T {
+  return std.mem.readInt(T, buffer[0..@sizeOf(T)], .little);
+}
 
 pub export fn malloc(size: usize) [*]u8 {
   const slice = std.heap.page_allocator.alloc(u8, size) catch unreachable;
@@ -81,7 +84,7 @@ fn analyzeDat(
 
   var ri: usize = 0;
   while (ri < rowCount) : (ri += 1) {
-    const row = dataFixed[ri*rowLength .. (ri + 1)*rowLength];
+    const row = dataFixed[ri*rowLength..][0..rowLength];
 
     for (stats, 0..) |*stat, bi| {
       const byte = row[bi];

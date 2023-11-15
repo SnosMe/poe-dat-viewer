@@ -1,7 +1,9 @@
 import type { DatFile } from '../dat/dat-file.js'
 import type { ColumnStats } from './stats.js'
 
-let _module: ModuleExports
+const _module = (await WebAssembly.instantiateStreaming(
+  fetch(new URL('../analysis.wasm', import.meta.url))
+)).instance.exports as unknown as ModuleExports
 
 type AnalyzeFn = (
   dataFixedPtr: number, dataFixed_len: number,
@@ -15,10 +17,6 @@ interface ModuleExports {
   fast_analyze_dat64: AnalyzeFn
   malloc: (size: number) => number
   free: (ptr: number, size: number) => void
-}
-
-export function setWasmExports (module: ModuleExports) {
-  _module = module
 }
 
 export function analyzeDatFile (file: DatFile): ColumnStats[] {

@@ -6,11 +6,11 @@ const S_CHUNK_COUNT$ = 36
 const S_COMPRESSION_GRANULARITY$ = 40
 const S_CHUNK_SIZES$ = 60
 
-export async function decompressSliceInBundle (
+export function decompressSliceInBundle (
   bundle: Uint8Array,
   sliceOffset = 0,
   sliceSize = 0
-): Promise<Uint8Array> {
+): Uint8Array {
   const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
   const decompressedBundleSize = reader.getInt32(S_DECOMPRESSED_DATA_SIZE$, true)
   const chunksCount = reader.getInt32(S_CHUNK_COUNT$, true)
@@ -40,7 +40,7 @@ export async function decompressSliceInBundle (
       const begin = Math.max(sliceOffset - bundleDecomprOffset, 0)
       const end = Math.min((sliceOffset + sliceSize) - bundleDecomprOffset, decomprChunkSize)
 
-      const raw = await Ooz.decompressUnsafe(chunk, decomprChunkSize)
+      const raw = Ooz.decompressUnsafe(chunk, decomprChunkSize)
       decompressedSlice.set(raw.subarray(begin, end), sliceDecomprOffset)
 
       sliceDecomprOffset += (end - begin)
