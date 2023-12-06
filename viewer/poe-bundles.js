@@ -10,7 +10,7 @@ async function handleRequest (event) {
 
     const proxiedUrl = (cdnPath === '/schema.min.json')
       ? 'https://github.com/poe-tool-dev/dat-schema/releases/download/latest/schema.min.json'
-      : `http://patchcdn.pathofexile.com${cdnPath}`
+      : `https://patch.poecdn.com${cdnPath}`
 
     const response = await fetch(proxiedUrl, {
       headers: event.request.headers

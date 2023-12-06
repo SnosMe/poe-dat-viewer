@@ -6,7 +6,7 @@
         <div class="max-w-xl mb-4 font-semibold">Useful when a new league is released. While the update is still downloading, you can review files and fix schema directly from the update servers.</div>
         <div class="inline-flex items-baseline pb-2">
           <div style="width: 200px;" class="my-1">
-            <input value="patchcdn.pathofexile.com/" readonly :class="$style.input" />
+            <input value="patch.poecdn.com/" readonly :class="$style.input" />
             <label :class="$style.label">Patch CDN</label>
           </div>
           <div style="width: 100px;" class="m-1">

@@ -83,7 +83,7 @@ export class CdnBundleLoader {
     console.log(`Loading from CDN: ${name} ...`)
 
     const webpath = `${this.patchVer}/${BUNDLE_DIR}/${name}`
-    const response = await fetch(`http://patchcdn.pathofexile.com/${webpath}`)
+    const response = await fetch(`https://patch.poecdn.com/${webpath}`)
     if (!response.ok) {
       console.error(`Failed to fetch ${name} from CDN.`)
       process.exit(1)
