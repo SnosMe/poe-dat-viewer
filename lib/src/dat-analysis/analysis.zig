@@ -40,7 +40,7 @@ const DatAnalyzedColumn = extern struct {
 inline fn isValidVaroffset(comptime SizeT: type, offset: SizeT, len: SizeT, dataVariable_len: SizeT, arrN: SizeT) bool {
   const kMagicBbbbSize = 8;
 
-  var totalLen = @mulWithOverflow(len, arrN);
+  const totalLen = @mulWithOverflow(len, arrN);
   if (totalLen[1] != 0) return false;
 
   const totalEnd = @addWithOverflow(offset, totalLen[0]);
