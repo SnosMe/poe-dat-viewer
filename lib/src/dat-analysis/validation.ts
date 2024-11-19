@@ -19,7 +19,7 @@ export function validateHeader (header: Header, columns: ColumnStats[]): boolean
 
   if (integer) {
     // if (size === 1 && !array) return space >= 1
-    // if (size === 2 && !array) return space >= 2
+    if (size === 2 && !array) return space >= 2
     if (size === 4 && !array) return space >= 4
     // if (size === 8 && !array) return space >= 8
 

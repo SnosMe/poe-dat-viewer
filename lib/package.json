@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "type": "module",
   "bin": "./dist/cli/run.js",
   "exports": {
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "ooz-wasm": "^2.0.0",
-    "pathofexile-dat-schema": "^4.0.0"
+    "pathofexile-dat-schema": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

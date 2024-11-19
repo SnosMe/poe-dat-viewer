@@ -11,15 +11,15 @@ pub fn build(b: *std.Build) void {
     });
     const optimize = b.standardOptimizeOption(.{});
 
-    const module = b.addExecutable(.{
+    const exe = b.addExecutable(.{
         .name = "analysis",
-        .root_source_file = .{ .path = "./analysis.zig" },
+        .root_source_file = b.path("./analysis.zig"),
         .target = target,
         .optimize = optimize,
     });
-    module.export_symbol_names = &[_][]const u8{
+    exe.root_module.export_symbol_names = &.{
         "malloc", "free", "fast_analyze_dat64",
     };
-    module.entry = .disabled;
-    b.installArtifact(module);
+    exe.entry = .disabled;
+    b.installArtifact(exe);
 }
