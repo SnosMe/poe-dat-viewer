@@ -113,7 +113,7 @@ function dataTypeOpts (header: Header, stats: ColumnStats, datFile: DatFile) {
   if (len === fieldSize.KEY_FOREIGN && stats.keyForeign) {
     opts.push({ label: 'Key (foreign)', value: 'key_foreign' })
   }
-  if (/* len === 8 || */ len === 4 /* || len === 2 || len === 1 */) {
+  if (/* len === 8 || */ len === 4 || len === 2 /* || len === 1 */) {
     opts.push({ label: 'Integer', value: 'integer' })
   }
   if (/* len === 8 || */ len === 4) {
