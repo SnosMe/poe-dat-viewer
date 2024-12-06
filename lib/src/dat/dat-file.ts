@@ -20,8 +20,8 @@ export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFi
   if (content.byteLength < MIN_FILE_SIZE) {
     throw new Error('Invalid file size.')
   }
-  if (!filenameOrExt.endsWith('dat64')) {
-    throw new Error('Only dat64 files are supported.')
+  if (!filenameOrExt.endsWith('datc64')) {
+    throw new Error('Only datc64 files are supported.')
   }
 
   const file = new Uint8Array(content)
