@@ -13,8 +13,8 @@
         type="search" spellcheck="false">
     </div>
     <template v-if="showTree">
-      <div v-if="extensionOpts"
-        class="flex gap-x-1 border-b pb-1.5 px-2 justify-end">
+      <div class="flex gap-x-1 border-b pb-1.5 px-2 justify-end">
+        <span v-if="!extensionOpts.length">No files with extensions</span>
         <button v-for="opt in extensionOpts" :key="opt.value"
           @click="opt.handleClick"
           :class="['px-2', (opt.active ? 'bg-gray-200' : 'hover:bg-gray-100') ]"
@@ -153,23 +153,34 @@ export default defineComponent({
       showTree.value = !showTree.value
     }
 
-    const { tree, handleTreeNav, currentDir } = useTreeNavigation(index)
+    const { tree, handleTreeNav } = useTreeNavigation(index)
 
     const searchExtension = shallowRef('.dat64')
     const extensionOpts = computed(() => {
-      if (!currentDir.value.startsWith('data')) return null
+      const extensions: string[] = []
+      for (const entry of tree.value) {
+        if (entry.isFile) {
+          const [_, ext] = entry.label.split('.')
+          if (ext != null && !extensions.includes(`.${ext}`)) {
+            extensions.push(`.${ext}`)
+          }
+        }
+      }
 
-      return ['.dat', '.dat64', '.datl', '.datl64'].map(ext => ({
+      return extensions.map(ext => ({
         value: ext,
         active: searchExtension.value === ext,
-        handleClick: () => { searchExtension.value = ext }
+        handleClick: () => {
+          searchExtension.value = (searchExtension.value !== ext) ? ext : ''
+        }
       }))
     })
 
     const searchText = shallowRef('')
     const filteredTree = computed(() => {
       const term = searchText.value.toLowerCase()
-      const ext = extensionOpts.value ? searchExtension.value : ''
+      const ext = extensionOpts.value
+        .some(opt => opt.value === searchExtension.value) ? searchExtension.value : ''
       return tree.value.filter(item => {
         return item.label.toLowerCase().includes(term) &&
           (item.isFile ? item.label.endsWith(ext) : true)
