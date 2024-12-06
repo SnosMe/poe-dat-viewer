@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "11.0.0",
+  "version": "11.0.1",
   "type": "module",
   "bin": "./dist/cli/run.js",
   "exports": {

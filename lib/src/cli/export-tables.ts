@@ -98,7 +98,7 @@ function importHeaders (
   const validFor = (config.patch?.startsWith('4.') || config.steam?.includes('Path of Exile 2'))
     ? ValidFor.PoE2
     : ValidFor.PoE1
-  const sch = schema.tables.find(s => s.name === name && s.validFor === validFor)!
+  const sch = schema.tables.find(s => s.name === name && (s.validFor & validFor))!
   let offset = 0
   for (const column of sch.columns) {
     headers.push({

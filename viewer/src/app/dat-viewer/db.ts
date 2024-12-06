@@ -72,7 +72,7 @@ export class DatSchemasDatabase {
       : ValidFor.PoE1
     name = name.toLowerCase()
     const sch = this.publicSchema.value
-      .find(s => s.name.toLowerCase() === name && s.validFor === validFor)
+      .find(s => s.name.toLowerCase() === name && (s.validFor & validFor))
 
     return sch && fromPublicSchema(sch)
   }
