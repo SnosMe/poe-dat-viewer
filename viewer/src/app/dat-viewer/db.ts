@@ -88,7 +88,7 @@ export class DatSchemasDatabase {
   async preloadDataTables (totalTables: Ref<number>) {
     const filePaths = this.index.getDirContent('data')
       .files
-      .filter(file => file.endsWith('.dat64')) // this also removes special `Languages.dat`
+      .filter(file => file.endsWith('.datc64')) // this also removes special `Languages.dat`
 
     totalTables.value = filePaths.length
 
@@ -119,7 +119,7 @@ export class DatSchemasDatabase {
 
         const datFile = readDatFile(fullPath, res.slice)
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
-        const name = fullPath.replace('data/', '').replace('.dat64', '')
+        const name = fullPath.replace('data/', '').replace('.datc64', '')
 
         const schema = await this.findSchemaByName(name)
         const headers = fromSerializedHeaders(schema?.headers ?? [], columnStats, datFile)

@@ -40,7 +40,7 @@
           class="hidden"
           id="import-local-file"
           type="file"
-          accept=".dat,.dat64"
+          accept=".datc64"
           @input="handleFile" />
       </div>
     </div>

@@ -107,7 +107,7 @@ function useTreeNavigation (index: BundleIndex) {
     if (!item.isFile) {
       currentDir.value = item.fullPath
     } else {
-      if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
+      if (item.fullPath.endsWith('.datc64')) {
         if (hasTabId(`bundles@${item.fullPath}`)) {
           setActiveTab(`bundles@${item.fullPath}`)
           return
@@ -116,7 +116,7 @@ function useTreeNavigation (index: BundleIndex) {
 
       const fileContent = await index.loadFileContent(item.fullPath)
 
-      if (item.fullPath.endsWith('.dat') || item.fullPath.endsWith('.dat64')) {
+      if (item.fullPath.endsWith('.datc64')) {
         openTab({
           id: `bundles@${item.fullPath}`,
           title: item.label,
@@ -155,7 +155,7 @@ export default defineComponent({
 
     const { tree, handleTreeNav } = useTreeNavigation(index)
 
-    const searchExtension = shallowRef('.dat64')
+    const searchExtension = shallowRef('.datc64')
     const extensionOpts = computed(() => {
       const extensions: string[] = []
       for (const entry of tree.value) {
