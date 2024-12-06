@@ -6,11 +6,11 @@
         <div class="max-w-xl mb-4 font-semibold">Useful when a new league is released. While the update is still downloading, you can review files and fix schema directly from the update servers.</div>
         <div class="inline-flex items-baseline pb-2">
           <div style="width: 200px;" class="my-1">
-            <input value="patch.poecdn.com/" readonly :class="$style.input" />
+            <input value="patch(-poe2).poecdn.com/" readonly :class="$style.input" />
             <label :class="$style.label">Patch CDN</label>
           </div>
           <div style="width: 100px;" class="m-1">
-            <input v-model.trim="poePatch" placeholder="3.12.x.x.x" :class="$style.input" />
+            <input v-model.trim="poePatch" placeholder="x.x.x.x.x" :class="$style.input" />
             <label :class="$style.label">Patch #</label>
           </div>
           <div style="width: 220px;" class="my-1">
@@ -23,7 +23,8 @@
             :loading="isCdnImportRunning">{{ isCdnImportRunning ? 'Wait...' : 'Import' }}</button>
         </div>
         <div v-if="latestPoEPatch && poePatch !== latestPoEPatch">
-          Latest PoE patch is <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch }}</code>
+          Latest PoE patch is <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch }}</code>,
+          and version <code class="px-1 border border-gray-300 rounded">{{ 'TODO' }}</code> for PoE2.
         </div>
       </div>
     </div>
