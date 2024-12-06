@@ -1,4 +1,4 @@
-import { SCHEMA_URL, SCHEMA_VERSION, SchemaFile } from 'pathofexile-dat-schema'
+import { SCHEMA_URL, SCHEMA_VERSION, SchemaFile, ValidFor } from 'pathofexile-dat-schema'
 import type { ExportConfig } from './ExportConfig.js'
 import { FileLoader } from './bundle-loaders.js'
 import { Header, getHeaderLength } from '../dat/header.js'
@@ -6,8 +6,6 @@ import { DatFile, readDatFile } from '../dat/dat-file.js'
 import { readColumn } from '../dat/reader.js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-
-let schema: SchemaFile
 
 const TRANSLATIONS = [
   { name: 'English', path: 'Data' },
@@ -30,7 +28,7 @@ export async function exportTables (
   if (!config.tables?.length) return
 
   console.log('Loading schema for dat files')
-  schema = await (await fetch(SCHEMA_URL)).json()
+  const schema = await (await fetch(SCHEMA_URL)).json()
   if (schema.version !== SCHEMA_VERSION) {
     console.error('Schema has format not compatible with this package. Check for "pathofexile-dat" updates.')
     process.exit(1)
@@ -48,7 +46,7 @@ export async function exportTables (
     for (const target of config.tables) {
       console.log(`Exporting table "${tr.path}/${target.name}"`)
       const datFile = readDatFile('.datc64', await loader.getFileContents(`${tr.path}/${target.name}.datc64`))
-      const headers = importHeaders(target.name, datFile)
+      const headers = importHeaders(target.name, datFile, config, schema)
         .filter(hdr => target.columns.includes(hdr.name))
 
       for (const column of target.columns) {
@@ -89,10 +87,18 @@ interface NamedHeader extends Header {
   name: string
 }
 
-function importHeaders (name: string, datFile: DatFile): NamedHeader[] {
+function importHeaders (
+  name: string,
+  datFile: DatFile,
+  config: ExportConfig,
+  schema: SchemaFile
+): NamedHeader[] {
   const headers = [] as NamedHeader[]
 
-  const sch = schema.tables.find(s => s.name === name)!
+  const validFor = (config.patch?.startsWith('4.') || config.steam?.includes('Path of Exile 2'))
+    ? ValidFor.PoE2
+    : ValidFor.PoE1
+  const sch = schema.tables.find(s => s.name === name && s.validFor === validFor)!
   let offset = 0
   for (const column of sch.columns) {
     headers.push({
