@@ -31,6 +31,8 @@ export class BundleLoader {
     this.patchVer = version
   }
 
+  get patchVersion () { return this.patchVer }
+
   readonly progress = computed(() => {
     return (this.state.isDownloading) ? {
       totalSize: this.state.totalSize,

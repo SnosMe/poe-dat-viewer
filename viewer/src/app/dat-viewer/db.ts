@@ -1,6 +1,6 @@
 import { openDB, type DBSchema } from 'idb'
 import { type Ref, shallowRef, triggerRef } from 'vue'
-import { type SchemaFile, SCHEMA_VERSION } from 'pathofexile-dat-schema'
+import { type SchemaFile, type SchemaTable, SCHEMA_VERSION, ValidFor } from 'pathofexile-dat-schema'
 import { fromSerializedHeaders, type Header } from './headers.js'
 import type { BundleIndex } from '@/app/patchcdn/index-store.js'
 import { readDatFile } from 'pathofexile-dat/dat.js'
@@ -61,12 +61,23 @@ export class DatSchemasDatabase {
     this._isLoading.value = false
   }
 
-  async findSchemaByName (name: string): Promise<DatSchema | null> {
-    const record = await (await this.db).get('dat-schemas', name)
-    return record ?? fromPublicSchema(name, this.publicSchema.value)
+  async findSchemaByName (name: string): Promise<DatSchema | undefined> {
+    const localSchema = await (await this.db).get('dat-schemas', name)
+    if (localSchema != null) {
+      return localSchema
+    }
+
+    const validFor = this.index.loader.patchVersion.startsWith('4.')
+      ? ValidFor.PoE2
+      : ValidFor.PoE1
+    name = name.toLowerCase()
+    const sch = this.publicSchema.value
+      .find(s => s.name.toLowerCase() === name && s.validFor === validFor)
+
+    return sch && fromPublicSchema(sch)
   }
 
-  async findByName (name: string) {
+  async findByName (name: string): Promise<ViewerSerializedHeader[]> {
     const schema = await this.findSchemaByName(name)
     return schema?.headers ?? []
   }
@@ -151,11 +162,7 @@ function serializeHeaders (headers: Header[]) {
   }))
 }
 
-function fromPublicSchema (name: string, publicSchema: SchemaFile['tables']): DatSchema | null {
-  name = name.toLowerCase()
-  const sch = publicSchema.find(s => s.name.toLowerCase() === name)
-  if (!sch) return null
-
+function fromPublicSchema (sch: SchemaTable): DatSchema {
   const headers: ViewerSerializedHeader[] = sch.columns.map(column => {
     return { /* eslint-disable @typescript-eslint/indent */
       name: column.name || '',
