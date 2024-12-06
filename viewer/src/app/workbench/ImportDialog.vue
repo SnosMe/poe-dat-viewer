@@ -22,9 +22,14 @@
             :disabled="isCdnImportRunning"
             :loading="isCdnImportRunning">{{ isCdnImportRunning ? 'Wait...' : 'Import' }}</button>
         </div>
-        <div v-if="latestPoEPatch && poePatch !== latestPoEPatch">
-          Latest PoE patch is <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch }}</code>,
-          and version <code class="px-1 border border-gray-300 rounded">{{ 'TODO' }}</code> for PoE2.
+        <div v-if="latestPoEPatch">
+          <p>
+            Latest PoE patch is <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch.poe }}</code>,
+            and version <code class="px-1 border border-gray-300 rounded">{{ latestPoEPatch.poe2 }}</code> for PoE2.
+          </p>
+          <p v-if="index.isLoaded && index.loader.patchVersion !== latestPoEPatch.poe && index.loader.patchVersion !== latestPoEPatch.poe2" class="text-red-600">
+            You can continue to work with cached files.<br>But don't delay updating the patch version, otherwise you may experience download errors.
+          </p>
         </div>
       </div>
     </div>
@@ -69,7 +74,7 @@ export default defineComponent({
     const db = inject<DatSchemasDatabase>('dat-schemas')!
 
     const poePatch = shallowRef(localStorage.getItem('POE_PATCH_VER') || '')
-    const latestPoEPatch = shallowRef('')
+    const latestPoEPatch = shallowRef<{ poe: string, poe2: string } | undefined>()
 
     if (poePatch.value && !index.isLoaded) {
       cdnImport()
@@ -106,12 +111,13 @@ export default defineComponent({
     }
 
     async function getLatestPoEPatch () {
-      const res = await fetch('https://raw.githubusercontent.com/poe-tool-dev/latest-patch-version/main/latest.txt')
-      const version = await res.text()
+      const res = await fetch('https://poe-versions.obsoleet.org')
+      const version = await res.json()
       latestPoEPatch.value = version
     }
 
     return {
+      index,
       poePatch,
       latestPoEPatch,
       isCdnImportRunning: computed(() => index.loader.progress.value != null),
