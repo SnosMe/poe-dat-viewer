@@ -159,10 +159,10 @@ export default defineComponent({
     const extensionOpts = computed(() => {
       const extensions: string[] = []
       for (const entry of tree.value) {
-        if (entry.isFile) {
-          const [_, ext] = entry.label.split('.')
-          if (ext != null && !extensions.includes(`.${ext}`)) {
-            extensions.push(`.${ext}`)
+        if (entry.isFile && entry.label.lastIndexOf('.') !== -1) {
+          const ext = entry.label.slice(entry.label.lastIndexOf('.'))
+          if (!extensions.includes(ext)) {
+            extensions.push(ext)
           }
         }
       }
