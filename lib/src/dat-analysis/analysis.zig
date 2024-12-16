@@ -57,8 +57,8 @@ fn analyzeDat(
 ) void {
   const kPtrSize = @sizeOf(SizeT);
   const kPtrSize_2 = @sizeOf(SizeT) * 2;
-  const kNull = if (@sizeOf(SizeT) == 4) 0xFEFEFEFE else 0xFEFEFEFEFEFEFEFE;
-  const kZero = if (@sizeOf(SizeT) == 4) 0x00000000 else 0x0000000000000000;
+  const kNull = if (@sizeOf(SizeT) == 4) 0xFEFEFEFE else if (@sizeOf(SizeT) == 8) 0xFEFEFEFEFEFEFEFE else 0xFEFEFEFEFEFEFEFEFEFEFEFEFEFEFEFE;
+  const kZero = if (@sizeOf(SizeT) == 4) 0x00000000 else if (@sizeOf(SizeT) == 8) 0x0000000000000000 else 0x00000000000000000000000000000000;
   const kNullStart = 0xFE;
   const kStrTerminatorSize = 4;
   const rowLength = stats.len;
