@@ -78,12 +78,18 @@ export function readIndexBundle (indexBundle: Uint8Array) {
   }
 }
 
-export function getFileInfo (path: string, bundlesInfo: Uint8Array, filesInfo: Uint8Array) {
+interface FileInfo {
+  bundle: string
+  offset: number
+  size: number
+}
+
+export function getFileInfo (path: string, bundlesInfo: Uint8Array, filesInfo: Uint8Array): FileInfo | null {
   const hash = murmur64a(path.toLowerCase())
 
   const structOffset = findSequence(filesInfo, hash)
   if (structOffset === -1) {
-    throw new Error('never')
+    return null
   }
 
   const filesReader = new DataView(filesInfo.buffer, filesInfo.byteOffset, filesInfo.byteLength)

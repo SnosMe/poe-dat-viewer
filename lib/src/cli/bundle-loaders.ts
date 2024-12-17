@@ -38,8 +38,18 @@ export class FileLoader {
     return bundleBin
   }
 
-  async getFileContents (fullPath: string) {
+  async getFileContents (fullPath: string): Promise<Uint8Array> {
+    const contents = await this.tryGetFileContents(fullPath)
+    if (!contents) {
+      throw new Error(`File no longer exists: ${fullPath}`)
+    }
+    return contents
+  }
+
+  async tryGetFileContents (fullPath: string): Promise<Uint8Array | null> {
     const location = getFileInfo(fullPath, this.index.bundlesInfo, this.index.filesInfo)
+    if (!location) return null
+
     const bundleBin = await this.fetchBundle(location.bundle)
     return decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
   }

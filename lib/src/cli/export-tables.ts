@@ -19,6 +19,7 @@ const TRANSLATIONS = [
   { name: 'Thai', path: 'Data/Thai' },
   { name: 'Traditional Chinese', path: 'Data/Traditional Chinese' }
 ]
+const TRANSLATIONS_NONE = TRANSLATIONS[0]
 
 export async function exportTables (
   config: ExportConfig,
@@ -45,7 +46,9 @@ export async function exportTables (
     loader.clearBundleCache()
     for (const target of config.tables) {
       console.log(`Exporting table "${tr.path}/${target.name}"`)
-      const datFile = readDatFile('.datc64', await loader.getFileContents(`${tr.path}/${target.name}.datc64`))
+      const datFile = readDatFile('.datc64',
+        await loader.tryGetFileContents(`${tr.path}/${target.name}.datc64`) ??
+        await loader.getFileContents(`${TRANSLATIONS_NONE.path}/${target.name}.datc64`))
       const headers = importHeaders(target.name, datFile, config, schema)
         .filter(hdr => target.columns.includes(hdr.name))
 
