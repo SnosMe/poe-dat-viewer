@@ -19,6 +19,7 @@ const TRANSLATIONS = [
   { name: 'Thai', path: 'Data/Thai' },
   { name: 'Traditional Chinese', path: 'Data/Traditional Chinese' }
 ]
+const TRANSLATIONS_NONE = TRANSLATIONS[0]
 
 export async function exportTables (
   config: ExportConfig,
@@ -45,7 +46,9 @@ export async function exportTables (
     loader.clearBundleCache()
     for (const target of config.tables) {
       console.log(`Exporting table "${tr.path}/${target.name}"`)
-      const datFile = readDatFile('.datc64', await loader.getFileContents(`${tr.path}/${target.name}.datc64`))
+      const datFile = readDatFile('.datc64',
+        await loader.tryGetFileContents(`${tr.path}/${target.name}.datc64`) ??
+        await loader.getFileContents(`${TRANSLATIONS_NONE.path}/${target.name}.datc64`))
       const headers = importHeaders(target.name, datFile, config, schema)
         .filter(hdr => target.columns.includes(hdr.name))
 
@@ -108,11 +111,11 @@ function importHeaders (
         array: column.array,
         integer:
           // column.type === 'u8' ? { unsigned: true, size: 1 }
-          // : column.type === 'u16' ? { unsigned: true, size: 2 }
-          // : column.type === 'u32' ? { unsigned: true, size: 4 }
+          column.type === 'u16' ? { unsigned: true, size: 2 }
+          : column.type === 'u32' ? { unsigned: true, size: 4 }
           // : column.type === 'u64' ? { unsigned: true, size: 8 }
           // : column.type === 'i8' ? { unsigned: false, size: 1 }
-          column.type === 'i16' ? { unsigned: false, size: 2 }
+          : column.type === 'i16' ? { unsigned: false, size: 2 }
           : column.type === 'i32' ? { unsigned: false, size: 4 }
           // : column.type === 'i64' ? { unsigned: false, size: 8 }
           : column.type === 'enumrow' ? { unsigned: false, size: 4 }

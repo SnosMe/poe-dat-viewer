@@ -173,11 +173,11 @@ function fromPublicSchema (sch: SchemaTable): DatSchema {
           : undefined,
         integer:
           // column.type === 'u8' ? { unsigned: true, size: 1 }
-          // : column.type === 'u16' ? { unsigned: true, size: 2 }
-          // : column.type === 'u32' ? { unsigned: true, size: 4 }
+          column.type === 'u16' ? { unsigned: true, size: 2 }
+          : column.type === 'u32' ? { unsigned: true, size: 4 }
           // : column.type === 'u64' ? { unsigned: true, size: 8 }
           // : column.type === 'i8' ? { unsigned: false, size: 1 }
-          column.type === 'i16' ? { unsigned: false, size: 2 }
+          : column.type === 'i16' ? { unsigned: false, size: 2 }
           : column.type === 'i32' ? { unsigned: false, size: 4 }
           // : column.type === 'i64' ? { unsigned: false, size: 8 }
           : column.type === 'enumrow' ? { unsigned: false, size: 4 }
