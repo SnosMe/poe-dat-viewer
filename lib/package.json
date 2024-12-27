@@ -1,26 +1,26 @@
 {
-  "name": "pathofexile-dat",
-  "version": "13.0.0",
-  "type": "module",
-  "bin": "./dist/cli/run.js",
-  "exports": {
-    "./bundles.js": "./dist/bundles.js",
-    "./dat.js": "./dist/dat.js"
-  },
-  "files": ["dist/**/*"],
-  "license": "MIT",
-  "repository": {
-    "url": "https://github.com/SnosMe/poe-dat-viewer"
-  },
-  "dependencies": {
-    "ooz-wasm": "^2.0.0",
-    "pathofexile-dat-schema": "^7.0.0"
-  },
-  "devDependencies": {
-    "@types/node": "^18.0.0",
-    "typescript": "^5.2.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
-  }
+	"name": "pathofexile-dat",
+	"version": "13.0.0",
+	"type": "module",
+	"bin": "./dist/cli/run.js",
+	"exports": {
+		"./bundles.js": "./dist/bundles.js",
+		"./dat.js": "./dist/dat.js"
+	},
+	"files": ["dist/**/*"],
+	"license": "MIT",
+	"repository": {
+		"url": "https://github.com/SnosMe/poe-dat-viewer"
+	},
+	"dependencies": {
+		"ooz-wasm": "^2.0.0",
+		"pathofexile-dat-schema": "latest"
+	},
+	"devDependencies": {
+		"@types/node": "^18.0.0",
+		"typescript": "^5.2.0"
+	},
+	"engines": {
+		"node": ">=18.0.0"
+	}
 }
