@@ -109,6 +109,7 @@ export class DatSchemasDatabase {
       name: string
       files: Array<{ fullPath: string, location: { offset: number, size: number } }>
     }>>((byBundle, location, idx) => {
+      if (!location) throw new Error('never')
       const found = byBundle.find(bundle => bundle.name === location.bundle)
       const fullPath = filePaths[idx]
       if (found) {
@@ -163,44 +164,57 @@ function serializeHeaders (headers: Header[]) {
 }
 
 function fromPublicSchema (sch: SchemaTable): DatSchema {
-  const headers: ViewerSerializedHeader[] = sch.columns.map(column => {
-    return { /* eslint-disable @typescript-eslint/indent */
-      name: column.name || '',
-      type: {
-        array: column.array,
-        byteView:
-          column.type === 'array' ? { array: true }
-          : undefined,
-        integer:
-          // column.type === 'u8' ? { unsigned: true, size: 1 }
-          column.type === 'u16' ? { unsigned: true, size: 2 }
-          : column.type === 'u32' ? { unsigned: true, size: 4 }
-          // : column.type === 'u64' ? { unsigned: true, size: 8 }
-          // : column.type === 'i8' ? { unsigned: false, size: 1 }
-          : column.type === 'i16' ? { unsigned: false, size: 2 }
-          : column.type === 'i32' ? { unsigned: false, size: 4 }
-          // : column.type === 'i64' ? { unsigned: false, size: 8 }
-          : column.type === 'enumrow' ? { unsigned: false, size: 4 }
-          : undefined,
-        decimal:
-          column.type === 'f32' ? { size: 4 }
-          // : column.type === 'f64' ? { size: 8 }
-          : undefined,
-        string:
-          column.type === 'string' ? {}
-          : undefined,
-        boolean:
-          column.type === 'bool' ? {}
-          : undefined,
-        key:
-          (column.type === 'row' || column.type === 'foreignrow') ? {
-            foreign: (column.type === 'foreignrow'),
-            table: column.references?.table ?? null,
-            viewColumn: null
-          }
-          : undefined
-      },
-      textLength: 4 * 3 - 1
+  const headers = sch.columns.flatMap<ViewerSerializedHeader>(column => {
+    const type: ViewerSerializedHeader['type'] = { /* eslint-disable @typescript-eslint/indent */
+      array: column.array,
+      byteView:
+        column.type === 'array' ? { array: true }
+        : undefined,
+      integer:
+        // column.type === 'u8' ? { unsigned: true, size: 1 }
+        column.type === 'u16' ? { unsigned: true, size: 2 }
+        : column.type === 'u32' ? { unsigned: true, size: 4 }
+        // : column.type === 'u64' ? { unsigned: true, size: 8 }
+        // : column.type === 'i8' ? { unsigned: false, size: 1 }
+        : column.type === 'i16' ? { unsigned: false, size: 2 }
+        : column.type === 'i32' ? { unsigned: false, size: 4 }
+        // : column.type === 'i64' ? { unsigned: false, size: 8 }
+        : column.type === 'enumrow' ? { unsigned: false, size: 4 }
+        : undefined,
+      decimal:
+        column.type === 'f32' ? { size: 4 }
+        // : column.type === 'f64' ? { size: 8 }
+        : undefined,
+      string:
+        column.type === 'string' ? {}
+        : undefined,
+      boolean:
+        column.type === 'bool' ? {}
+        : undefined,
+      key:
+        (column.type === 'row' || column.type === 'foreignrow') ? {
+          foreign: (column.type === 'foreignrow'),
+          table: column.references?.table ?? null,
+          viewColumn: null
+        }
+        : undefined
+    }
+    if (column.interval) {
+      return [{
+        name: (column.name) ? `${column.name}[0]` : '',
+        type,
+        textLength: 4 * 3 - 1
+      }, {
+        name: (column.name) ? `${column.name}[1]` : '',
+        type,
+        textLength: 4 * 3 - 1
+      }]
+    } else {
+      return [{
+        name: column.name || '',
+        type,
+        textLength: 4 * 3 - 1
+      }]
     }
   })
 
