@@ -102,22 +102,30 @@ export function getFieldReader (header: Header, datFile: DatFile) {
     oneFn = (type.key.foreign) ? oneKeyForeign : oneKeySelf
   }
 
-  if (!type.array) {
-    return function readScalarAtRow (rowIdx: number): Scalar {
-      const offset = (rowIdx * datFile.rowLength) + header.offset
-      return oneFn(datFile.readerFixed, offset, datFile.dataVariable)
-    }
-  } else {
+  if (type.array) {
     return function readArrayAtRow (rowIdx: number): Scalar[] {
       const offset = (rowIdx * datFile.rowLength) + header.offset
       return readMany(datFile, offset, oneFn, elSize)
+    }
+  } else if (type.interval) {
+    return function readIntervalAtRow (rowIdx: number): [Scalar, Scalar] {
+      const offset = (rowIdx * datFile.rowLength) + header.offset
+      return [
+        oneFn(datFile.readerFixed, offset + 0, datFile.dataVariable),
+        oneFn(datFile.readerFixed, offset + elSize, datFile.dataVariable)
+      ]
+    }
+  } else {
+    return function readScalarAtRow (rowIdx: number): Scalar {
+      const offset = (rowIdx * datFile.rowLength) + header.offset
+      return oneFn(datFile.readerFixed, offset, datFile.dataVariable)
     }
   }
 }
 
 export function readColumn (header: Header, datFile: DatFile) {
   const reader = getFieldReader(header, datFile)
-  const out: Array<Scalar | Scalar[]> = []
+  const out: Array<Scalar | Scalar[] | [Scalar, Scalar]> = []
   for (let rowIdx = 0; rowIdx < datFile.rowCount; ++rowIdx) {
     out.push(reader(rowIdx))
   }
