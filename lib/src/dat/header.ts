@@ -4,6 +4,7 @@ export interface Header {
   offset: number
   type: {
     array?: boolean
+    interval?: boolean
     boolean?: {}
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
@@ -12,9 +13,10 @@ export interface Header {
   }
 }
 
-export function getHeaderLength (header: Pick<Header, 'type'>, datFile: DatFile) {
+export function getHeaderLength (header: Pick<Header, 'type'>, datFile: DatFile): number {
   const { type } = header
   const { fieldSize } = datFile
+  const count = (type.interval) ? 2 : 1
 
   if (type.array) {
     return fieldSize.ARRAY
@@ -23,9 +25,9 @@ export function getHeaderLength (header: Pick<Header, 'type'>, datFile: DatFile)
   } else if (type.key) {
     return type.key.foreign ? fieldSize.KEY_FOREIGN : fieldSize.KEY
   } else if (type.integer) {
-    return type.integer.size
+    return type.integer.size * count
   } else if (type.decimal) {
-    return type.decimal.size
+    return type.decimal.size * count
   } else if (type.boolean) {
     return fieldSize.BOOL
   }

@@ -109,6 +109,7 @@ function importHeaders (
       offset,
       type: {
         array: column.array,
+        interval: column.interval,
         integer:
           // column.type === 'u8' ? { unsigned: true, size: 1 }
           column.type === 'u16' ? { unsigned: true, size: 2 }

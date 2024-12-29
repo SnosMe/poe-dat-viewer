@@ -36,6 +36,7 @@ export class BundleIndex {
   async loadFileContent (fullPath: string) {
     const { bundlesInfo, filesInfo } = this.index.value!
     const location = getFileInfo(fullPath, bundlesInfo, filesInfo)
+    if (!location) throw new Error('never')
     const bundleBin = await this.loader.fetchFile(location.bundle)
 
     const { slice } = await decompressFileInBundle(bundleBin.slice(0), location.offset, location.size)
