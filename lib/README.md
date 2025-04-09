@@ -16,10 +16,12 @@ Create a `config.json` in it:
 
 ```jsonc
 {
+  // Don't copy lines starting with // as this will cause an error
+
   // Game data will be downloaded from PoE update servers.
   // Latest version can be found by visiting https://raw.githubusercontent.com/poe-tool-dev/latest-patch-version/main/latest.txt
   // Remove if you want to use Steam installation directory.
-  "patch": "3.20.1.1",
+  "patch": "3.25.3.7",
 
   // Self-explanatory. Not required if you have provided "patch" above.
   "steam": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Path of Exile",
@@ -27,7 +29,8 @@ Create a `config.json` in it:
   // Files to export
   "files": [
     // exported as-is
-    "Metadata/StatDescriptions/stat_descriptions.txt",
+    "metadata/items/item.it",
+    "Metadata/StatDescriptions/stat_descriptions.csd"
 
     // images from sprites are exported as PNG
     // you will need to install ImageMagick for this to work
