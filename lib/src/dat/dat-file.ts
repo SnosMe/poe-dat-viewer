@@ -60,7 +60,7 @@ function findAlignedSequence (data: Uint8Array, sequence: number[], elementCount
     const idx = findSequence(data, sequence, fromIndex)
     if (idx === -1) return -1
 
-    if (idx % elementCount === 0) {
+    if (elementCount === 0 || idx % elementCount === 0) {
       return idx
     } else {
       fromIndex = idx + 1
