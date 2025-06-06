@@ -28,16 +28,16 @@ export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFi
   const fileReader = new DataView(file.buffer)
 
   const rowCount = fileReader.getUint32(0, true)
-  const boundary = findSequence(file, VDATA_MAGIC)
+  const boundary = findAlignedSequence(file.subarray(INT_ROWCOUNT), VDATA_MAGIC, rowCount)
   if (boundary === -1) {
     throw new Error('Invalid file: section with variable data not found.')
   }
   const rowLength = rowCount > 0
-    ? (boundary - INT_ROWCOUNT) / rowCount
+    ? boundary / rowCount
     : 0
 
-  const dataFixed = file.subarray(INT_ROWCOUNT, boundary)
-  const dataVariable = file.subarray(boundary)
+  const dataFixed = file.subarray(INT_ROWCOUNT, INT_ROWCOUNT + boundary)
+  const dataVariable = file.subarray(INT_ROWCOUNT + boundary)
 
   const readerFixed = new DataView(dataFixed.buffer, dataFixed.byteOffset, dataFixed.byteLength)
   const readerVariable = new DataView(dataVariable.buffer, dataVariable.byteOffset, dataVariable.byteLength)
@@ -51,5 +51,19 @@ export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFi
     readerFixed,
     readerVariable,
     fieldSize: FIELD_SIZE
+  }
+}
+
+function findAlignedSequence (data: Uint8Array, sequence: number[], elementCount: number): number {
+  let fromIndex = 0
+  for (;;) {
+    const idx = findSequence(data, sequence, fromIndex)
+    if (idx === -1) return -1
+
+    if (idx % elementCount === 0) {
+      return idx
+    } else {
+      fromIndex = idx + 1
+    }
   }
 }
