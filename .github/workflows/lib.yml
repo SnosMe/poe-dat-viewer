@@ -34,7 +34,7 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 22
-    - run: npm ci
+    - run: npm install
       working-directory: lib
     - run: npx tsc
       working-directory: lib

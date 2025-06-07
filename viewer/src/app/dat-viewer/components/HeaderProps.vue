@@ -62,10 +62,12 @@
         <div class="mb-4" v-if="header.type.key">
           <label for="datv-header-key-table">Table</label>
           <select id="datv-header-key-table" class="border mt-1 w-full focus:border-blue-500"
+            :disabled="tablesPreloadNeeded()"
             v-model="header.type.key.table">
             <option v-for="opt of keyTableOpts" :key="opt.label"
               :value="opt.value">{{ opt.label }}</option>
           </select>
+          <div v-if="tablesPreloadNeeded()" class="italic mt-2">(pre-load all Data Tables to change)</div>
         </div>
         <hr class="my-6">
         <div class="mb-4" v-if="keyDisplayColumnOpts.length">
@@ -80,7 +82,8 @@
           <label class="mr-4">Width</label>
           <input v-model.number="header.textLength"
             class="border w-16 text-center"> chars
-          <div class="italic mt-2">(move mouse over the column name in Viewer and use `ScrollWheel`, hold `Ctrl` to increase resize step)</div>
+          <div class="italic mt-2">(move mouse over the column name in Viewer and use `ScrollWheel`,
+            hold `Ctrl` to increase resize step)</div>
         </div>
       </div>
     </div>
@@ -397,6 +400,9 @@ export default defineComponent({
       viewModeOpts,
       keyTableOpts,
       keyDisplayColumnOpts,
+      tablesPreloadNeeded: () => (headerRef.value.type.key != null)
+        ? headerRef.value.type.key.foreign && !db.tableStats.length
+        : false,
       dataTypeOpts: computed(() =>
         dataTypeOpts(headerRef.value, stats.value, viewer.datFile)),
       arrayTypeOpts: computed(() =>

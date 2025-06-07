@@ -13,7 +13,7 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: npm ci
+    - run: npm install
       working-directory: viewer
     - run: npm run build "--" --base /poe-dat-viewer/
       working-directory: viewer
