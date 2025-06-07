@@ -4,7 +4,7 @@ Path of Exile .dat file viewer
 
 https://snosme.github.io/poe-dat-viewer
 
-- Supports .dat and .dat64
+- Supports .datc64 files from PoE1 & PoE2
 - Can upload file from PC or import from PoE patch server
 - Performs file analysis to find possible columns
 
@@ -18,6 +18,6 @@ Visit another [README.md file](./lib/README.md) in the lib directory.
 
 | Name | Language |
 |------|----------|
-| [PyPoE](https://github.com/OmegaK2/PyPoE) | Python |
+| [PyPoE](https://github.com/Project-Path-of-Exile-Wiki/PyPoE) | Python |
 | [pogo](https://github.com/oriath-net/pogo) | Go |
-| [libggpk](https://github.com/MuxaJIbI4/libggpk) | C# |
+| [LibGGPK3](https://github.com/aianlinb/LibGGPK3) | C# |

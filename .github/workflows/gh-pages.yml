@@ -13,9 +13,9 @@ jobs:
     - uses: actions/setup-node@v3
       with:
         node-version: 18
-    - run: yarn
+    - run: npm ci
       working-directory: viewer
-    - run: yarn build --base /poe-dat-viewer/
+    - run: npm run build "--" --base /poe-dat-viewer/
       working-directory: viewer
     - name: Publish
       uses: peaceiris/actions-gh-pages@v3

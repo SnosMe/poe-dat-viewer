@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "lint": "eslint --ext .ts,.vue src",
-    "build": "yarn lint && vue-tsc --noEmit && vite build",
+    "build": "npm run lint && vue-tsc --noEmit && vite build",
     "serve": "vite preview"
   },
   "dependencies": {
