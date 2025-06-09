@@ -16,7 +16,7 @@ export interface DatFile {
   fieldSize: typeof FIELD_SIZE
 }
 
-export function readDatFile (filenameOrExt: string, content: ArrayBuffer): DatFile {
+export function readDatFile (filenameOrExt: string, content: ArrayBufferLike): DatFile {
   if (content.byteLength < MIN_FILE_SIZE) {
     throw new Error('Invalid file size.')
   }
