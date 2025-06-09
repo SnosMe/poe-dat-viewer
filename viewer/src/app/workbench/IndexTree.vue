@@ -47,7 +47,7 @@
 <script lang="ts">
 import { defineComponent, shallowRef, computed, inject } from 'vue'
 import FileSaver from 'file-saver'
-import VirtualScroll, { VirtualScrollT } from '@/VirtualScroll.vue'
+import VirtualScroll, { type VirtualScrollT } from '@/VirtualScroll.vue'
 import { openTab, activeTabId, hasTabId, setActiveTab } from './workbench-core.js'
 import type { BundleIndex } from '@/app/patchcdn/index-store.js'
 import DatViewer from '../dat-viewer/components/DatViewer.vue'

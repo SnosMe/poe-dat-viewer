@@ -55,8 +55,8 @@
 <script lang="ts">
 import { toggleColsBetween } from '../selection.js'
 import { sortRows } from '../sorting.js'
-import { defineComponent, inject, shallowRef, computed, triggerRef, PropType } from 'vue'
-import { saveHeaders, Viewer } from '../Viewer.js'
+import { defineComponent, inject, shallowRef, computed, triggerRef, type PropType } from 'vue'
+import { saveHeaders, type Viewer } from '../Viewer.js'
 import * as rendering from '../rendering.js'
 import { renderHeaderCols } from '../rendering/header-columns.js'
 import type { RenderByte } from '../rendering/byte-columns.js'

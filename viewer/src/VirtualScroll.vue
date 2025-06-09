@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, shallowReactive, ref, PropType } from 'vue'
+import { defineComponent, computed, shallowReactive, ref, type PropType } from 'vue'
 import ResizeObserver from './ResizeObserver.vue'
 import CanvasScroll from './CanvasScroll.vue'
 

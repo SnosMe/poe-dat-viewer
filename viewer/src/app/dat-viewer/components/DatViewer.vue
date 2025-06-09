@@ -32,10 +32,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed, provide, watch, ref, onMounted, inject, EffectScope } from 'vue'
+import { defineComponent, type PropType, computed, provide, watch, ref, onMounted, inject, EffectScope } from 'vue'
 import ResizeObserver from '@/ResizeObserver.vue'
 import CanvasScroll from '@/CanvasScroll.vue'
-import { Viewer, createViewer } from '../Viewer.js'
+import { type Viewer, createViewer } from '../Viewer.js'
 import ViewerActions from './Actions.vue'
 import ViewerHead from './ViewerHead.vue'
 import HeaderProps from './HeaderProps.vue'
@@ -71,7 +71,7 @@ export default defineComponent({
 
     let viewer: Viewer
     if (props.kaState) {
-      viewer = props.kaState // eslint-disable-line vue/no-setup-props-destructure
+      viewer = props.kaState // eslint-disable-line vue/no-setup-props-reactivity-loss
     } else {
       viewer = createViewer(props.args.fullPath, props.args.fileContent, index, db, props.kaScope)
       ctx.emit('update:kaState', viewer)

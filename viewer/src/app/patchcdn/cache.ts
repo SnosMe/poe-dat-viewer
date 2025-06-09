@@ -18,7 +18,7 @@ export class BundleLoader {
     console.debug(`[Bundle] garbage-collected, name: "${name}"`)
   })
 
-  private readonly weakCache = new ExpiryMap<string, ArrayBuffer>(20 * 1000)
+  private readonly weakCache = new ExpiryMap<string, ArrayBufferLike>(20 * 1000)
 
   async setPatch (version: string) {
     if (this.state.active) {
@@ -41,7 +41,7 @@ export class BundleLoader {
     } : null
   })
 
-  async fetchFile (name: string): Promise<ArrayBuffer> {
+  async fetchFile (name: string): Promise<ArrayBufferLike> {
     let bundle = this.weakCache.get(name)
     if (bundle && bundle.byteLength !== 0) {
       console.log(`[Bundle] name: "${name}", source: memory.`)
@@ -71,7 +71,7 @@ export class BundleLoader {
     }
   }
 
-  private async _fetchFile (name: string): Promise<ArrayBuffer> {
+  private async _fetchFile (name: string): Promise<ArrayBufferLike> {
     const { state, patchVer } = this
     const path = `${patchVer}/${BUNDLE_DIR}/${name}`
     const cache = await window.caches.open('bundles')

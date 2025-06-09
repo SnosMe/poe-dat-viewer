@@ -83,7 +83,7 @@ export function renderCellContent (
   if (referenced?.header.type.array) {
     throw new Error('Can\'t show array of arrays.')
   }
-  type ReadReferencedReturn = (rowIdx: number) => Exclude<ReturnType<ReturnType<typeof getFieldReader>>, any[]>
+  type ReadReferencedReturn = (rowIdx: number) => Exclude<ReturnType<ReturnType<typeof getFieldReader>>, unknown[]>
   const readReferenced = referenced && getFieldReader(referenced.header, referenced.datFile) as ReadReferencedReturn
 
   const draw: StringifyOut = { text: '', color: '' }

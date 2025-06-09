@@ -9,10 +9,10 @@ export interface Header {
   type: {
     byteView?: { array: boolean }
     array?: boolean
-    boolean?: Record<any, never>
+    boolean?: Record<string, never>
     integer?: { unsigned: boolean, size: number }
     decimal?: { size: number }
-    string?: Record<any, never>
+    string?: Record<string, never>
     key?: { foreign: boolean, table: string | null, viewColumn: string | null }
   }
   textLength?: number

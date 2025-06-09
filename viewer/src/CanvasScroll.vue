@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, shallowReactive, computed, Ref, PropType, readonly, watch } from 'vue'
+import { defineComponent, shallowReactive, computed, type Ref, type PropType, readonly, watch } from 'vue'
 
 const MIN_THUMB_SIZE = 40
 const SCROLL_DIR_THRESHOLD = 15

@@ -43,7 +43,7 @@ function getTableFromCache (path: string, index: BundleIndex, db: DatSchemasData
 
 async function loadFromFile (path: string, index: BundleIndex, db: DatSchemasDatabase) {
   const fileContent = await index.loadFileContent(path)
-  const datFile = readDatFile(path, fileContent)
+  const datFile = readDatFile(path, fileContent.buffer)
   const columnStats = await analyzeDatFile(datFile)
   const serialized = await db.findByName(getNamePart(path))
   const headers = fromSerializedHeaders(serialized, columnStats, datFile)
@@ -62,7 +62,7 @@ export function createViewer (
   db: DatSchemasDatabase,
   scope: EffectScope
 ): Viewer {
-  const parsed = readDatFile(path, fileContent)
+  const parsed = readDatFile(path, fileContent.buffer)
 
   const viewer: Viewer = {
     headers: shallowRef(

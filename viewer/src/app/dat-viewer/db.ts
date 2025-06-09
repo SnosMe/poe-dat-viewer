@@ -129,7 +129,7 @@ export class DatSchemasDatabase {
         const res = await decompressFileInBundle(bundleBin, location.offset, location.size)
         bundleBin = res.bundle
 
-        const datFile = readDatFile(fullPath, res.slice)
+        const datFile = readDatFile(fullPath, res.slice.buffer)
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
         const name = fullPath.replace('data/', '').replace('.datc64', '')
 
@@ -165,7 +165,7 @@ function serializeHeaders (headers: Header[]) {
 
 function fromPublicSchema (sch: SchemaTable): DatSchema {
   const headers = sch.columns.flatMap<ViewerSerializedHeader>(column => {
-    const type: ViewerSerializedHeader['type'] = { /* eslint-disable @typescript-eslint/indent */
+    const type: ViewerSerializedHeader['type'] = {
       array: column.array,
       byteView:
         column.type === 'array' ? { array: true }

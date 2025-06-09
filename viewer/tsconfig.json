@@ -1,31 +1,17 @@
 {
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
-    "target": "esnext",
-    "useDefineForClassFields": true,
-    "module": "esnext",
-    "strict": true,
-    "jsx": "preserve",
-    "moduleResolution": "NodeNext",
     "baseUrl": ".",
-    "sourceMap": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["ES2020", "ES2021.WeakRef", "DOM"],
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     "types": [
       "vite/client"
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "src/**/*.d.ts"
+    "src/**/*",
+    "src/**/*.vue"
   ]
 }

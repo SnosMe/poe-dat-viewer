@@ -5,13 +5,13 @@ import type { DatFile } from 'pathofexile-dat/dat.js'
 
 const thread = Comlink.wrap<WorkerRPC>(new Worker())
 
-export async function decompressBundle (bundle: ArrayBuffer) {
+export async function decompressBundle (bundle: ArrayBufferLike) {
   return await thread.decompressSliceInBundle(
     Comlink.transfer(bundle, [bundle])
   )
 }
 
-export async function decompressFileInBundle (bundle: ArrayBuffer, offset: number, size: number) {
+export async function decompressFileInBundle (bundle: ArrayBufferLike, offset: number, size: number) {
   return await thread.decompressSliceInBundle(
     Comlink.transfer(bundle, [bundle]),
     offset,

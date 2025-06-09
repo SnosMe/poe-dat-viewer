@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, computed } from 'vue'
-import { Header } from '../headers.js'
+import { defineComponent, type PropType, computed } from 'vue'
+import { type Header } from '../headers.js'
 
 export default defineComponent({
   props: {

@@ -91,10 +91,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, computed, triggerRef, reactive, watch, WatchStopHandle, shallowRef } from 'vue'
-import { Header, removeHeader } from '../headers.js'
-import { Viewer, saveHeaders } from '../Viewer.js'
-import { DatFile, readColumn, ColumnStats } from 'pathofexile-dat/dat.js'
+import { defineComponent, inject, computed, triggerRef, reactive, watch, type WatchStopHandle, shallowRef } from 'vue'
+import { type Header, removeHeader } from '../headers.js'
+import { type Viewer, saveHeaders } from '../Viewer.js'
+import { type DatFile, readColumn, type ColumnStats } from 'pathofexile-dat/dat.js'
 import { HEADERS_HEIGHT } from '../rendering.js'
 import type { DatSchemasDatabase, ViewerSerializedHeader } from '@/app/dat-viewer/db.js'
 import { foreignTableSuggestions } from './foreignTableSuggestions.js'
