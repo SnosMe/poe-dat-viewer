@@ -289,4 +289,57 @@ export default defineComponent({
   contain: strict;
   @apply bg-gray-100;
 }
+
+:root[data-theme="dark"] .datv-header-layer {
+  background: var(--color-surface-alt);
+}
+:root[data-theme="dark"] .datv-col--border {
+  border-color: var(--color-border-strong);
+}
+:root[data-theme="dark"] .datv-header {
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] .datv-header:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+}
+:root[data-theme="dark"] .datv-header.datv-header--active {
+  background: var(--color-selection-strong);
+  color: var(--color-text-inverse);
+}
+:root[data-theme="dark"] .datv-byte {
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] .datv-byte:hover {
+  background: var(--color-selection-soft);
+  color: var(--color-text);
+}
+:root[data-theme="dark"] .datv-byte.datv-byte--selected {
+  background: var(--color-selection-strong);
+  color: var(--color-text-inverse);
+}
+:root[data-theme="dark"] .datv-byte.datv-byte--selected.datv-col--border,
+:root[data-theme="dark"] .datv-byte.datv-byte--selected + .datv-byte.datv-col--border {
+  border-color: var(--color-border-strong);
+}
+:root[data-theme="dark"] .datv-stat {
+  color: var(--color-text-muted);
+}
+:root[data-theme="dark"] .datv-stat.datv-byte--selected {
+  background: var(--color-selection-soft);
+}
+:root[data-theme="dark"] .datv-stat.datv-byte--selected.datv-col--border,
+:root[data-theme="dark"] .datv-stat.datv-byte--selected + .datv-stat.datv-col--border {
+  border-color: var(--color-border-strong);
+}
+:root[data-theme="dark"] .datv-stats_row:hover > .datv-stat {
+  background: var(--color-hover);
+}
+:root[data-theme="dark"] .datv-stat__max {
+  color: var(--color-text-inverse);
+  text-shadow: none;
+}
+:root[data-theme="dark"] .datv-stat__line {
+  opacity: 0.9;
+}
 </style>

@@ -13,20 +13,20 @@
         type="search" spellcheck="false">
     </div>
     <template v-if="showTree">
-      <div class="flex gap-x-1 border-b pb-1.5 px-2 justify-end">
+      <div :class="['flex gap-x-1 pb-1.5 px-2 justify-end', $style.filterBar]">
         <span v-if="!extensionOpts.length">No files with extensions</span>
         <button v-for="opt in extensionOpts" :key="opt.value"
           @click="opt.handleClick"
-          :class="['px-2', (opt.active ? 'bg-gray-200' : 'hover:bg-gray-100') ]"
+          :class="['px-2', $style.filterBtn, (opt.active ? $style.filterActive : $style.filterIdle) ]"
           v-text="opt.value" />
       </div>
       <div v-if="!isIndexLoaded"
-        class="italic text-center text-gray-500 p-2">Waiting for Index bundle...</div>
+        class="italic text-center text-muted p-2">Waiting for Index bundle...</div>
       <div v-if="isIndexLoaded && !tree.length"
-        class="italic text-center text-gray-500 p-2">No results found</div>
+        class="italic text-center text-muted p-2">No results found</div>
       <virtual-scroll
         class="flex-1"
-        :scrollable-props="{ style: 'background: #fff;', widthY: 10 }"
+        :scrollable-props="{ style: 'background: var(--color-surface);', widthY: 10 }"
         :items="tree"
         :item-height="22"
       >
@@ -207,20 +207,22 @@ export default defineComponent({
   line-height: 1;
 
   &:hover {
-    @apply bg-gray-100;
+    background: var(--color-hover);
   }
 }
 
 .searchInput {
   @apply h-7;
-  @apply border;
+  border: 1px solid var(--color-border);
   box-sizing: content-box;
   @apply flex-1;
   @apply mx-1;
   @apply px-1 py-px;
+  background: var(--color-surface);
+  color: var(--color-text);
 
   &:focus {
-    @apply border-blue-500;
+    border-color: var(--color-selection-strong);
   }
 }
 
@@ -233,14 +235,42 @@ export default defineComponent({
   width: 100%;
   display: flex;
   align-items: center;
+  color: var(--color-text);
+  background: transparent;
 
   &:hover {
-    @apply bg-gray-100;
+    background: var(--color-hover);
   }
 
   &.active {
-    @apply bg-blue-600;
-    @apply text-white;
+    background: var(--color-selection-strong);
+    color: var(--color-text-inverse);
   }
+}
+
+.filterBtn {
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--color-text-muted);
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--color-hover);
+    color: var(--color-text);
+  }
+}
+
+.filterActive {
+  background: var(--color-selection-soft);
+  color: var(--color-text);
+}
+
+.filterIdle {
+  background: transparent;
+}
+
+.filterBar {
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
 }
 </style>

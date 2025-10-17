@@ -35,10 +35,15 @@ export default defineComponent({
   bottom: 0;
   right: 0;
   width: 20rem;
-  @apply bg-gray-50;
+  background: var(--color-surface);
   @apply m-6;
-  @apply shadow;
-  @apply border;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--color-border);
   @apply text-base;
+  color: var(--color-text);
+
+  :global([data-theme="dark"]) & {
+    box-shadow: 0 10px 25px rgba(2, 6, 23, 0.4);
+  }
 }
 </style>

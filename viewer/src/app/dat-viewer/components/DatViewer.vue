@@ -2,7 +2,7 @@
   <viewer-actions />
   <div class="flex flex-1">
     <resize-observer @resize="handleResize" class="flex-1 min-h-0 relative">
-      <div class="bg-gray-100 absolute" :style="headerBlockStyle">
+      <div :class="[$style.headerBlock, 'absolute']" :style="headerBlockStyle">
         <viewer-head :style="headerOverlayContentStyle"
           :left="scrollLeft"
           :width="rowsWidth"
@@ -11,7 +11,7 @@
       </div>
       <canvas-scroll
         ref="canvasScroll"
-        class="absolute bg-white"
+        :class="[$style.canvasSurface, 'absolute']"
         @scroll="handleScroll"
         :style="scrollableStyle"
         :paint-size="scrollablePaintSize"
@@ -44,6 +44,7 @@ import { renderByteCols, renderColStats } from '../rendering/byte-columns.js'
 import { renderHeaderCols } from '../rendering/header-columns.js'
 import type { BundleIndex } from '@/app/patchcdn/index-store.js'
 import type { DatSchemasDatabase } from '@/app/dat-viewer/db.js'
+import { useTheme } from '@/theme.js'
 
 export default defineComponent({
   components: { ResizeObserver, CanvasScroll, ViewerActions, ViewerHead, HeaderProps },
@@ -71,7 +72,7 @@ export default defineComponent({
 
     let viewer: Viewer
     if (props.kaState) {
-      viewer = props.kaState // eslint-disable-line vue/no-setup-props-reactivity-loss
+      viewer = props.kaState
     } else {
       viewer = createViewer(props.args.fullPath, props.args.fileContent, index, db, props.kaScope)
       ctx.emit('update:kaState', viewer)
@@ -118,7 +119,11 @@ export default defineComponent({
     const rowsHeight = computed(() =>
       Math.max(0, paintHeight.value - rendering.HEADERS_HEIGHT))
 
-    watch([rowsWidth, rowsHeight], () => {
+    const { isDarkTheme } = useTheme()
+    const canvasPalette = computed(() =>
+      rendering.canvasPalettes[isDarkTheme.value ? 'dark' : 'light'])
+
+    watch([rowsWidth, rowsHeight, canvasPalette], () => {
       const dpr = window.devicePixelRatio
 
       canvasRef.value!.style.width = rowsWidth.value + 'px'
@@ -147,13 +152,12 @@ export default defineComponent({
 
     const tablesLoadWatcher = computed(() => {
       for (const entry of viewer.referencedTables.value.values()) {
-        // eslint-disable-next-line no-void
         void entry.value // vue-reactivity: subscribe
       }
       return undefined
     })
 
-    watch([scrollPos, renderColumns, rowIndices, viewer.selectedRow, tablesLoadWatcher], () => { draw() })
+    watch([scrollPos, renderColumns, rowIndices, viewer.selectedRow, tablesLoadWatcher, canvasPalette], () => { draw() })
 
     function draw () {
       const ctx = canvasRef.value!.getContext('2d', { alpha: false })!
@@ -165,7 +169,8 @@ export default defineComponent({
         rows: renderItems.value.ids,
         columns: renderColumns.value,
         viewer,
-        ctx
+        ctx,
+        palette: canvasPalette.value
       })
     }
 
@@ -235,12 +240,24 @@ export default defineComponent({
   overflow: hidden;
   transform: translate3d(0, 0, 0);
   contain: strict;
-  @apply bg-white;
+  background: var(--color-surface);
   padding-left: 7px;
-  @apply border-l border-gray-100;
+  border-left: 1px solid var(--color-border-subtle);
   padding-right: 8px;
   text-align: right;
-  box-shadow: #cacaca 0 6px 6px -6px inset;
+  box-shadow: var(--color-overlay-shadow) 0 6px 6px -6px inset;
   user-select: none;
+  color: var(--color-text-muted);
+}
+
+.headerBlock {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.canvasSurface {
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 </style>

@@ -272,6 +272,8 @@ export default defineComponent({
   overflow: hidden;
   position: relative;
   transform: translate3d(0, 0, 0);
+  background: var(--color-surface);
+  color: inherit;
 }
 
 .track {
@@ -285,11 +287,11 @@ export default defineComponent({
   position: absolute;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--color-scroll-thumb);
   will-change: transform;
 
   &:hover {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--color-scroll-thumb-hover);
   }
 }
 </style>

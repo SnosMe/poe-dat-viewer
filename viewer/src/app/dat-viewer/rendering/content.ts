@@ -1,4 +1,4 @@
-import { CHAR_WIDTH, LINE_HEIGHT } from '../rendering.js'
+import { CHAR_WIDTH, LINE_HEIGHT, type CanvasPalette } from '../rendering.js'
 import { type DatFile, type Header as DatHeader, type ColumnStats, getFieldReader } from 'pathofexile-dat/dat.js'
 import type { Header as HeaderViewer } from '../headers.js'
 
@@ -7,68 +7,68 @@ interface StringifyOut {
   color: string
 }
 
-function integerToString (value: number, out: StringifyOut) {
+function integerToString (value: number, out: StringifyOut, palette: CanvasPalette) {
   out.text = String(value)
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
-function decimalToString (value: number, out: StringifyOut) {
+function decimalToString (value: number, out: StringifyOut, palette: CanvasPalette) {
   out.text = value.toLocaleString(undefined, { maximumFractionDigits: 6, minimumFractionDigits: 1 })
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
-function integerArrayToString (value: number[], out: StringifyOut) {
+function integerArrayToString (value: number[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.join(', ')}]`
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
-function decimalArrayToString (value: number[], out: StringifyOut) {
+function decimalArrayToString (value: number[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.map(value => value.toLocaleString(undefined, { maximumFractionDigits: 6, minimumFractionDigits: 1 })).join(', ')}]`
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
-function booleanToString (value: boolean, out: StringifyOut) {
+function booleanToString (value: boolean, out: StringifyOut, palette: CanvasPalette) {
   out.text = String(value)
-  out.color = '#0000ff'
+  out.color = palette.typeColors.nullish
 }
-function booleanArrayToString (value: boolean[], out: StringifyOut) {
+function booleanArrayToString (value: boolean[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.join(', ')}]`
-  out.color = '#0000ff'
+  out.color = palette.typeColors.nullish
 }
-function stringToString (value: string, out: StringifyOut) {
+function stringToString (value: string, out: StringifyOut, palette: CanvasPalette) {
   if (value === '') {
     out.text = 'empty'
-    out.color = '#0000ff'
+    out.color = palette.typeColors.nullish
   } else {
     out.text = String(value)
-    out.color = '#001080'
+    out.color = palette.typeColors.string
   }
 }
-function stringArrayToString (value: string[], out: StringifyOut) {
+function stringArrayToString (value: string[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.map(str => JSON.stringify(str)).join(', ')}]`
-  out.color = '#001080'
+  out.color = palette.typeColors.string
 }
-function keySelfToString (value: number | null, out: StringifyOut) {
+function keySelfToString (value: number | null, out: StringifyOut, palette: CanvasPalette) {
   if (value === null) {
     out.text = '<null, self>'
-    out.color = '#0000ff'
+    out.color = palette.typeColors.nullish
   } else {
     out.text = `<${value}, self>`
-    out.color = '#098658'
+    out.color = palette.typeColors.numeric
   }
 }
-function keySelfArrayToString (value: number[], out: StringifyOut) {
+function keySelfArrayToString (value: number[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.map(key => `<${key}, self>`).join(', ')}]`
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
-function keyForeignToString (value: number | null, out: StringifyOut) {
+function keyForeignToString (value: number | null, out: StringifyOut, palette: CanvasPalette) {
   if (value === null) {
     out.text = '<null>'
-    out.color = '#0000ff'
+    out.color = palette.typeColors.nullish
   } else {
     out.text = `<${value}>`
-    out.color = '#098658'
+    out.color = palette.typeColors.numeric
   }
 }
-function keyForeignArrayToString (value: number[], out: StringifyOut) {
+function keyForeignArrayToString (value: number[], out: StringifyOut, palette: CanvasPalette) {
   out.text = `[${value.map(key => `<${key}>`).join(', ')}]`
-  out.color = '#098658'
+  out.color = palette.typeColors.numeric
 }
 
 export function renderCellContent (
@@ -76,6 +76,7 @@ export function renderCellContent (
   header: DatHeader,
   datFile: DatFile,
   rows: number[],
+  palette: CanvasPalette,
   referenced?: { header: DatHeader, datFile: DatFile }
 ) {
   const read = getFieldReader(header, datFile)
@@ -88,7 +89,7 @@ export function renderCellContent (
 
   const draw: StringifyOut = { text: '', color: '' }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const stringify: (value: any, out: StringifyOut) => void = (() => {
+  const stringify: (value: any, out: StringifyOut, palette: CanvasPalette) => void = (() => {
     const type = (referenced != null) ? referenced.header.type : header.type
     if (header.type.array) {
       if (type.boolean) return booleanArrayToString
@@ -115,18 +116,18 @@ export function renderCellContent (
     if (referenced) {
       if (header.type.array) {
         cellData = (cellData as number[]).map(rRid => readReferenced!(rRid))
-        stringify(cellData, draw)
+        stringify(cellData, draw, palette)
       } else {
         if (cellData === null) {
           const stringify = (header.type.key!.foreign) ? keyForeignToString : keySelfToString
-          stringify(cellData, draw)
+          stringify(cellData, draw, palette)
         } else {
           cellData = readReferenced!(cellData as number)
-          stringify(cellData, draw)
+          stringify(cellData, draw, palette)
         }
       }
     } else {
-      stringify(cellData, draw)
+      stringify(cellData, draw, palette)
     }
 
     if (prevColor !== draw.color) {
@@ -138,8 +139,16 @@ export function renderCellContent (
   }
 }
 
-export function drawByteView (ctx: CanvasRenderingContext2D, header: DatHeader, datFile: DatFile, rows: number[], begin: number, end: number) {
-  ctx.fillStyle = '#000'
+export function drawByteView (
+  ctx: CanvasRenderingContext2D,
+  header: DatHeader,
+  datFile: DatFile,
+  rows: number[],
+  begin: number,
+  end: number,
+  palette: CanvasPalette
+) {
+  ctx.fillStyle = palette.text
 
   let textY = 0
   for (const rowIdx of rows) {
@@ -156,8 +165,15 @@ export function drawByteView (ctx: CanvasRenderingContext2D, header: DatHeader, 
   }
 }
 
-export function drawArrayVarData (ctx: CanvasRenderingContext2D, header: HeaderViewer, datFile: DatFile, rows: number[], stats: ColumnStats) {
-  ctx.fillStyle = '#000'
+export function drawArrayVarData (
+  ctx: CanvasRenderingContext2D,
+  header: HeaderViewer,
+  datFile: DatFile,
+  rows: number[],
+  stats: ColumnStats,
+  palette: CanvasPalette
+) {
+  ctx.fillStyle = palette.text
 
   const stat = stats.refArray as Exclude<typeof stats['refArray'], false>
   const entryMaxLength = Math.max(...([
