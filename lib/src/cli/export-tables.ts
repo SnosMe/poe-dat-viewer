@@ -7,7 +7,7 @@ import { readColumn } from '../dat/reader.js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
-const TRANSLATIONS = [
+const TRANSLATIONS_POE1 = [
   { name: 'English', path: 'Data' },
   { name: 'French', path: 'Data/French' },
   { name: 'German', path: 'Data/German' },
@@ -19,7 +19,31 @@ const TRANSLATIONS = [
   { name: 'Thai', path: 'Data/Thai' },
   { name: 'Traditional Chinese', path: 'Data/Traditional Chinese' }
 ]
-const TRANSLATIONS_NONE = TRANSLATIONS[0]
+
+const TRANSLATIONS_POE2 = [
+  { name: 'English', path: 'Data/Balance' },
+  { name: 'French', path: 'Data/Balance/French' },
+  { name: 'German', path: 'Data/Balance/German' },
+  { name: 'Japanese', path: 'Data/Balance/Japanese' },
+  { name: 'Korean', path: 'Data/Balance/Korean' },
+  { name: 'Portuguese', path: 'Data/Balance/Portuguese' },
+  { name: 'Russian', path: 'Data/Balance/Russian' },
+  { name: 'Spanish', path: 'Data/Balance/Spanish' },
+  { name: 'Thai', path: 'Data/Balance/Thai' },
+  { name: 'Traditional Chinese', path: 'Data/Balance/Traditional Chinese' }
+]
+
+function getValidFor (config: ExportConfig): ValidFor {
+  return (config.patch?.startsWith('4.') || config.steam?.includes('Path of Exile 2'))
+    ? ValidFor.PoE2
+    : ValidFor.PoE1
+}
+
+function getTranslations (validFor: ValidFor) {
+  return validFor === ValidFor.PoE2
+    ? TRANSLATIONS_POE2
+    : TRANSLATIONS_POE1
+}
 
 export async function exportTables (
   config: ExportConfig,
@@ -34,6 +58,10 @@ export async function exportTables (
     console.error('Schema has format not compatible with this package. Check for "pathofexile-dat" updates.')
     process.exit(1)
   }
+
+  const validFor = getValidFor(config)
+  const TRANSLATIONS = getTranslations(validFor)
+  const TRANSLATIONS_NONE = TRANSLATIONS[0]
 
   const includeTranslations = (config.translations?.length)
     ? TRANSLATIONS.filter(tr => config.translations!.includes(tr.name))
@@ -98,9 +126,7 @@ function importHeaders (
 ): NamedHeader[] {
   const headers = [] as NamedHeader[]
 
-  const validFor = (config.patch?.startsWith('4.') || config.steam?.includes('Path of Exile 2'))
-    ? ValidFor.PoE2
-    : ValidFor.PoE1
+  const validFor = getValidFor(config)
   const sch = schema.tables.find(s => s.name === name && (s.validFor & validFor))!
   let offset = 0
   for (const column of sch.columns) {
