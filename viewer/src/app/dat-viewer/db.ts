@@ -97,7 +97,11 @@ export class DatSchemasDatabase {
   }
 
   async preloadDataTables (totalTables: Ref<number>) {
-    const filePaths = this.index.getDirContent('data')
+    const tablesDirPath = this.index.loader.patchVersion.startsWith('4.')
+      ? 'data/balance'
+      : 'data'
+
+    const filePaths = this.index.getDirContent(tablesDirPath)
       .files
       .filter(file => file.endsWith('.datc64')) // this also removes special `Languages.dat`
 
@@ -131,7 +135,7 @@ export class DatSchemasDatabase {
 
         const datFile = readDatFile(fullPath, res.slice.buffer)
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
-        const name = fullPath.replace('data/', '').replace('.datc64', '')
+        const name = fullPath.replace(tablesDirPath + '/', '').replace('.datc64', '')
 
         const schema = await this.findSchemaByName(name)
         const headers = fromSerializedHeaders(schema?.headers ?? [], columnStats, datFile)
