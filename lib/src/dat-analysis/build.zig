@@ -13,9 +13,11 @@ pub fn build(b: *std.Build) void {
 
     const exe = b.addExecutable(.{
         .name = "analysis",
-        .root_source_file = b.path("./analysis.zig"),
-        .target = target,
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("./analysis.zig"),
+            .target = target,
+            .optimize = optimize,
+        }),
     });
     exe.root_module.export_symbol_names = &.{
         "malloc", "free", "fast_analyze_dat64",
