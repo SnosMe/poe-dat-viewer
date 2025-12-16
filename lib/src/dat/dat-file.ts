@@ -16,16 +16,15 @@ export interface DatFile {
   fieldSize: typeof FIELD_SIZE
 }
 
-export function readDatFile (filenameOrExt: string, content: ArrayBufferLike): DatFile {
-  if (content.byteLength < MIN_FILE_SIZE) {
+export function readDatFile (filenameOrExt: string, file: Uint8Array): DatFile {
+  if (file.byteLength < MIN_FILE_SIZE) {
     throw new Error('Invalid file size.')
   }
   if (!filenameOrExt.endsWith('datc64')) {
     throw new Error('Only datc64 files are supported.')
   }
 
-  const file = new Uint8Array(content)
-  const fileReader = new DataView(file.buffer)
+  const fileReader = new DataView(file.buffer, file.byteOffset, file.byteLength)
 
   const rowCount = fileReader.getUint32(0, true)
   const boundary = findAlignedSequence(file.subarray(INT_ROWCOUNT), VDATA_MAGIC, rowCount)
