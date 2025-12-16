@@ -133,7 +133,7 @@ export class DatSchemasDatabase {
         const res = await decompressFileInBundle(bundleBin, location.offset, location.size)
         bundleBin = res.bundle
 
-        const datFile = readDatFile(fullPath, res.slice.buffer)
+        const datFile = readDatFile(fullPath, res.slice)
         const columnStats = await analyzeDatFile(datFile, { transfer: true })
         const name = fullPath.replace(tablesDirPath + '/', '').replace('.datc64', '')
 

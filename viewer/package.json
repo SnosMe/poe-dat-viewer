@@ -17,7 +17,7 @@
     "file-saver": "^2.0.2",
     "idb": "^8.0.0",
     "neverthrow": "^8.2.0",
-    "pathofexile-dat": "^14.0.1",
+    "pathofexile-dat": "^14.0.4",
     "pathofexile-dat-schema": "^8.0.0",
     "string-metric": "^0.3.3",
     "tailwindcss": "^3.0.0",
