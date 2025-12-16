@@ -6,9 +6,9 @@ import * as path from 'path'
 const BUNDLE_DIR = 'Bundles2'
 
 export class FileLoader {
-  private bundleCache = new Map<string, ArrayBuffer>()
+  private bundleCache = new Map<string, Uint8Array>()
 
-  constructor (
+  private constructor (
     private bundleLoader: IBundleLoader,
     private index: {
       bundlesInfo: Uint8Array
@@ -20,7 +20,7 @@ export class FileLoader {
     console.log('Loading bundles index...')
 
     const indexBin = await bundleLoader.fetchFile('_.index.bin')
-    const indexBundle = decompressSliceInBundle(new Uint8Array(indexBin))
+    const indexBundle = decompressSliceInBundle(indexBin)
     const _index = readIndexBundle(indexBundle)
 
     return new FileLoader(bundleLoader, {
@@ -51,7 +51,7 @@ export class FileLoader {
     if (!location) return null
 
     const bundleBin = await this.fetchBundle(location.bundle)
-    return decompressSliceInBundle(new Uint8Array(bundleBin), location.offset, location.size)
+    return decompressSliceInBundle(bundleBin, location.offset, location.size)
   }
 
   clearBundleCache () {
@@ -60,10 +60,10 @@ export class FileLoader {
 }
 
 interface IBundleLoader {
-  fetchFile: (name: string) => Promise<ArrayBuffer>
+  fetchFile: (name: string) => Promise<Uint8Array>
 }
 
-export class CdnBundleLoader {
+export class CdnBundleLoader implements IBundleLoader {
   private constructor (
     private cacheDir: string,
     private patchVer: string
@@ -81,11 +81,10 @@ export class CdnBundleLoader {
     return new CdnBundleLoader(cacheDir, patchVer)
   }
 
-  async fetchFile (name: string): Promise<ArrayBuffer> {
+  async fetchFile (name: string) {
     const cachedFilePath = path.join(this.cacheDir, name.replace(/\//g, '@'))
 
     try {
-      await fs.access(cachedFilePath)
       const bundleBin = await fs.readFile(cachedFilePath)
       return bundleBin
     } catch {}
@@ -103,16 +102,16 @@ export class CdnBundleLoader {
     }
     const bundleBin = await response.arrayBuffer()
     await fs.writeFile(cachedFilePath, Buffer.from(bundleBin, 0, bundleBin.byteLength))
-    return bundleBin
+    return new Uint8Array(bundleBin)
   }
 }
 
-export class SteamBundleLoader {
+export class SteamBundleLoader implements IBundleLoader {
   constructor (
     private gameDir: string
   ) {}
 
-  async fetchFile (name: string): Promise<ArrayBuffer> {
-    return await fs.readFile(path.join(this.gameDir, BUNDLE_DIR, name))
+  fetchFile (name: string) {
+    return fs.readFile(path.join(this.gameDir, BUNDLE_DIR, name))
   }
 }
