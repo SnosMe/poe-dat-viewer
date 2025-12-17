@@ -21,11 +21,20 @@ const SDIR_DIRECT_SIZE    = 4
 const SDIR_ALL_SIZE       = 4
 /* eslint-enable */
 
-export function readIndexBundle (indexBundle: Uint8Array) {
+export interface IndexBundle<TArrayBuffer extends ArrayBufferLike = ArrayBufferLike> {
+  bundlesInfo: Uint8Array<TArrayBuffer>
+  filesInfo: Uint8Array<TArrayBuffer>
+  dirsInfo: Uint8Array<TArrayBuffer>
+  pathRepsBundle: Uint8Array<TArrayBuffer>
+}
+
+export function readIndexBundle<TArrayBuffer extends ArrayBufferLike> (
+  indexBundle: Uint8Array<TArrayBuffer>
+): IndexBundle<TArrayBuffer> {
   const reader = new DataView(indexBundle.buffer, indexBundle.byteOffset, indexBundle.byteLength)
   let offset = 0
 
-  let bundlesInfo: Uint8Array
+  let bundlesInfo: Uint8Array<TArrayBuffer>
   {
     const bundlesCount = reader.getInt32(offset, true)
     offset += S_BUNDLES_COUNT
@@ -40,7 +49,7 @@ export function readIndexBundle (indexBundle: Uint8Array) {
     bundlesInfo = indexBundle.subarray(begin, end)
   }
 
-  let filesInfo: Uint8Array
+  let filesInfo: Uint8Array<TArrayBuffer>
   {
     const filesCount = reader.getInt32(offset, true)
     offset += S_FILES_COUNT
@@ -51,7 +60,7 @@ export function readIndexBundle (indexBundle: Uint8Array) {
     filesInfo = indexBundle.subarray(begin, end)
   }
 
-  let dirsInfo: Uint8Array
+  let dirsInfo: Uint8Array<TArrayBuffer>
   {
     const dirsCount = reader.getInt32(offset, true)
     offset += S_DIRS_COUNT
@@ -62,7 +71,7 @@ export function readIndexBundle (indexBundle: Uint8Array) {
     dirsInfo = indexBundle.subarray(begin, end)
   }
 
-  let pathRepsBundle: Uint8Array
+  let pathRepsBundle: Uint8Array<TArrayBuffer>
   {
     const begin = offset
     const end = indexBundle.byteLength
@@ -78,7 +87,7 @@ export function readIndexBundle (indexBundle: Uint8Array) {
   }
 }
 
-interface FileInfo {
+export interface FileInfo {
   bundle: string
   offset: number
   size: number

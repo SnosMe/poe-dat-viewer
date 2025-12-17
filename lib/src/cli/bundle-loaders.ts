@@ -1,4 +1,4 @@
-import { decompressSliceInBundle } from '../bundles/bundle.js'
+import { decompressSliceInBundle, decompressedBundleSize } from '../bundles/bundle.js'
 import { getFileInfo, readIndexBundle } from '../bundles/index-bundle.js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
@@ -20,7 +20,8 @@ export class FileLoader {
     console.log('Loading bundles index...')
 
     const indexBin = await bundleLoader.fetchFile('_.index.bin')
-    const indexBundle = decompressSliceInBundle(indexBin)
+    const indexBundle = new Uint8Array(decompressedBundleSize(indexBin))
+    decompressSliceInBundle(indexBin, 0, indexBundle)
     const _index = readIndexBundle(indexBundle)
 
     return new FileLoader(bundleLoader, {
@@ -51,7 +52,9 @@ export class FileLoader {
     if (!location) return null
 
     const bundleBin = await this.fetchBundle(location.bundle)
-    return decompressSliceInBundle(bundleBin, location.offset, location.size)
+    const contents = new Uint8Array(location.size)
+    decompressSliceInBundle(bundleBin, location.offset, contents)
+    return contents
   }
 
   clearBundleCache () {

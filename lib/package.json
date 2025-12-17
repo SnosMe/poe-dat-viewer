@@ -1,6 +1,6 @@
 {
   "name": "pathofexile-dat",
-  "version": "14.0.4",
+  "version": "15.0.0",
   "type": "module",
   "bin": "./dist/cli/run.js",
   "exports": {
@@ -17,8 +17,8 @@
     "pathofexile-dat-schema": "^8.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.9.0"
+    "@types/node": "^20.19.27",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.0.0"

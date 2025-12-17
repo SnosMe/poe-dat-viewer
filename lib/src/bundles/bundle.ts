@@ -6,21 +6,22 @@ const S_CHUNK_COUNT$ = 36
 const S_COMPRESSION_GRANULARITY$ = 40
 const S_CHUNK_SIZES$ = 60
 
+export function decompressedBundleSize (bundle: Uint8Array): number {
+  const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
+  return reader.getInt32(S_DECOMPRESSED_DATA_SIZE$, true)
+}
+
 export function decompressSliceInBundle (
   bundle: Uint8Array,
-  sliceOffset = 0,
-  sliceSize = 0
-): Uint8Array {
+  sliceOffset: number,
+  decompressedSlice: Uint8Array
+): void {
   const reader = new DataView(bundle.buffer, bundle.byteOffset, bundle.byteLength)
   const decompressedBundleSize = reader.getInt32(S_DECOMPRESSED_DATA_SIZE$, true)
   const chunksCount = reader.getInt32(S_CHUNK_COUNT$, true)
   const compressionGranularity = reader.getInt32(S_COMPRESSION_GRANULARITY$, true)
 
-  if (!sliceSize) {
-    sliceSize = decompressedBundleSize
-  }
-
-  const decompressedSlice = new Uint8Array(sliceSize)
+  const sliceSize = decompressedSlice.byteLength
 
   let chunkBegin = S_CHUNK_SIZES$ + (chunksCount * 4)
   let bundleDecomprOffset = 0
@@ -49,6 +50,4 @@ export function decompressSliceInBundle (
     bundleDecomprOffset += decomprChunkSize
     chunkBegin += chunkSize
   }
-
-  return decompressedSlice
 }
