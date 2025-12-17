@@ -14,6 +14,8 @@ export class BundleLoader {
     active: null as Promise<unknown> | null
   })
 
+  private cache = window.caches.open('bundles')
+
   private readonly registry = new FinalizationRegistry<string>(name => {
     console.debug(`[Bundle] garbage-collected, name: "${name}"`)
   })
@@ -26,7 +28,7 @@ export class BundleLoader {
     }
     if (this.patchVer && this.patchVer !== version) {
       this.weakCache.clear()
-      await window.caches.delete('bundles')
+      this._clearCache(version)
     }
     this.patchVer = version
   }
@@ -40,6 +42,21 @@ export class BundleLoader {
       bundleName: this.state.bundleName
     } : null
   })
+
+  private async _clearCache (keepPatch: string) {
+    const [major] = keepPatch.split('.', 1)
+    const keepPrefix = `/${keepPatch}/`
+    const deletePrefix = `/${major}.`
+
+    const cache = await this.cache
+    const requests = await cache.keys()
+    for (const request of requests) {
+      const { pathname } = new URL(request.url)
+      if (pathname.startsWith(deletePrefix) && !pathname.startsWith(keepPrefix)) {
+        await cache.delete(request)
+      }
+    }
+  }
 
   async fetchFile (name: string): Promise<ArrayBufferLike> {
     let bundle = this.weakCache.get(name)
@@ -74,7 +91,7 @@ export class BundleLoader {
   private async _fetchFile (name: string): Promise<ArrayBufferLike> {
     const { state, patchVer } = this
     const path = `${patchVer}/${BUNDLE_DIR}/${name}`
-    const cache = await window.caches.open('bundles')
+    const cache = await this.cache
     let res = await cache.match(path)
     if (res) {
       console.log(`[Bundle] name: "${name}", source: disk cache.`)
