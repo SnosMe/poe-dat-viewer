@@ -9,13 +9,13 @@ jobs:
   build-wasm:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: mlugg/setup-zig@v2
       with:
         version: master
     - run: zig build -Doptimize=ReleaseSmall
       working-directory: lib/src/dat-analysis
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: wasm-artifact
         path: lib/src/dat-analysis/zig-out/bin/analysis.wasm
@@ -26,21 +26,19 @@ jobs:
     needs: build-wasm
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/download-artifact@v4
+    - uses: actions/checkout@v6
+    - uses: actions/download-artifact@v7
       with:
         name: wasm-artifact
         path: lib/dist
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 22
+    - uses: actions/setup-node@v6
     - run: npm install
       working-directory: lib
     - run: npx tsc
       working-directory: lib
     - run: npm pack
       working-directory: lib
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v6
       with:
         name: package
         path: lib/pathofexile-dat-*.tgz

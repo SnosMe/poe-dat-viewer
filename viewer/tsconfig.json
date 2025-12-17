@@ -2,16 +2,12 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": ["ES2020", "ES2021.WeakRef", "DOM"],
+    "lib": ["ES2020", "ES2021.WeakRef", "DOM", "DOM.Iterable"],
     "paths": {
       "@/*": ["src/*"]
     },
-    "types": [
-      "vite/client"
-    ]
+    "types": ["vite/client"],
+    "noUncheckedIndexedAccess": false
   },
-  "include": [
-    "src/**/*",
-    "src/**/*.vue"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue"]
 }

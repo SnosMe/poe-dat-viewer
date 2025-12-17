@@ -93,10 +93,10 @@ export class BundleLoader {
       }
       state.totalSize = Number(res.headers.get('content-length'))
 
-      let buf: Uint8Array
+      let buf: Uint8Array<ArrayBuffer>
       try {
         const reader = res.body!.getReader()
-        const chunks = [] as Uint8Array[]
+        const chunks = [] as Uint8Array<ArrayBuffer>[]
         while (true) {
           const { done, value } = await reader.read()
           if (done) break

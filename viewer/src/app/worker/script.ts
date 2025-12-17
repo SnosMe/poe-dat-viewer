@@ -1,13 +1,15 @@
 import * as Comlink from 'comlink'
-import { decompressSliceInBundle, getFileInfo } from 'pathofexile-dat/bundles.js'
+import { decompressSliceInBundle, decompressedBundleSize, getFileInfo } from 'pathofexile-dat/bundles.js'
 import { type DatFile, analyzeDatFile } from 'pathofexile-dat/dat.js'
 
 const WorkerBody = {
   async decompressSliceInBundle (bundle: ArrayBufferLike, sliceOffset?: number, sliceSize?: number) {
-    const slice = decompressSliceInBundle(new Uint8Array(bundle), sliceOffset, sliceSize)
+    const _bundle = new Uint8Array(bundle)
+    const decompressedSlice = new Uint8Array(sliceSize || decompressedBundleSize(_bundle))
+    decompressSliceInBundle(_bundle, sliceOffset || 0, decompressedSlice)
     return {
       bundle: Comlink.transfer(bundle, [bundle]),
-      slice: Comlink.transfer(slice, [slice.buffer])
+      slice: Comlink.transfer(decompressedSlice, [decompressedSlice.buffer])
     }
   },
   async analyzeDatFile (datFile: DatFile) {
