@@ -3,18 +3,62 @@ import type { RenderByte } from './rendering/byte-columns.js'
 import type { Viewer } from './Viewer.js'
 import { renderCellContent, drawByteView, drawArrayVarData } from './rendering/content.js'
 
-/* eslint-disable */
-export const FONT_FAMILY    = 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-export const FONT_SIZE      = 14
-export const CHAR_WIDTH     = getMonoFontWidth(FONT_SIZE, FONT_FAMILY)
-export const XBASE_HEIGHT   = getFontBaseLine(FONT_SIZE, FONT_FAMILY)
-export const LINE_HEIGHT    = 19
-export const ROWNUM_MIN_LENGTH    = 3
-export const BORDER_WIDTH         = 1
-export const COLUMN_STAT_HEIGHT   = 7
-export const COLUMN_BYTE_HEIGHT   = Math.round(CHAR_WIDTH * 3)
-export const HEADERS_HEIGHT       = COLUMN_BYTE_HEIGHT * 2 + COLUMN_STAT_HEIGHT * 3
-/* eslint-enable */
+export const FONT_FAMILY = 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+export const FONT_SIZE = 14
+export const CHAR_WIDTH = getMonoFontWidth(FONT_SIZE, FONT_FAMILY)
+export const XBASE_HEIGHT = getFontBaseLine(FONT_SIZE, FONT_FAMILY)
+export const LINE_HEIGHT = 19
+export const ROWNUM_MIN_LENGTH = 3
+export const BORDER_WIDTH = 1
+export const COLUMN_STAT_HEIGHT = 7
+export const COLUMN_BYTE_HEIGHT = Math.round(CHAR_WIDTH * 3)
+export const HEADERS_HEIGHT = COLUMN_BYTE_HEIGHT * 2 + COLUMN_STAT_HEIGHT * 3
+
+export interface CanvasPalette {
+  background: string
+  text: string
+  selectedRow: string
+  selectedColumn: string
+  columnBorder: string
+  shadowTop: [string, string]
+  shadowLeft: [string, string]
+  typeColors: {
+    numeric: string
+    string: string
+    nullish: string
+  }
+}
+
+export const canvasPalettes: Record<'light' | 'dark', CanvasPalette> = {
+  light: {
+    background: '#ffffff',
+    text: '#1f2933',
+    selectedRow: 'rgba(148, 197, 255, 0.55)',
+    selectedColumn: 'rgba(148, 197, 255, 0.55)',
+    columnBorder: '#cbd5e1',
+    shadowTop: ['rgba(248, 250, 252, 0.7)', 'rgba(248, 250, 252, 0)'],
+    shadowLeft: ['rgba(248, 250, 252, 0.5)', 'rgba(248, 250, 252, 0)'],
+    typeColors: {
+      numeric: '#065f46',
+      string: '#1d4ed8',
+      nullish: '#0e7490'
+    }
+  },
+  dark: {
+    background: '#161b22',
+    text: '#f3f4f6',
+    selectedRow: 'rgba(96, 165, 250, 0.35)',
+    selectedColumn: 'rgba(96, 165, 250, 0.35)',
+    columnBorder: '#2d3645',
+    shadowTop: ['rgba(22, 27, 34, 0.7)', 'rgba(22, 27, 34, 0)'],
+    shadowLeft: ['rgba(22, 27, 34, 0.5)', 'rgba(22, 27, 34, 0)'],
+    typeColors: {
+      numeric: '#34d399',
+      string: '#93c5fd',
+      nullish: '#38bdf8'
+    }
+  }
+}
 
 // console.log(getBaseLine(14), 'CR: 11  |  FF: 12')
 // console.log(getBaseLine(18), 'CR: 13  |  FF: 14')
@@ -68,17 +112,18 @@ export function drawRows (params: {
   columns: RenderByte[]
   viewer: Viewer
   ctx: CanvasRenderingContext2D
+  palette: CanvasPalette
 }) {
-  const { ctx } = params
+  const { ctx, palette } = params
 
-  ctx.fillStyle = '#fff'
+  ctx.fillStyle = palette.background
   ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
   // draw selected row
   if (params.viewer.selectedRow.value !== null) {
     const selectedIdx = params.rows.indexOf(params.viewer.selectedRow.value)
     if (selectedIdx !== -1) {
-      ctx.fillStyle = '#bee3f8'
+      ctx.fillStyle = palette.selectedRow
       ctx.fillRect(
         0, params.top + (selectedIdx * LINE_HEIGHT),
         ctx.canvas.width, LINE_HEIGHT
@@ -89,12 +134,12 @@ export function drawRows (params: {
   // drawColumns
   ctx.save()
   ctx.translate(-params.left, 0)
-  drawColumns(ctx, params.columns)
+  drawColumns(ctx, params.columns, palette)
   ctx.restore()
 
   // draw content
   ctx.font = `${FONT_SIZE}px ${FONT_FAMILY}`
-  ctx.fillStyle = '#000'
+  ctx.fillStyle = palette.text
 
   const renderers = getColumnRenderers(params.viewer, params.left, params.left + params.paintWidth)
 
@@ -105,37 +150,37 @@ export function drawRows (params: {
     ctx.rect(0, 0, render.width, ctx.canvas.height)
     ctx.clip()
     ctx.translate(CHAR_WIDTH / 2, params.top + getBaseLine(LINE_HEIGHT))
-    render.exec(ctx, params.rows)
+    render.exec(ctx, params.rows, palette)
     ctx.restore()
   }
 
   // draw inset shadow
   {
     const grdH = ctx.createLinearGradient(0, -16, 0, 4)
-    grdH.addColorStop(0, 'rgba(254,254,254,0.6)')
-    grdH.addColorStop(1, 'transparent')
+    grdH.addColorStop(0, palette.shadowTop[0])
+    grdH.addColorStop(1, palette.shadowTop[1])
     ctx.fillStyle = grdH
     ctx.fillRect(0, 0, ctx.canvas.width, 6)
 
     const grdV = ctx.createLinearGradient(-16, 0, 4, 0)
-    grdV.addColorStop(0, 'rgba(254,254,254,0.5)')
-    grdV.addColorStop(1, 'transparent')
+    grdV.addColorStop(0, palette.shadowLeft[0])
+    grdV.addColorStop(1, palette.shadowLeft[1])
     ctx.fillStyle = grdV
     ctx.fillRect(0, 0, 6, ctx.canvas.height)
   }
 }
 
-function drawColumns (ctx: CanvasRenderingContext2D, columns: readonly RenderByte[]) {
+function drawColumns (ctx: CanvasRenderingContext2D, columns: readonly RenderByte[], palette: CanvasPalette) {
   for (const col of columns) {
     if (col.selected) {
-      ctx.fillStyle = '#bee3f8'
+      ctx.fillStyle = palette.selectedColumn
       ctx.fillRect(
         col.leftPx + (col.border ? BORDER_WIDTH : 0), 0,
         col.widthPx, ctx.canvas.height
       )
     }
     if (col.border) {
-      ctx.fillStyle = '#bdbdbd'
+      ctx.fillStyle = palette.columnBorder
       ctx.fillRect(
         col.leftPx, 0,
         BORDER_WIDTH, ctx.canvas.height
@@ -144,7 +189,7 @@ function drawColumns (ctx: CanvasRenderingContext2D, columns: readonly RenderByt
   }
 }
 
-type DrawColumnContentFn = (ctx: CanvasRenderingContext2D, rows: number[]) => void
+type DrawColumnContentFn = (ctx: CanvasRenderingContext2D, rows: number[], palette: CanvasPalette) => void
 interface ColumnContentRenderer {
   left: number
   width: number
@@ -167,8 +212,8 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           res.push({
             left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
             width: sizes.paddingWidth,
-            exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
-              drawArrayVarData(ctx, header, datFile, rows, stats[header.offset])
+            exec: (ctx: CanvasRenderingContext2D, rows: number[], palette: CanvasPalette) => {
+              drawArrayVarData(ctx, header, datFile, rows, stats[header.offset], palette)
             }
           })
         } else {
@@ -177,8 +222,8 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
           res.push({
             left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
             width: sizes.paddingWidth,
-            exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
-              drawByteView(ctx, header, datFile, rows, hexBegin, hexEnd)
+            exec: (ctx: CanvasRenderingContext2D, rows: number[], palette: CanvasPalette) => {
+              drawByteView(ctx, header, datFile, rows, hexBegin, hexEnd, palette)
             }
           })
         }
@@ -186,22 +231,22 @@ export function getColumnRenderers (viewer: Viewer, paintBegin: number, paintEnd
         res.push({
           left: left + (sizes.borderWidth ? BORDER_WIDTH : 0),
           width: sizes.paddingWidth,
-          exec: (ctx: CanvasRenderingContext2D, rows: number[]) => {
-            if (header.type.key?.table && header.type.key.viewColumn) {
-              const referenced = viewer.referencedTables.value.get(header.type.key.table)!.value
-              if (referenced) {
-                const referencedHeader = referenced.headers.find(h => h.name === header.type.key!.viewColumn)
-                if (referencedHeader) {
-                  renderCellContent(ctx, header, datFile, rows, { header: referencedHeader, datFile: referenced.datFile })
-                  return
+            exec: (ctx: CanvasRenderingContext2D, rows: number[], palette: CanvasPalette) => {
+              if (header.type.key?.table && header.type.key.viewColumn) {
+                const referenced = viewer.referencedTables.value.get(header.type.key.table)!.value
+                if (referenced) {
+                  const referencedHeader = referenced.headers.find(h => h.name === header.type.key!.viewColumn)
+                  if (referencedHeader) {
+                    renderCellContent(ctx, header, datFile, rows, palette, { header: referencedHeader, datFile: referenced.datFile })
+                    return
+                  }
                 }
               }
+              renderCellContent(ctx, header, datFile, rows, palette)
             }
-            renderCellContent(ctx, header, datFile, rows)
-          }
-        })
+          })
+        }
       }
-    }
 
     left += sizes.borderWidth
     if (left >= paintEnd) return res

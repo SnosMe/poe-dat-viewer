@@ -135,23 +135,26 @@ export default defineComponent({
   @apply py-1 px-2;
 
   &:not([readonly]) {
-    @apply border;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
 
     &:focus {
-      @apply border-blue-500;
+      border-color: var(--color-selection-strong);
     }
   }
 
   &[readonly] {
-    @apply border-b;
-    @apply bg-gray-100;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text-muted);
   }
 }
 
 .label {
   @apply text-xs;
   @apply px-2;
-  @apply text-gray-500;
+  color: var(--color-text-muted);
 }
 
 .importVariant {
@@ -159,8 +162,14 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   line-height: 1;
-  @apply bg-gray-700 text-gray-200;
+  background: var(--color-toolbar);
+  color: var(--color-toolbar-text);
   @apply w-8 h-8;
   @apply rounded;
+}
+
+:global([data-theme="dark"]) .importVariant {
+  background: var(--color-selection-soft);
+  color: var(--color-text);
 }
 </style>
