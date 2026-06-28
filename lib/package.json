@@ -1,11 +1,12 @@
 {
   "name": "pathofexile-dat",
-  "version": "15.1.0",
+  "version": "15.2.0",
   "type": "module",
   "bin": "./dist/cli/run.js",
   "exports": {
     "./bundles.js": "./dist/bundles.js",
-    "./dat.js": "./dist/dat.js"
+    "./dat.js": "./dist/dat.js",
+    "./sprites.js": "./dist/sprites.js"
   },
   "files": ["dist/**/*"],
   "license": "MIT",

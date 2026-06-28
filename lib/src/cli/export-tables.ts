@@ -71,7 +71,7 @@ export async function exportTables (
     await fs.mkdir(path.join(outDir, tr.name), { recursive: true })
   }
   for (const tr of includeTranslations) {
-    loader.clearBundleCache()
+    loader.bundleLoader.clearBundleCache()
     for (const target of config.tables) {
       console.log(`Exporting table "${tr.path}/${target.name}"`)
       const datFile = readDatFile('.datc64',

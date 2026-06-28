@@ -1,60 +1,24 @@
-import { decompressSliceInBundle, decompressedBundleSize } from '../bundles/bundle.js'
-import { getFileInfo, readIndexBundle } from '../bundles/index-bundle.js'
+import { toCdnUrl, BUNDLES_DIR, BundleLoader, FileLoader as BaseFileLoader } from '../bundles/load-util.js'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 
-const BUNDLE_DIR = 'Bundles2'
+export const FileLoader = BaseFileLoader
+export type FileLoader = BaseFileLoader<CachingBundleLoader>
 
-export class FileLoader {
+export class CachingBundleLoader implements BundleLoader {
   private bundleCache = new Map<string, Uint8Array>()
 
-  private constructor (
-    private bundleLoader: IBundleLoader,
-    private index: {
-      bundlesInfo: Uint8Array
-      filesInfo: Uint8Array
-    }
+  constructor (
+    private loader: BundleLoader
   ) {}
 
-  static async create (bundleLoader: IBundleLoader) {
-    console.log('Loading bundles index...')
-
-    const indexBin = await bundleLoader.fetchFile('_.index.bin')
-    const indexBundle = new Uint8Array(decompressedBundleSize(indexBin))
-    decompressSliceInBundle(indexBin, 0, indexBundle)
-    const _index = readIndexBundle(indexBundle)
-
-    return new FileLoader(bundleLoader, {
-      bundlesInfo: _index.bundlesInfo,
-      filesInfo: _index.filesInfo,
-    })
-  }
-
-  private async fetchBundle (name: string) {
+  async fetchFile (name: string) {
     let bundleBin = this.bundleCache.get(name)
     if (!bundleBin) {
-      bundleBin = await this.bundleLoader.fetchFile(name)
+      bundleBin = await this.loader.fetchFile(name)
       this.bundleCache.set(name, bundleBin)
     }
     return bundleBin
-  }
-
-  async getFileContents (fullPath: string): Promise<Uint8Array> {
-    const contents = await this.tryGetFileContents(fullPath)
-    if (!contents) {
-      throw new Error(`File no longer exists: ${fullPath}`)
-    }
-    return contents
-  }
-
-  async tryGetFileContents (fullPath: string): Promise<Uint8Array | null> {
-    const location = getFileInfo(fullPath, this.index.bundlesInfo, this.index.filesInfo)
-    if (!location) return null
-
-    const bundleBin = await this.fetchBundle(location.bundle)
-    const contents = new Uint8Array(location.size)
-    decompressSliceInBundle(bundleBin, location.offset, contents)
-    return contents
   }
 
   clearBundleCache () {
@@ -62,11 +26,7 @@ export class FileLoader {
   }
 }
 
-interface IBundleLoader {
-  fetchFile: (name: string) => Promise<Uint8Array>
-}
-
-export class CdnBundleLoader implements IBundleLoader {
+export class CdnBundleLoader implements BundleLoader {
   private constructor (
     private cacheDir: string,
     private patchVer: string
@@ -94,11 +54,7 @@ export class CdnBundleLoader implements IBundleLoader {
 
     console.log(`Loading from CDN: ${name} ...`)
 
-    const webpath = `/${this.patchVer}/${BUNDLE_DIR}/${name}`
-    const response = await fetch(
-      webpath.startsWith('/4.')
-        ? `https://patch-poe2.poecdn.com${webpath}`
-        : `https://patch.poecdn.com${webpath}`)
+    const response = await fetch(toCdnUrl(this.patchVer, name))
     if (!response.ok) {
       console.error(`Failed to fetch ${name} from CDN.`)
       process.exit(1)
@@ -109,12 +65,12 @@ export class CdnBundleLoader implements IBundleLoader {
   }
 }
 
-export class SteamBundleLoader implements IBundleLoader {
+export class SteamBundleLoader implements BundleLoader {
   constructor (
     private gameDir: string
   ) {}
 
   fetchFile (name: string) {
-    return fs.readFile(path.join(this.gameDir, BUNDLE_DIR, name))
+    return fs.readFile(path.join(this.gameDir, BUNDLES_DIR, name))
   }
 }

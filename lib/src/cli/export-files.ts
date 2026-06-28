@@ -1,4 +1,4 @@
-import { parseFile as parseSpriteIndex, SpriteImage } from '../sprites/layout-parser.js'
+import { parseSpriteIndex, SpriteImage } from '../sprites/layout-parser.js'
 import type { ExportConfig } from './ExportConfig.js'
 import { FileLoader } from './bundle-loaders.js'
 import { spawn } from 'child_process'

@@ -8,7 +8,7 @@ export interface SpriteImage {
   height: number
 }
 
-export function parse (text: string) {
+function _parse (text: string): SpriteImage[] {
   return text
     .trim()
     .split('\n')
@@ -27,7 +27,11 @@ export function parse (text: string) {
     })
 }
 
-export function parseFile (file: Uint8Array) {
-  const decoder = new TextDecoder('utf-16le')
-  return parse(decoder.decode(file))
+export function parseSpriteIndex (text: string | Uint8Array): SpriteImage[] {
+  if (typeof text === "string") {
+    return _parse(text)
+  } else {
+    const decoder = new TextDecoder('utf-16le')
+    return _parse(decoder.decode(text))
+  }
 }
