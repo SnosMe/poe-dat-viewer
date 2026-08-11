@@ -34,7 +34,7 @@ export function sortRows (header: Header, order: 1 | -1, datFile: DatFile): numb
         rows.sort((ai, bi) => {
           const a = data[ai] as number | null
           const b = data[bi] as number | null
-          return ((b || 0) - (a || 0)) * order
+          return ((b ?? -1) - (a ?? -1)) * order
         })
       } else {
         rows.sort((ai, bi) => {
