@@ -191,7 +191,10 @@ export default defineComponent({
       showTree,
       toggleTree,
       tree: filteredTree,
-      handleTreeNav,
+      handleTreeNav (item: TreeItem) {
+        handleTreeNav(item)
+        searchText.value = ''
+      },
       searchText,
       isIndexLoaded: computed(() => index.isLoaded),
       extensionOpts
