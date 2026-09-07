@@ -193,7 +193,9 @@ export default defineComponent({
       tree: filteredTree,
       handleTreeNav (item: TreeItem) {
         handleTreeNav(item)
-        searchText.value = ''
+        if (!item.isFile) {
+          searchText.value = ''
+        }
       },
       searchText,
       isIndexLoaded: computed(() => index.isLoaded),
