@@ -4,8 +4,8 @@ import * as loaders from './bundle-loaders.js'
 import { exportFiles } from './export-files.js'
 import { exportTables } from './export-tables.js'
 import type { ExportConfig } from './ExportConfig.js'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 
 ;(async function main () {
   const config: ExportConfig = JSON.parse(

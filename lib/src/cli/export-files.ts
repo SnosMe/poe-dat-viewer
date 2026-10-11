@@ -1,9 +1,9 @@
 import { parseSpriteIndex, SpriteImage } from '../sprites/layout-parser.js'
 import type { ExportConfig } from './ExportConfig.js'
 import { FileLoader } from './bundle-loaders.js'
-import { spawn } from 'child_process'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import { spawn } from 'node:child_process'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 
 const SPRITE_LISTS = [{
   path: 'Art/UIImages1.txt',

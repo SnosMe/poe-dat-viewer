@@ -4,8 +4,8 @@ import { FileLoader } from './bundle-loaders.js'
 import { Header, getHeaderLength } from '../dat/header.js'
 import { DatFile, readDatFile } from '../dat/dat-file.js'
 import { readColumn } from '../dat/reader.js'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 
 const TRANSLATIONS_POE1 = [
   { name: 'English', path: 'Data' },

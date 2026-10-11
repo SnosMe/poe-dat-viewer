@@ -1,6 +1,6 @@
 import { toCdnUrl, BUNDLES_DIR, BundleLoader, FileLoader as BaseFileLoader } from '../bundles/load-util.js'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 
 export const FileLoader = BaseFileLoader
 export type FileLoader = BaseFileLoader<CachingBundleLoader>
