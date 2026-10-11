@@ -1,9 +1,20 @@
+/// <reference types="node" />
 import type { DatFile } from '../dat/dat-file.js'
 import type { ColumnStats } from './stats.js'
 
-const _module = (await WebAssembly.instantiateStreaming(
-  fetch(new URL('../analysis.wasm', import.meta.url))
-)).instance.exports as unknown as ModuleExports
+const _module = (
+  await (async () => {
+    const wasmUrl = new URL('../analysis.wasm', import.meta.url);
+    // Checking nodejs environment
+    if (typeof process !== 'undefined' && process?.versions?.node) {
+      const fs = await import('node:fs/promises');
+      const wasm = await fs.readFile(wasmUrl);
+      return WebAssembly.instantiate(wasm);
+    }
+    // Default for browser
+    return WebAssembly.instantiateStreaming(fetch(wasmUrl));
+  })()
+).instance.exports as unknown as ModuleExports;
 
 type AnalyzeFn = (
   dataFixedPtr: number, dataFixed_len: number,
